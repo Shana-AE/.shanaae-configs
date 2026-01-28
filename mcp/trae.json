@@ -1,0 +1,203 @@
+{
+    "mcpServers": {
+        "Git": {
+            "command": "uvx",
+            "args": [
+                "mcp-server-git"
+            ],
+            "env": {},
+            "fromGalleryId": "modelcontextprotocol.servers_git"
+        },
+        "Sequential Thinking": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@modelcontextprotocol/server-sequential-thinking"
+            ],
+            "env": {},
+            "fromGalleryId": "modelcontextprotocol.servers_sequentialthinking"
+        },
+        "Figma AI Bridge": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "figma-developer-mcp",
+                "--stdio"
+            ],
+            "env": {
+                "FIGMA_API_KEY": "figd_AuqIKztBFYNbcNiZOY5SiE_-3WxN919GhPFHJw19"
+            },
+            "fromGalleryId": "GLips.Figma-Context-MCP",
+            "disabled": true
+        },
+        "shadcn-ui": {
+            "command": "npx",
+            "args": [
+                "shadcn@latest",
+                "mcp"
+            ],
+            "env": {},
+            "fromGalleryId": "byted-mcp.shadcn-ui"
+        },
+        "Figma Desktop": {
+            "url": "http://127.0.0.1:3845/mcp",
+            "type": "http",
+            "disabled": false
+        },
+        "Puppeteer": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@modelcontextprotocol/server-puppeteer"
+            ],
+            "env": {},
+            "fromGalleryId": "modelcontextprotocol.servers_puppeteer"
+        },
+        "Chrome DevTools MCP": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "chrome-devtools-mcp@latest"
+            ],
+            "env": {},
+            "fromGalleryId": "byted-mcp.chrome-devtools-mcp"
+        },
+        "File System": {
+            "command": "npx -y @bunas/fs-mcp@latest",
+            "args": [],
+            "env": {
+                "API_KEY": ""
+            },
+            "fromGalleryId": "bunasQ.fs",
+            "disabled": true
+        },
+        "swiper": {
+            "url": "https://swiperjs.com/mcp"
+        },
+        "context7": {
+          "command": "npx",
+          "args": [
+            "-y",
+            "@upstash/context7-mcp@latest",
+            "--api-key",
+            "ctx7sk-82d2ccae-ef39-4c34-9ced-b73cf309406d"
+          ],
+          "url": null,
+          "env": null,
+          "headers": null,
+          "fromGalleryId": "upstash.context7"
+        },
+        "Memory": {
+          "command": "npx",
+          "args": [
+            "-y",
+            "@modelcontextprotocol/server-memory"
+          ],
+          "env": {
+            "MEMORY_FILE_PATH": "memory.json"
+          },
+          "url": null,
+          "headers": null,
+          "fromGalleryId": "modelcontextprotocol.servers_memory"
+        },
+        "Filesystem": {
+          "command": "npx",
+          "args": [
+            "-y",
+            "@modelcontextprotocol/server-filesystem",
+            "/path/to/allowed/directory"
+          ],
+          "env": {},
+          "url": null,
+          "headers": null,
+          "fromGalleryId": "modelcontextprotocol.servers_filesystem",
+          "disabled": true
+        },
+        "Fetch": {
+          "command": "uvx",
+          "args": [
+            "mcp-server-fetch"
+          ],
+          "env": {},
+          "url": null,
+          "headers": null,
+          "fromGalleryId": "modelcontextprotocol.servers_fetch"
+        },
+        "Playwright": {
+          "command": "npx",
+          "args": [
+            "-y",
+            "@executeautomation/playwright-mcp-server"
+          ],
+          "env": {},
+          "url": null,
+          "headers": null,
+          "fromGalleryId": "executeautomation.mcp-playwright"
+        },
+        "Desktop Commander": {
+          "command": "npx desktop-commander",
+          "args": [],
+          "env": {},
+          "fromGalleryId": "wonderwhy-er.ClaudeComputerCommander",
+          "disabled": true
+        },
+        "Package Version": {
+          "command": "npx",
+          "args": [
+            "-y",
+            "mcp-package-version"
+          ],
+          "env": {},
+          "url": null,
+          "headers": null,
+          "fromGalleryId": "sammcj.mcp-package-version"
+        },
+        "eudic-mcp": {
+          "command": "npx eudic-mcp",
+          "env": {
+            "EUDIC_AUTH_TOKEN": "NIS PWXy6ivk2Op9+4d6nxyAoRA20ahZJZWVXBwZLQNRJaaaR3iYkHY32Q=="
+          },
+          "url": null,
+          "args": null,
+          "headers": null
+        },
+        "github": {
+          "url": "https://api.githubcopilot.com/mcp/",
+          "headers": {
+            "Authorization": "Bearer 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"
+          },
+          "command": null,
+          "args": null,
+          "env": null
+        },
+        "ticktick": {
+          "command": "uv",
+          "args": [
+            "run",
+            "--directory",
+            "/home/shanaae/projects/ticktick-mcp",
+            "-m",
+            "ticktick_mcp.cli",
+            "run"
+          ],
+          "url": null,
+          "env": null,
+          "headers": null
+        },
+        "obsidian-mcp-server": {
+          "command": "npx",
+          "args": [
+            "obsidian-mcp-server"
+          ],
+          "env": {
+            "OBSIDIAN_API_KEY": "79b415a1adb9baf0f94a6bdc5bf660cc76ba58c9f1b2250befca6e34ed392b35",
+            "OBSIDIAN_BASE_URL": "http://127.0.0.1:27123",
+            "OBSIDIAN_VERIFY_SSL": "false",
+            "OBSIDIAN_ENABLE_CACHE": "true"
+          },
+          "autoApprove": [],
+          "url": null,
+          "headers": null
+        }
+    }
+}

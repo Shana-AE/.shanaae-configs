@@ -1,0 +1,8 @@
+[wsl2]
+firewall=false
+networkingMode=Mirrored
+autoProxy=true
+[experimental]
+autoMemoryReclaim=gradual
+hostAddressLoopback=true
+bestEffortDnsParsing=true
