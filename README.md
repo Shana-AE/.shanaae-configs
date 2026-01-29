@@ -1,17 +1,22 @@
 # ShanaAE Configs (Central Repository)
 
-This is the central configuration hub for the ShanaAE development environment. It serves as the "Source of Truth" for all skills, user rules, and MCP configurations, which are then consumed by the runtime environment (`.trae`).
+This is the central configuration hub for the ShanaAE development environment. It serves as the "Source of Truth" for all skills, user rules, and MCP configurations.
 
-## Directory Structure
+## Deployment Links
 
-### 📂 `skills/`
-Contains the complete collection of available skills, aggregating both custom implementations and installed packages.
-*   **Custom Skills**: A comprehensive set of Eudic dictionary tools (`eudic-add-word`, `eudic-get-words`, etc.) for language learning workflows.
-*   **NPM Skills (Symlinked)**: Skills installed via NPM packages [skills](https://www.npmjs.com/package/skills) (e.g., `find-skills`, `skill-creator`) are linked here from the `.agents` workspace.
+### MCP Configuration (`ai/mcp/trae.json`)
 
-### 📂 `user_rules/`
-Defines personal operating rules and preferences in Markdown format.
+- **Linux (Remote)**: Symlink to `~/.trae-server/data/Machine/mcp.json`
+- **Windows**: Symlink to `C:\Users\shana\AppData\Roaming\Trae\User\mcp.json`
 
-### 📂 `mcp/`
-Configuration for Model Context Protocol (MCP) servers.
-*   `trae.json`: Main MCP configuration file.
+### Trae Configuration
+
+- **Skills**: `.trae/skills` -> `ai/skills`
+- **User Rules**: `.trae/user_rules` -> `ai/user_rules`
+
+### Agent Skills Configuration (`.agents`)
+
+This directory is used by the [skills](https://www.npmjs.com/package/skills) CLI tool to manage and store agent skills. It follows the standard structure required by the `skills` package.
+
+- **Skills Location**: `.agents/skills`
+- **Usage**: Use `npx skills` to manage these skills.
