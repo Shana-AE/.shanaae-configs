@@ -3,8 +3,9 @@ import os
 import sys
 import json
 import argparse
-import requests
-import http.client
+import urllib.request
+import urllib.parse
+import urllib.error
 
 def get_token():
     token = os.environ.get('EUDIC_TOKEN')
@@ -24,27 +25,62 @@ BASE_URL = "https://api.frdic.com/api/open/v1/studylist"
 
 def handle_response(response):
     try:
-        if response.status_code == 204:
+        if response.status == 204:
             print(json.dumps({"success": True, "message": "Operation successful (No Content)"}))
             return
 
-        data = response.json()
-        print(json.dumps(data, indent=2, ensure_ascii=False))
-    except json.JSONDecodeError:
-        print(json.dumps({
-            "error": "Failed to decode JSON response",
-            "status_code": response.status_code,
-            "text": response.text
-        }, ensure_ascii=False))
+        data = response.read()
+        if not data:
+             print(json.dumps({"success": True, "message": "Operation successful (Empty Body)"}))
+             return
+
+        try:
+            json_data = json.loads(data)
+            print(json.dumps(json_data, indent=2, ensure_ascii=False))
+        except json.JSONDecodeError:
+            print(json.dumps({
+                "error": "Failed to decode JSON response",
+                "status_code": response.status,
+                "text": data.decode('utf-8', errors='ignore')
+            }, ensure_ascii=False))
+
     except Exception as e:
         print(json.dumps({"error": str(e)}))
+
+def make_request(url, method='GET', params=None, data=None, headers=None):
+    if params:
+        url_parts = list(urllib.parse.urlparse(url))
+        query = dict(urllib.parse.parse_qsl(url_parts[4]))
+        query.update(params)
+        url_parts[4] = urllib.parse.urlencode(query)
+        url = urllib.parse.urlunparse(url_parts)
+
+    print(f"DEBUG: Request URL: {url}") # Add debug print
+
+    encoded_data = None
+    if data is not None:
+        print(f"DEBUG: Payload: {json.dumps(data)}")
+        encoded_data = json.dumps(data).encode('utf-8')
+
+    req = urllib.request.Request(url, data=encoded_data, headers=headers or {}, method=method)
+
+    try:
+        with urllib.request.urlopen(req) as response:
+            handle_response(response)
+    except urllib.error.HTTPError as e:
+        error_body = e.read().decode('utf-8', errors='ignore')
+        print(json.dumps({
+            "error": f"HTTP Error {e.code}: {e.reason}",
+            "body": error_body
+        }, ensure_ascii=False))
+    except urllib.error.URLError as e:
+        print(json.dumps({"error": f"URL Error: {e.reason}"}))
 
 def get_categories(args):
     token = get_token()
     url = f"{BASE_URL}/category"
     params = {'language': args.language}
-    response = requests.get(url, headers=get_headers(token), params=params)
-    handle_response(response)
+    make_request(url, method='GET', headers=get_headers(token), params=params)
 
 def add_category(args):
     token = get_token()
@@ -53,8 +89,7 @@ def add_category(args):
         "language": args.language,
         "name": args.name
     }
-    response = requests.post(url, headers=get_headers(token), json=payload)
-    handle_response(response)
+    make_request(url, method='POST', headers=get_headers(token), data=payload)
 
 def rename_category(args):
     token = get_token()
@@ -64,8 +99,7 @@ def rename_category(args):
         "language": args.language,
         "name": args.name
     }
-    response = requests.patch(url, headers=get_headers(token), json=payload)
-    handle_response(response)
+    make_request(url, method='PATCH', headers=get_headers(token), data=payload)
 
 def delete_category(args):
     token = get_token()
@@ -73,11 +107,9 @@ def delete_category(args):
     payload = {
         "id": args.id,
         "language": args.language,
-        "name": args.name if args.name else "" # Name might be required or optional, safer to pass empty if not provided but API doc says name is required in body? Wait, delete usually just needs ID. But API doc says "value" object with id, language, name. I'll pass name if user provides, or try empty string.
+        "name": args.name if args.name else ""
     }
-    # Note: requests.delete with json payload
-    response = requests.request("DELETE", url, headers=get_headers(token), json=payload)
-    handle_response(response)
+    make_request(url, method='DELETE', headers=get_headers(token), data=payload)
 
 def get_words(args):
     token = get_token()
@@ -88,19 +120,23 @@ def get_words(args):
         "page": args.page,
         "page_size": args.page_size
     }
-    response = requests.get(url, headers=get_headers(token), params=params)
-    handle_response(response)
+    make_request(url, method='GET', headers=get_headers(token), params=params)
 
 def add_words(args):
     token = get_token()
     url = f"{BASE_URL}/words"
+    # Try converting category_id to int if possible, otherwise keep as string
+    try:
+        cat_id = int(args.category_id)
+    except ValueError:
+        cat_id = args.category_id
+
     payload = {
         "language": args.language,
-        "category_id": args.category_id,
+        "category_id": cat_id,
         "words": args.words
     }
-    response = requests.post(url, headers=get_headers(token), json=payload)
-    handle_response(response)
+    make_request(url, method='POST', headers=get_headers(token), data=payload)
 
 def delete_words(args):
     token = get_token()
@@ -110,8 +146,7 @@ def delete_words(args):
         "category_id": args.category_id,
         "words": args.words
     }
-    response = requests.request("DELETE", url, headers=get_headers(token), json=payload)
-    handle_response(response)
+    make_request(url, method='DELETE', headers=get_headers(token), data=payload)
 
 def add_word(args):
     token = get_token()
@@ -123,8 +158,7 @@ def add_word(args):
         "context_line": args.context_line,
         "category_ids": args.category_ids
     }
-    response = requests.post(url, headers=get_headers(token), json=payload)
-    handle_response(response)
+    make_request(url, method='POST', headers=get_headers(token), data=payload)
 
 def get_word(args):
     token = get_token()
@@ -133,11 +167,10 @@ def get_word(args):
         "language": args.language,
         "word": args.word
     }
-    response = requests.get(url, headers=get_headers(token), params=params)
-    handle_response(response)
+    make_request(url, method='GET', headers=get_headers(token), params=params)
 
 def main():
-    parser = argparse.ArgumentParser(description="Eudic API CLI")
+    parser = argparse.ArgumentParser(description="Eudic API CLI (urllib version)")
     subparsers = parser.add_subparsers(dest="command", help="Command to execute")
 
     # 1. Get Categories
@@ -161,7 +194,7 @@ def main():
     # 4. Delete Category
     p_del_cat = subparsers.add_parser("delete-category", help="Delete a category")
     p_del_cat.add_argument("--id", required=True, help="Category ID")
-    p_del_cat.add_argument("--name", default="", help="Category name (required by API?)")
+    p_del_cat.add_argument("--name", default="", help="Category name")
     p_del_cat.add_argument("--language", default="en", help="Language (default: en)")
     p_del_cat.set_defaults(func=delete_category)
 
@@ -169,7 +202,7 @@ def main():
     p_get_words = subparsers.add_parser("get-words", help="Get words from a category")
     p_get_words.add_argument("--category-id", default="0", help="Category ID (default: 0)")
     p_get_words.add_argument("--language", default="en", help="Language (default: en)")
-    p_get_words.add_argument("--page", type=int, default=1, help="Page number")
+    p_get_words.add_argument("--page", type=int, default=0, help="Page number (starts at 0)")
     p_get_words.add_argument("--page-size", type=int, default=100, help="Page size")
     p_get_words.set_defaults(func=get_words)
 

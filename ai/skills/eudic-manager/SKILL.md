@@ -1,9 +1,9 @@
 ---
-name: eudic-api-operations
-description: "Perform operations on Eudic wordbooks/categories using the Eudic API. Invoke when user wants to rename, delete, or get categories, or manage words directly via API commands."
+name: eudic-manager
+description: "Comprehensive tool to manage Eudic wordbooks and words (add, list, delete, rename) using the Eudic API."
 ---
 
-# Eudic API Operations
+# Eudic Manager
 
 This skill provides a comprehensive CLI for interacting with the Eudic Study List API. It supports managing categories (wordbooks) and words.
 
@@ -13,12 +13,12 @@ This skill provides a comprehensive CLI for interacting with the Eudic Study Lis
 
 ## Usage
 
-The script is located at: `/home/shanaae/.trae/skills/eudic-api-operations/scripts/eudic_api.py`
+The script is located at `scripts/eudic_api.py` relative to the skill root.
 
 ### General Syntax
 
 ```bash
-python3 /home/shanaae/.trae/skills/eudic-api-operations/scripts/eudic_api.py <COMMAND> [OPTIONS]
+python3 scripts/eudic_api.py <COMMAND> [OPTIONS]
 ```
 
 ### Commands
