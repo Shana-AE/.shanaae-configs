@@ -7,6 +7,7 @@ This is the central configuration hub for the ShanaAE development environment. I
 ### MCP Configuration (`ai/mcp/trae.json`)
 
 - **Linux (Remote)**: Symlink to `~/.trae-server/data/Machine/mcp.json`
+- **Linux (Local)**: Symlink to `~/.config/Trae/User/mcp.json`
 - **Windows**: Symlink to `C:\Users\shana\AppData\Roaming\Trae\User\mcp.json`
 
 ### Trae Configuration
