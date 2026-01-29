@@ -105,13 +105,10 @@
           "args": [
             "-y",
             "@modelcontextprotocol/server-filesystem",
-            "/path/to/allowed/directory"
+            "/home/shanaae/projects"
           ],
           "env": {},
-          "url": null,
-          "headers": null,
-          "fromGalleryId": "modelcontextprotocol.servers_filesystem",
-          "disabled": true
+          "fromGalleryId": "modelcontextprotocol.servers_filesystem"
         },
         "Fetch": {
           "command": "uvx",
