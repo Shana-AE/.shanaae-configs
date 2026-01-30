@@ -22,5 +22,12 @@
   "opus45MigrationComplete": true,
   "thinkingMigrationComplete": true,
   "changelogLastFetched": 1768293892628,
-  "autoUpdatesProtectedForNative": true
+  "autoUpdatesProtectedForNative": true,
+  "rules": [
+    "rules/english-learning.md",
+    "rules/git-pull-context.md",
+    "rules/learning.md",
+    "rules/save-to-eudic.md",
+    "rules/save-to-obsidian.md"
+  ]
 }
