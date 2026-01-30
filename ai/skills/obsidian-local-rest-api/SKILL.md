@@ -83,6 +83,14 @@ Permanently delete a note.
 python3 client.py delete "Note To Delete.md"
 ```
 
+#### 7. Delete Empty Folders (Filesystem)
+
+Local REST API does not list empty directories, so removing empty folders needs filesystem access (e.g., WSL path to your vault).
+
+```bash
+python3 vault_fs_cleanup.py --vault "/mnt/e/Users/shana/Documents/Obsidian Vault/obsidian-vault" --report "/tmp/obsidian-empty-dirs.txt"
+```
+
 ## Examples
 
 **Task**: "Add a task to my daily note."
