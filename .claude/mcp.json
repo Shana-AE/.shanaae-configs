@@ -1,0 +1,56 @@
+{
+  "mcpServers": {
+    "Git": {
+      "command": "uvx",
+      "args": ["mcp-server-git"]
+    },
+    "Sequential Thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "Puppeteer": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
+    },
+    "Chrome DevTools MCP": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@latest"]
+    },
+    "Memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "env": {
+        "MEMORY_FILE_PATH": "memory.json"
+      }
+    },
+    "Filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/shanaae/projects"]
+    },
+    "Fetch": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"]
+    },
+    "Playwright": {
+      "command": "npx",
+      "args": ["-y", "@executeautomation/playwright-mcp-server"]
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest", "--api-key", "ctx7sk-82d2ccae-ef39-4c34-9ced-b73cf309406d"]
+    },
+    "github": {
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer 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"
+      }
+    },
+    "Figma Desktop": {
+      "url": "http://127.0.0.1:3845/mcp"
+    },
+    "Package Version": {
+      "command": "npx",
+      "args": ["-y", "mcp-package-version"]
+    }
+  }
+}
