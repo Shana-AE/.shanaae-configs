@@ -1,23 +1,104 @@
-.cache
-.DS_Store
-.idea
+# =============================================================================
+# 配置同步仓库 - Claude Code + OpenCode
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 1. Claude Code - 需要同步的配置（否定规则放前面）
+# -----------------------------------------------------------------------------
+!.claude/.claude.json
+!.claude/.claude.json.backup
+!.claude/todos/
+
+# Claude Code - 运行时数据（忽略规则放后面，会覆盖前面的检查）
+.claude/transcripts/
+.claude/shell-snapshots/
+.claude/cache/
+.claude/debug/
+.claude/downloads/
+.claude/statsig/
+.claude/todos/
+
+# -----------------------------------------------------------------------------
+# 2. OpenCode - 需要同步的配置（否定规则放前面）
+# -----------------------------------------------------------------------------
+!.config/opencode/opencode.json
+!.config/opencode/oh-my-opencode.json
+!.config/opencode/antigravity-accounts.json
+!.config/opencode/package.json
+!.local/share/opencode/auth.json
+
+# OpenCode - 运行时数据（忽略规则放后面）
+.local/share/opencode/storage/
+.local/share/opencode/session/
+.local/share/opencode/todo/
+.local/share/opencode/message/
+.local/share/opencode/part/
+.local/share/opencode/project/
+.local/share/opencode/session_diff/
+.local/share/opencode/agent-usage-reminder/
+.local/share/opencode/directory-agents/
+.local/share/opencode/directory-readme/
+.local/share/opencode/migration/
+
+# -----------------------------------------------------------------------------
+# 3. 临时和缓存文件
+# -----------------------------------------------------------------------------
+.local/share/opencode/log/
+.local/share/opencode/bin/
+.local/share/opencode/tool-output/
+.local/share/opencode/*/node_modules/
+.local/state/claude/locks/
+.cache/claude/
+
+# 配置文件中的临时文件
+.config/opencode/node_modules/
+.config/opencode/bun.lock
+.config/opencode/.gitignore
+
+.claude/.gitignore
+
+# -----------------------------------------------------------------------------
+# 4. 通用忽略规则
+# -----------------------------------------------------------------------------
+.node_modules
 *.log
 *.tgz
-
-# Build outputs
 coverage
 dist
 lib-cov
 temp
-logs
-
-# IDE
 .DS_Store
 .idea
 .vscode
-
-# Python
 __pycache__
-
-## node
-node_modules
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+build/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.manifest
+*.spec
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env
+.env.local
+.env.*.local
+.AppleDouble
+.LSOverride
+*~
+.lock
+.sw?
+.swp
+.tmp
+.trae-server/data/User/globalStorage/.mcp_gallery_cache/
