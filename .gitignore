@@ -3,10 +3,21 @@
 .idea
 *.log
 *.tgz
+
+# Build outputs
 coverage
 dist
 lib-cov
-logs
-node_modules
 temp
+logs
+
+# IDE
+.DS_Store
+.idea
+.vscode
+
+# Python
 __pycache__
+
+## node
+node_modules
