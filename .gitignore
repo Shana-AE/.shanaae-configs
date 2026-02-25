@@ -106,3 +106,10 @@ yarn-error.log*
 .swp
 .tmp
 .trae-server/data/User/globalStorage/.mcp_gallery_cache/
+
+.secrets
+
+# Sensitive config files
+.config/opencode/antigravity-accounts.json
+.config/opencode/opencode.json
+ai/mcp/trae.json
