@@ -1,0 +1,16 @@
+{
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "REMOVED_SECRET",
+    "ANTHROPIC_BASE_URL": "https://api.qnaigc.com",
+    "permissions": {
+      "deny": [
+        "Read(./.env)",
+        "Read(./.env.*)",
+        "Read(./secrets/**)"
+      ]
+    },
+    "companyAnnouncements": [
+      "您正在使用七牛云 AI 大模型推理服务 🚀"
+    ]
+  }
+}

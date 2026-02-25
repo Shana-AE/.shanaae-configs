@@ -17,6 +17,10 @@
 .claude/downloads/
 .claude/statsig/
 .claude/todos/
+.claude/projects/
+.claude/telemetry/
+.claude/history.jsonl
+
 
 # -----------------------------------------------------------------------------
 # 2. OpenCode - 需要同步的配置（否定规则放前面）

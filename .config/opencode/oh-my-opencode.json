@@ -3,16 +3,16 @@
   "google_auth": true,
   "agents": {
     "sisyphus": {
-      "model": "opencode/glm-4.7-free"
+      "model": "zhipuai-coding-plan/glm-5"
     },
     "librarian": {
-      "model": "opencode/glm-4.7-free"
+      "model": "zhipuai-coding-plan/glm-5"
     },
     "explore": {
       "model": "google/antigravity-gemini-3-flash"
     },
     "oracle": {
-      "model": "opencode/glm-4.7-free"
+      "model": "zhipuai-coding-plan/glm-5"
     },
     "frontend-ui-ux-engineer": {
       "model": "google/antigravity-gemini-3-pro-high"
