@@ -29,7 +29,7 @@
 !.config/opencode/oh-my-opencode.json
 !.config/opencode/antigravity-accounts.json
 !.config/opencode/package.json
-!.local/share/opencode/auth.json
+.local/share/opencode/auth.json
 
 # OpenCode - 运行时数据（忽略规则放后面）
 .local/share/opencode/storage/
@@ -119,3 +119,4 @@ yarn-error.log*
 .config/opencode/antigravity-accounts.json
 .config/opencode/opencode.json
 ai/mcp/trae.json
+.local/share/opencode/auth.json
