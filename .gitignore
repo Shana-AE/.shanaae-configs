@@ -20,6 +20,8 @@
 .claude/projects/
 .claude/telemetry/
 .claude/history.jsonl
+.claude/backups/
+
 
 
 # -----------------------------------------------------------------------------
@@ -126,3 +128,7 @@ yarn-error.log*
 .config/opencode/opencode.json
 ai/mcp/trae.json
 .local/share/opencode/auth.json
+.claude/.credentials.json
+.claude/plugins/blocklist.json
+.claude/plugins/known_marketplaces.json
+.claude-code-router/config.json.*.bak

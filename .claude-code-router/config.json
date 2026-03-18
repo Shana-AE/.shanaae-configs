@@ -1,10 +1,11 @@
 {
-  "APIKEY": "$CCR_API_KEY",
-  "PROXY_URL": "$CCR_PROXY_URL",
   "LOG": true,
   "LOG_LEVEL": "info",
-  "API_TIMEOUT_MS": 600000,
-  "NON_INTERACTIVE_MODE": false,
+  "HOST": "127.0.0.1",
+  "PORT": 3456,
+  "APIKEY": "$CCR_API_KEY",
+  "API_TIMEOUT_MS": "600000",
+  "transformers": [],
   "Providers": [
     {
       "name": "qiniu",
@@ -12,6 +13,7 @@
       "api_key": "$QINIU_AI_API_KEY",
       "models": [
         "claude-4.6-sonnet",
+        "claude-4.6-opus",
         "claude-4.5-sonnet",
         "claude-4.5-haiku",
         "deepseek-r1",
@@ -63,16 +65,14 @@
         "doubao-seed-1.6-thinking",
         "xiaomi/mimo-v2-flash",
         "meituan/longcat-flash-lite"
-      ],
-      "transformer": {
-        "use": ["Anthropic"]
-      }
+      ]
     },
     {
       "name": "zhipuai-coding-plan",
       "api_base_url": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
       "api_key": "$BIGMODEL_API_KEY",
       "models": [
+        "glm-5",
         "glm-4.5",
         "glm-4.5-air",
         "glm-4-plus",
@@ -84,15 +84,23 @@
         "glm-z1-flash"
       ],
       "transformer": {
-        "use": ["Anthropic"],
+        "use": [
+          "Anthropic"
+        ],
         "glm-z1-air": {
-          "use": ["reasoning"]
+          "use": [
+            "reasoning"
+          ]
         },
         "glm-z1-airx": {
-          "use": ["reasoning"]
+          "use": [
+            "reasoning"
+          ]
         },
         "glm-z1-flash": {
-          "use": ["reasoning"]
+          "use": [
+            "reasoning"
+          ]
         }
       }
     },
@@ -105,9 +113,13 @@
         "deepseek-reasoner"
       ],
       "transformer": {
-        "use": ["deepseek"],
+        "use": [
+          "deepseek"
+        ],
         "deepseek-chat": {
-          "use": ["tooluse"]
+          "use": [
+            "tooluse"
+          ]
         }
       }
     },
@@ -125,12 +137,18 @@
         "deepseek/deepseek-r1"
       ],
       "transformer": {
-        "use": ["openrouter"],
+        "use": [
+          "openrouter"
+        ],
         "anthropic/claude-3.7-sonnet:thinking": {
-          "use": ["reasoning"]
+          "use": [
+            "reasoning"
+          ]
         },
         "deepseek/deepseek-r1": {
-          "use": ["reasoning"]
+          "use": [
+            "reasoning"
+          ]
         }
       }
     },
@@ -145,21 +163,39 @@
       ],
       "transformer": {
         "use": [
-          ["maxtoken", { "max_tokens": 16384 }]
+          [
+            "maxtoken",
+            {
+              "max_tokens": 16384
+            }
+          ]
         ],
         "Qwen/Qwen3-235B-A22B-Thinking-2507": {
-          "use": ["reasoning"]
+          "use": [
+            "reasoning"
+          ]
         }
       }
     }
   ],
+  "StatusLine": {
+    "enabled": false,
+    "currentStyle": "default",
+    "default": {
+      "modules": []
+    },
+    "powerline": {
+      "modules": []
+    }
+  },
   "Router": {
-    "default": "qiniu,deepseek-v3.1",
-    "background": "qiniu,deepseek-v3",
-    "think": "qiniu,deepseek-r1",
-    "longContext": "qiniu,qwen3-max",
+    "default": "qiniu,claude-4.6-sonnet",
+    "background": "qiniu,claude-4.5-haiku",
+    "think": "qiniu,claude-4.6-sonnet",
+    "longContext": "qiniu,claude-4.6-sonnet",
     "longContextThreshold": 60000,
     "webSearch": "qiniu,qwen3-max",
     "image": "qiniu,qwen-vl-max-2025-01-25"
-  }
+  },
+  "CUSTOM_ROUTER_PATH": ""
 }
