@@ -37,12 +37,12 @@
     },
     "context7": {
       "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp@latest", "--api-key", "ctx7sk-82d2ccae-ef39-4c34-9ced-b73cf309406d"]
+      "args": ["-y", "@upstash/context7-mcp@latest", "--api-key", "${CONTEXT7_API_KEY}"]
     },
     "github": {
       "url": "https://api.githubcopilot.com/mcp/",
       "headers": {
-        "Authorization": "Bearer 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"
+        "Authorization": "Bearer ${GITHUB_TOKEN_MCP}"
       }
     },
     "Figma Desktop": {

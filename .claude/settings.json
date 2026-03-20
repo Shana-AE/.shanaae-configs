@@ -1,6 +1,5 @@
 {
   "env": {
-    "ANTHROPIC_AUTH_TOKEN": "sk-PcPgTEeZnHYMuIc7juRDwydRAMez0USua3RB_wKr24U",
     "ANTHROPIC_BASE_URL": "http://127.0.0.1:3456",
     "companyAnnouncements": [
       "using ccr 🚀"

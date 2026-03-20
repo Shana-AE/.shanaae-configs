@@ -27,9 +27,7 @@
 # -----------------------------------------------------------------------------
 # 2. OpenCode - 需要同步的配置（否定规则放前面）
 # -----------------------------------------------------------------------------
-!.config/opencode/opencode.json
 !.config/opencode/oh-my-opencode.json
-!.config/opencode/antigravity-accounts.json
 !.config/opencode/package.json
 .local/share/opencode/auth.json
 
@@ -121,14 +119,14 @@ yarn-error.log*
 .trae-server/data/User/globalStorage/.mcp_gallery_cache/
 .claude-code-router/.claude-code-router.pid
 
-.secrets
-
-# Sensitive config files
-.config/opencode/antigravity-accounts.json
-.config/opencode/opencode.json
-ai/mcp/trae.json
-.local/share/opencode/auth.json
-.claude/.credentials.json
 .claude/plugins/blocklist.json
 .claude/plugins/known_marketplaces.json
 .claude-code-router/config.json.*.bak
+
+
+# Sensitive config files - 含有 token 或敏感数据，不提交
+.secrets
+.config/opencode/antigravity-accounts.json
+ai/mcp/trae.json
+.local/share/opencode/auth.json
+.claude/.credentials.json

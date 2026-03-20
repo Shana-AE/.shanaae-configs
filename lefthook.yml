@@ -1,0 +1,9 @@
+pre-commit:
+  jobs:
+    - name: gitleaks
+      run: gitleaks protect --staged --verbose
+
+pre-push:
+  jobs:
+    - name: gitleaks
+      run: gitleaks protect --verbose
