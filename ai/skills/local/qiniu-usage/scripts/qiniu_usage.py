@@ -15,6 +15,8 @@ Options:
     --month         Shortcut: query current month
     --json          Output raw JSON instead of formatted table
     --api-key       Override API key (default: reads QINIU_AI_API_KEY env)
+    --bill          Query estimated billing (day/week/month)
+    --bill-type     Billing period: day, week, month (default: month)
 """
 
 import argparse
@@ -80,8 +82,25 @@ def build_url(granularity: str, start: datetime, end: datetime) -> str:
     return f"{BASE_URL}{USAGE_PATH}?{params}"
 
 
-def fetch_usage(api_key: str, granularity: str, start: datetime, end: datetime) -> dict:
-    url = build_url(granularity, start, end)
+# ── Formatting ────────────────────────────────────────────────────────────────
+
+
+def format_value(v: float) -> str:
+    """Format kToken value with appropriate precision."""
+    if v >= 1000:
+        return f"{v / 1000:.2f} MToken"
+    elif v >= 1:
+        return f"{v:.3f} kToken"
+    else:
+        return f"{v * 1000:.0f} Token"
+
+
+def fetch_billing(api_key: str, bill_type: str) -> dict:
+    """Fetch estimated billing from /v2/stat/usage/apikey/cost."""
+    if bill_type not in ("day", "week", "month"):
+        print(f"Error: --bill-type must be day, week, or month", file=sys.stderr)
+        sys.exit(1)
+    url = f"{BASE_URL}/v2/stat/usage/apikey/cost?type={bill_type}"
     req = urllib.request.Request(
         url,
         headers={"Authorization": f"Bearer {api_key}"},
@@ -99,17 +118,97 @@ def fetch_usage(api_key: str, granularity: str, start: datetime, end: datetime) 
         sys.exit(1)
 
 
-# ── Formatting ────────────────────────────────────────────────────────────────
+def print_billing(data: dict, bill_type: str) -> None:
+    """Print estimated billing report."""
+    period_label = {"day": "Today", "week": "This Week", "month": "This Month"}
+    api_keys = data.get("api_keys", [])
+
+    print()
+    print(f"  ═══════════════════════════════════════════════════════════════")
+    print(f"  Qiniu AI Estimated Billing Report")
+    print(f"  ═══════════════════════════════════════════════════════════════")
+    print(f"  Period      : {period_label.get(bill_type, bill_type)}")
+    print(f"  Note        : Estimated prices at original rate (CNY)")
+    print()
+
+    if not api_keys:
+        print("  No billing data found.")
+        return
+
+    # Aggregate across all api_keys (usually just one)
+    # Collect per-model totals
+    model_totals: dict[str, dict] = {}
+    for key_data in api_keys:
+        for model in key_data.get("models", []):
+            model_id = model.get("model_id", "unknown")
+            total_fee = model.get("total_fee", 0.0)
+            if model_id not in model_totals:
+                model_totals[model_id] = {"fee": 0.0, "items": []}
+            model_totals[model_id]["fee"] += total_fee
+            # Merge items for detail
+            for item in model.get("items", []):
+                model_totals[model_id]["items"].append(item)
+
+    if not model_totals:
+        print("  No billing data found.")
+        return
+
+    # Sort by fee descending
+    sorted_models = sorted(
+        model_totals.items(), key=lambda x: x[1]["fee"], reverse=True
+    )
+
+    col_model = max(18, max(len(m) for m, _ in sorted_models))
+    col_tokens = 16
+    col_fee = 14
+
+    print(
+        f"  {'Model':<{col_model}} │ {'Tokens':>{col_tokens}} │ {'Fee (CNY)':>{col_fee}}"
+    )
+    print(f"  {'─' * col_model}─┼─{'─' * col_tokens}─┼─{'─' * col_fee}")
+
+    grand_fee = 0.0
+    grand_tokens = 0.0
+
+    for model_id, mdata in sorted_models:
+        fee = mdata["fee"]
+        # Sum tokens from items
+        total_ktokens = sum(
+            item.get("usage", {}).get("count", 0.0) for item in mdata["items"]
+        )
+        grand_fee += fee
+        grand_tokens += total_ktokens
+
+        fee_str = f"¥{fee:.4f}" if fee < 0.01 else f"¥{fee:.2f}"
+        print(
+            f"  {model_id:<{col_model}} │ {format_value(total_ktokens):>{col_tokens}} │ {fee_str:>{col_fee}}"
+        )
+
+    print(f"  {'─' * col_model}─┼─{'─' * col_tokens}─┼─{'─' * col_fee}")
+    grand_fee_str = f"¥{grand_fee:.4f}" if grand_fee < 0.01 else f"¥{grand_fee:.2f}"
+    print(
+        f"  {'TOTAL':<{col_model}} │ {format_value(grand_tokens):>{col_tokens}} │ {grand_fee_str:>{col_fee}}"
+    )
+    print()
 
 
-def format_value(v: float) -> str:
-    """Format kToken value with appropriate precision."""
-    if v >= 1000:
-        return f"{v / 1000:.2f} MToken"
-    elif v >= 1:
-        return f"{v:.3f} kToken"
-    else:
-        return f"{v * 1000:.0f} Token"
+def fetch_usage(api_key: str, granularity: str, start: datetime, end: datetime) -> dict:
+    url = build_url(granularity, start, end)
+    req = urllib.request.Request(
+        url,
+        headers={"Authorization": f"Bearer {api_key}"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            body = resp.read().decode()
+            return json.loads(body)
+    except urllib.error.HTTPError as e:
+        body = e.read().decode()
+        print(f"HTTP {e.code}: {body}", file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"Request failed: {e}", file=sys.stderr)
+        sys.exit(1)
 
 
 def print_table(
@@ -272,6 +371,18 @@ def parse_args():
     parser.add_argument(
         "--json", action="store_true", dest="output_json", help="Output raw JSON"
     )
+    parser.add_argument(
+        "--bill",
+        action="store_true",
+        help="Query estimated billing (use --bill-type to set period)",
+    )
+    parser.add_argument(
+        "--bill-type",
+        dest="bill_type",
+        choices=["day", "week", "month"],
+        default="month",
+        help="Billing period: day, week, or month (default: month)",
+    )
     parser.add_argument("--api-key", dest="api_key", help="Override API key")
     return parser.parse_args()
 
@@ -304,6 +415,19 @@ def main():
     args = parse_args()
 
     api_key = get_api_key(args.api_key)
+
+    # Handle billing query
+    if args.bill:
+        result = fetch_billing(api_key, args.bill_type)
+        if not result.get("status"):
+            print(f"API error: {result}", file=sys.stderr)
+            sys.exit(1)
+        if args.output_json:
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+        else:
+            print_billing(result.get("data", {}), args.bill_type)
+        return
+
     start, end = resolve_time_range(args)
 
     # Validate time range limits
