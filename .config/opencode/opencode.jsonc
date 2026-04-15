@@ -1,0 +1,917 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "autoupdate": true,
+  "plugin": [
+    // "oh-my-openagent@latest",
+    "@nick-vi/opencode-type-inject",
+    "@franlol/opencode-md-table-formatter@latest",
+    "@mohak34/opencode-notifier@latest",
+    "@ramtinj95/opencode-tokenscope@latest",
+    "opencode-vibeguard",
+    "@tarquinen/opencode-dcp@latest",
+    "opencode-pty",
+    "opencode-websearch-cite"
+  ],
+  "mcp": {
+    "Git": {
+      "enabled": false,
+      "type": "local",
+      "command": [
+        "uvx",
+        "mcp-server-git"
+      ]
+    },
+    "Sequential-Thinking": {
+      "enabled": false,
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    "Puppeteer": {
+      "enabled": false,
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-puppeteer"
+      ]
+    },
+    "Chrome-DevTools-MCP": {
+      "enabled": false,
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "chrome-devtools-mcp@latest"
+      ]
+    },
+    "Memory": {
+      "enabled": false,
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "environment": {
+        "MEMORY_FILE_PATH": "memory.json"
+      }
+    },
+    "Filesystem": {
+      "enabled": false,
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/home/shanaae/projects"
+      ]
+    },
+    "Fetch": {
+      "enabled": false,
+      "type": "local",
+      "command": [
+        "uvx",
+        "mcp-server-fetch"
+      ]
+    },
+    "Playwright": {
+      "enabled": false,
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@executeautomation/playwright-mcp-server"
+      ]
+    },
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "{env:CONTEXT7_API_KEY}"
+      }
+    },
+    "Figma-Desktop": {
+      "type": "remote",
+      "url": "http://127.0.0.1:3845/mcp"
+    },
+    "Package-Version": {
+      "enabled": false,
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "mcp-package-version"
+      ]
+    },
+    "zai-mcp-server": {
+      "enabled": false,
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@z_ai/mcp-server"
+      ],
+      "environment": {
+        "Z_AI_MODE": "ZHIPU",
+        "Z_AI_API_KEY": "{env:BIGMODEL_API_KEY}"
+      }
+    },
+    "web-search-prime": {
+      "enabled": false,
+      "type": "remote",
+      "url": "https://open.bigmodel.cn/api/mcp/web_search_prime/mcp",
+      "headers": {
+        "Authorization": "Bearer {env:BIGMODEL_API_KEY}"
+      }
+    },
+    "web-reader": {
+      "enabled": false,
+      "type": "remote",
+      "url": "https://open.bigmodel.cn/api/mcp/web_reader/mcp",
+      "headers": {
+        "Authorization": "Bearer {env:BIGMODEL_API_KEY}"
+      }
+    },
+    "zread": {
+      "enabled": false,
+      "type": "remote",
+      "url": "https://open.bigmodel.cn/api/mcp/zread/mcp",
+      "headers": {
+        "Authorization": "Bearer {env:BIGMODEL_API_KEY}"
+      }
+    }
+  },
+  "instructions": [
+    "rules/english-learning.md",
+    "rules/git-pull-context.md",
+    "rules/learning.md",
+    "rules/save-to-eudic.md",
+    "rules/save-to-obsidian.md",
+    "plugin/shell-strategy/shell_strategy.md"
+  ],
+  "tools": {
+    "Chrome-DevTools-MCP": true,
+    "github": true
+  },
+  "provider": {
+    "zhipuai-coding-plan": {
+      "options": {
+        "apiKey": "{env:BIGMODEL_API_KEY}",
+        "websearch_cited": {
+          "model": "glm-4.6v-flash"
+        }
+      },
+      "models": {
+        "glm-4.5": {
+          "name": "GLM-4.5",
+          "thinking": true,
+          "limit": {
+            "context": 131072,
+            "output": 98304
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "glm-4.5-air": {
+          "name": "GLM-4.5 Air",
+          "thinking": true,
+          "limit": {
+            "context": 131072,
+            "output": 98304
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "glm-4.6": {
+          "name": "GLM-4.6",
+          "thinking": true,
+          "limit": {
+            "context": 204800,
+            "output": 131072
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "glm-4.7": {
+          "name": "GLM-4.7",
+          "thinking": true,
+          "limit": {
+            "context": 204800,
+            "output": 131072
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "glm-5": {
+          "name": "GLM-5",
+          "thinking": true,
+          "limit": {
+            "context": 204800,
+            "output": 131072
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "glm-5-turbo": {
+          "name": "GLM-5 Turbo",
+          "thinking": true,
+          "limit": {
+            "context": 204800,
+            "output": 131072
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "glm-5.1": {
+          "name": "GLM-5.1",
+          "thinking": true,
+          "limit": {
+            "context": 204800,
+            "output": 131072
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        }
+      }
+    },
+    "qiniu": {
+      "options": {
+        "baseURL": "https://api.qnaigc.com/v1",
+        "apiKey": "{env:QINIU_AI_API_KEY}"
+      },
+      "models": {
+        "claude-4.0-opus": {
+          "name": "Claude 4.0 Opus (Qiniu)",
+          "thinking": true
+        },
+        "claude-4.0-sonnet": {
+          "name": "Claude 4.0 Sonnet (Qiniu)",
+          "thinking": true
+        },
+        "claude-4.1-opus": {
+          "name": "Claude 4.1 Opus (Qiniu)",
+          "thinking": true
+        },
+        "claude-4.5-opus": {
+          "name": "Claude 4.5 Opus (Qiniu)",
+          "thinking": true
+        },
+        "claude-4.5-sonnet": {
+          "name": "Claude 4.5 Sonnet (Qiniu)",
+          "thinking": true
+        },
+        "claude-4.5-haiku": {
+          "name": "Claude 4.5 Haiku (Qiniu)",
+          "thinking": true
+        },
+        "claude-4.6-opus": {
+          "name": "Claude 4.6 Opus (Qiniu)",
+          "thinking": true
+        },
+        "claude-4.6-sonnet": {
+          "name": "Claude 4.6 Sonnet (Qiniu)",
+          "thinking": true
+        },
+        "deepseek-r1": {
+          "name": "DeepSeek R1 (Qiniu)",
+          "thinking": true
+        },
+        "deepseek-r1-0528": {
+          "name": "DeepSeek R1 0528 (Qiniu)",
+          "thinking": true
+        },
+        "deepseek-v3": {
+          "name": "DeepSeek V3 (Qiniu)"
+        },
+        "deepseek-v3-0324": {
+          "name": "DeepSeek V3 0324 (Qiniu)"
+        },
+        "deepseek-v3.1": {
+          "name": "DeepSeek V3.1 (Qiniu)"
+        },
+        "deepseek/deepseek-v3.1-terminus": {
+          "name": "DeepSeek V3.1 Terminus (Qiniu)"
+        },
+        "deepseek/deepseek-v3.1-terminus-thinking": {
+          "name": "DeepSeek V3.1 Terminus Thinking (Qiniu)",
+          "thinking": true
+        },
+        "deepseek/deepseek-v3.2": {
+          "name": "DeepSeek V3.2 (Qiniu)",
+          "thinking": true
+        },
+        "deepseek/deepseek-v3.2-exp": {
+          "name": "DeepSeek V3.2 Exp (Qiniu)"
+        },
+        "deepseek/deepseek-v3.2-exp-thinking": {
+          "name": "DeepSeek V3.2 Exp Thinking (Qiniu)",
+          "thinking": true
+        },
+        "openai/gpt-5": {
+          "name": "GPT-5 (Qiniu)",
+          "thinking": true
+        },
+        "openai/gpt-5-chat": {
+          "name": "GPT-5 Chat (Qiniu)",
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "openai/gpt-5-mini": {
+          "name": "GPT-5 Mini (Qiniu)"
+        },
+        "openai/gpt-5-nano": {
+          "name": "GPT-5 Nano (Qiniu)",
+          "thinking": true
+        },
+        "openai/gpt-5-pro": {
+          "name": "GPT-5 Pro (Qiniu)",
+          "thinking": true
+        },
+        "openai/gpt-5.2": {
+          "name": "GPT-5.2 (Qiniu)",
+          "thinking": true
+        },
+        "openai/gpt-5.2-chat": {
+          "name": "GPT-5.2 Chat (Qiniu)",
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "openai/gpt-5.2-codex": {
+          "name": "GPT-5.2 Codex (Qiniu)",
+          "thinking": true
+        },
+        "openai/gpt-5.3-codex": {
+          "name": "GPT-5.3 Codex (Qiniu)",
+          "thinking": true
+        },
+        "openai/gpt-5.4": {
+          "name": "GPT-5.4 (Qiniu)",
+          "thinking": true,
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "openai/gpt-5.4-mini": {
+          "name": "GPT-5.4 Mini (Qiniu)",
+          "thinking": true,
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "openai/gpt-5.4-nano": {
+          "name": "GPT-5.4 Nano (Qiniu)",
+          "thinking": true,
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "openai/gpt-5.4-pro": {
+          "name": "GPT-5.4 Pro (Qiniu)",
+          "thinking": true,
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "gpt-oss-20b": {
+          "name": "GPT-OSS 20B (Qiniu)",
+          "thinking": true
+        },
+        "gpt-oss-120b": {
+          "name": "GPT-OSS 120B (Qiniu)",
+          "thinking": true
+        },
+        "gemini-2.5-flash": {
+          "name": "Gemini 2.5 Flash (Qiniu)",
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "gemini-2.5-flash-lite": {
+          "name": "Gemini 2.5 Flash Lite (Qiniu)",
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "gemini-2.5-pro": {
+          "name": "Gemini 2.5 Pro (Qiniu)",
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "gemini-3.0-flash-preview": {
+          "name": "Gemini 3.0 Flash Preview (Qiniu)",
+          "thinking": true,
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "gemini-3.0-pro-preview": {
+          "name": "Gemini 3.0 Pro Preview (Qiniu)",
+          "thinking": true,
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "gemini-3.1-flash-lite-preview": {
+          "name": "Gemini 3.1 Flash Lite Preview (Qiniu)",
+          "thinking": true,
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "gemini-3.1-pro-preview": {
+          "name": "Gemini 3.1 Pro Preview (Qiniu)",
+          "thinking": true,
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "qwen-turbo": {
+          "name": "Qwen Turbo (Qiniu)",
+          "thinking": true
+        },
+        "qwen-max-2025-01-25": {
+          "name": "Qwen Max 2025-01-25 (Qiniu)"
+        },
+        "qwen-vl-max-2025-01-25": {
+          "name": "Qwen VL Max 2025-01-25 (Qiniu)",
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "qwen3.5-397b-a17b": {
+          "name": "Qwen3.5 397B A17B (Qiniu)",
+          "thinking": true,
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "qwen/qwen3.5-plus": {
+          "name": "Qwen3.5 Plus (Qiniu)",
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "qwen/qwen3.6-plus": {
+          "name": "Qwen3.6 Plus (Qiniu)",
+          "thinking": true
+        },
+        "qwen3-30b-a3b": {
+          "name": "Qwen3 30B A3B (Qiniu)",
+          "thinking": true
+        },
+        "qwen3-30b-a3b-instruct-2507": {
+          "name": "Qwen3 30B A3B Instruct 2507 (Qiniu)"
+        },
+        "qwen3-30b-a3b-thinking-2507": {
+          "name": "Qwen3 30B A3B Thinking 2507 (Qiniu)",
+          "thinking": true
+        },
+        "qwen3-32b": {
+          "name": "Qwen3 32B (Qiniu)",
+          "thinking": true
+        },
+        "qwen3-235b-a22b": {
+          "name": "Qwen3 235B A22B (Qiniu)"
+        },
+        "qwen3-235b-a22b-instruct-2507": {
+          "name": "Qwen3 235B A22B Instruct 2507 (Qiniu)"
+        },
+        "qwen3-235b-a22b-thinking-2507": {
+          "name": "Qwen3 235B A22B Thinking 2507 (Qiniu)",
+          "thinking": true
+        },
+        "qwen3-coder-480b-a35b-instruct": {
+          "name": "Qwen3 Coder 480B A35B (Qiniu)"
+        },
+        "qwen3-max": {
+          "name": "Qwen3 Max (Qiniu)"
+        },
+        "qwen3-max-preview": {
+          "name": "Qwen3 Max Preview (Qiniu)"
+        },
+        "qwen3-next-80b-a3b-instruct": {
+          "name": "Qwen3 Next 80B Instruct (Qiniu)"
+        },
+        "qwen3-next-80b-a3b-thinking": {
+          "name": "Qwen3 Next 80B Thinking (Qiniu)",
+          "thinking": true
+        },
+        "qwen3-vl-30b-a3b-instruct": {
+          "name": "Qwen3 VL 30B A3B Instruct (Qiniu)",
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "qwen3-vl-30b-a3b-thinking": {
+          "name": "Qwen3 VL 30B Thinking (Qiniu)",
+          "thinking": true,
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "qwen2.5-vl-72b-instruct": {
+          "name": "Qwen2.5 VL 72B (Qiniu)",
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "qwen2.5-vl-7b-instruct": {
+          "name": "Qwen2.5 VL 7B (Qiniu)",
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "moonshotai/kimi-k2-thinking": {
+          "name": "Kimi K2 Thinking (Qiniu)",
+          "thinking": true
+        },
+        "moonshotai/kimi-k2.5": {
+          "name": "Kimi K2.5 (Qiniu)",
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "glm-4.5": {
+          "name": "GLM-4.5 (Qiniu)",
+          "thinking": true
+        },
+        "z-ai/glm-4.6": {
+          "name": "GLM-4.6 (Qiniu)"
+        },
+        "z-ai/glm-4.7": {
+          "name": "GLM-4.7 (Qiniu)",
+          "thinking": true
+        },
+        "z-ai/glm-5": {
+          "name": "GLM-5 (Qiniu)",
+          "thinking": true
+        },
+        "z-ai/glm-5.1": {
+          "name": "GLM-5.1 (Qiniu)",
+          "thinking": true
+        },
+        "MiniMax-M1": {
+          "name": "MiniMax M1 (Qiniu)",
+          "thinking": true
+        },
+        "minimax/minimax-m2": {
+          "name": "MiniMax M2 (Qiniu)"
+        },
+        "minimax/minimax-m2.1": {
+          "name": "MiniMax M2.1 (Qiniu)"
+        },
+        "minimax/minimax-m2.5": {
+          "name": "MiniMax M2.5 (Qiniu)"
+        },
+        "minimax/minimax-m2.5-highspeed": {
+          "name": "MiniMax M2.5 Highspeed (Qiniu)",
+          "thinking": true
+        },
+        "minimax/minimax-m2.7": {
+          "name": "MiniMax M2.7 (Qiniu)",
+          "thinking": true
+        },
+        "doubao-1.5-pro-32k": {
+          "name": "Doubao 1.5 Pro 32K (Qiniu)"
+        },
+        "doubao-1.5-vision-pro": {
+          "name": "Doubao 1.5 Vision Pro (Qiniu)",
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "doubao-seed-1.6": {
+          "name": "Doubao Seed 1.6 (Qiniu)"
+        },
+        "doubao-seed-1.6-flash": {
+          "name": "Doubao Seed 1.6 Flash (Qiniu)",
+          "thinking": true
+        },
+        "doubao-seed-1.6-thinking": {
+          "name": "Doubao Seed 1.6 Thinking (Qiniu)",
+          "thinking": true
+        },
+        "doubao-seed-2.0-lite": {
+          "name": "Doubao Seed 2.0 Lite (Qiniu)",
+          "thinking": true
+        },
+        "doubao-seed-2.0-mini": {
+          "name": "Doubao Seed 2.0 Mini (Qiniu)",
+          "thinking": true
+        },
+        "doubao-seed-2.0-pro": {
+          "name": "Doubao Seed 2.0 Pro (Qiniu)",
+          "thinking": true
+        },
+        "doubao-seed-2.0-code": {
+          "name": "Doubao Seed 2.0 Code (Qiniu)",
+          "thinking": true
+        },
+        "x-ai/grok-4-fast": {
+          "name": "Grok 4 Fast (Qiniu)",
+          "thinking": true,
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "x-ai/grok-4-fast-reasoning": {
+          "name": "Grok 4 Fast Reasoning (Qiniu)",
+          "thinking": true,
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "x-ai/grok-4-fast-non-reasoning": {
+          "name": "Grok 4 Fast Non-Reasoning (Qiniu)",
+          "thinking": true,
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "x-ai/grok-4.1-fast": {
+          "name": "Grok 4.1 Fast (Qiniu)",
+          "thinking": true,
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "x-ai/grok-4.1-fast-reasoning": {
+          "name": "Grok 4.1 Fast Reasoning (Qiniu)",
+          "thinking": true,
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "x-ai/grok-4.1-fast-non-reasoning": {
+          "name": "Grok 4.1 Fast Non-Reasoning (Qiniu)",
+          "thinking": true,
+          "attachment": true,
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "x-ai/grok-code-fast-1": {
+          "name": "Grok Code Fast 1 (Qiniu)",
+          "thinking": true
+        },
+        "xiaomi/mimo-v2-flash": {
+          "name": "MiMo V2 Flash (Qiniu)",
+          "thinking": true
+        },
+        "nvidia/nemotron-3-super-120b-a12b": {
+          "name": "Nemotron 3 Super 120B (Qiniu)"
+        },
+        "meituan/longcat-flash-lite": {
+          "name": "LongCat Flash Lite (Qiniu)"
+        },
+        "qwen3-max-2026-01-23": {
+          "name": "Qwen3 Max 2026-01-23 (Qiniu)"
+        }
+      }
+    }
+  }
+}

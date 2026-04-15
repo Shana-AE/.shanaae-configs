@@ -8,7 +8,7 @@
             "env": {},
             "fromGalleryId": "modelcontextprotocol.servers_git"
         },
-        "Sequential Thinking": {
+        "Sequential-Thinking": {
             "command": "npx",
             "args": [
                 "-y",
@@ -40,7 +40,7 @@
             "fromGalleryId": "byted-mcp.shadcn-ui",
             "disabled": true
         },
-        "Figma Desktop": {
+        "Figma-Desktop": {
             "url": "http://127.0.0.1:3845/mcp",
             "type": "http",
             "disabled": false
@@ -54,7 +54,7 @@
             "env": {},
             "fromGalleryId": "modelcontextprotocol.servers_puppeteer"
         },
-        "Chrome DevTools MCP": {
+        "Chrome-DevTools-MCP": {
             "command": "npx",
             "args": [
                 "-y",

@@ -269,7 +269,7 @@
       "skillPath": "skills/json-canvas/SKILL.md",
       "skillFolderHash": "",
       "installedAt": "2026-01-29T08:19:28.911Z",
-      "updatedAt": "2026-01-29T08:19:28.911Z"
+      "updatedAt": "2026-04-14T10:36:40.546Z"
     },
     "obsidian-bases": {
       "source": "kepano/obsidian-skills",
@@ -278,7 +278,7 @@
       "skillPath": "skills/obsidian-bases/SKILL.md",
       "skillFolderHash": "",
       "installedAt": "2026-01-29T08:19:29.193Z",
-      "updatedAt": "2026-01-29T08:19:29.193Z"
+      "updatedAt": "2026-04-14T10:36:41.119Z"
     },
     "obsidian-markdown": {
       "source": "kepano/obsidian-skills",
@@ -287,16 +287,55 @@
       "skillPath": "skills/obsidian-markdown/SKILL.md",
       "skillFolderHash": "",
       "installedAt": "2026-01-29T08:19:29.481Z",
-      "updatedAt": "2026-01-29T08:19:29.481Z"
+      "updatedAt": "2026-04-14T10:36:42.249Z"
+    },
+    "memo-api": {
+      "source": "maimemo/memo-skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/maimemo/memo-skills.git",
+      "skillPath": "memo-api/SKILL.md",
+      "skillFolderHash": "",
+      "installedAt": "2026-04-14T06:08:51.629Z",
+      "updatedAt": "2026-04-14T06:08:51.629Z"
+    },
+    "defuddle": {
+      "source": "kepano/obsidian-skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/kepano/obsidian-skills.git",
+      "skillPath": "skills/defuddle/SKILL.md",
+      "skillFolderHash": "",
+      "installedAt": "2026-04-14T10:36:39.965Z",
+      "updatedAt": "2026-04-14T10:36:39.965Z"
+    },
+    "obsidian-cli": {
+      "source": "kepano/obsidian-skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/kepano/obsidian-skills.git",
+      "skillPath": "skills/obsidian-cli/SKILL.md",
+      "skillFolderHash": "",
+      "installedAt": "2026-04-14T10:36:41.687Z",
+      "updatedAt": "2026-04-14T10:36:41.687Z"
     }
   },
   "dismissed": {
     "findSkillsPrompt": true
   },
   "lastSelectedAgents": [
-    "trae",
+    "amp",
+    "antigravity",
+    "cline",
+    "codex",
+    "cursor",
+    "deepagents",
+    "firebender",
+    "gemini-cli",
+    "github-copilot",
+    "kimi-cli",
     "opencode",
+    "warp",
+    "trae",
     "claude-code",
-    "moltbot"
+    "openclaw",
+    "trae-cn"
   ]
 }
