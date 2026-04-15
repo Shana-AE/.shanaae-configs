@@ -191,8 +191,8 @@
   "Router": {
     "default": "qiniu,claude-4.6-sonnet",
     "background": "qiniu,claude-4.5-haiku",
-    "think": "qiniu,claude-4.6-sonnet",
-    "longContext": "qiniu,claude-4.6-sonnet",
+    "think": "qiniu,deepseek/deepseek-v3.2",
+    "longContext": "qiniu,qwen3-max",
     "longContextThreshold": 60000,
     "webSearch": "qiniu,qwen3-max",
     "image": "qiniu,qwen-vl-max-2025-01-25"

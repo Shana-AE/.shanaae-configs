@@ -4,7 +4,7 @@
       "command": "uvx",
       "args": ["mcp-server-git"]
     },
-    "Sequential Thinking": {
+    "Sequential-Thinking": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
     },
@@ -12,7 +12,7 @@
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
     },
-    "Chrome DevTools MCP": {
+    "Chrome-DevTools-MCP": {
       "command": "npx",
       "args": ["-y", "chrome-devtools-mcp@latest"]
     },
@@ -40,15 +40,16 @@
       "args": ["-y", "@upstash/context7-mcp@latest", "--api-key", "${CONTEXT7_API_KEY}"]
     },
     "github": {
+      "enabled": false,
       "url": "https://api.githubcopilot.com/mcp/",
       "headers": {
         "Authorization": "Bearer ${GITHUB_TOKEN_MCP}"
       }
     },
-    "Figma Desktop": {
+    "Figma-Desktop": {
       "url": "http://127.0.0.1:3845/mcp"
     },
-    "Package Version": {
+    "Package-Version": {
       "command": "npx",
       "args": ["-y", "mcp-package-version"]
     }

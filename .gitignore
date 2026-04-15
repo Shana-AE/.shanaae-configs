@@ -6,7 +6,6 @@
 # 1. Claude Code - 需要同步的配置（否定规则放前面）
 # -----------------------------------------------------------------------------
 !.claude/.claude.json
-!.claude/.claude.json.backup
 !.claude/todos/
 
 # Claude Code - 运行时数据（忽略规则放后面，会覆盖前面的检查）
@@ -122,6 +121,9 @@ yarn-error.log*
 .claude/plugins/blocklist.json
 .claude/plugins/known_marketplaces.json
 .claude-code-router/config.json.*.bak
+.config/opencode/opencode-notifier-state.json
+.claude.*.backup*
+
 
 
 # Sensitive config files - 含有 token 或敏感数据，不提交
@@ -130,3 +132,9 @@ yarn-error.log*
 ai/mcp/trae.json
 .local/share/opencode/auth.json
 .claude/.credentials.json
+
+ai/skills/local/backend-api-generator-skill
+
+oh-my-openagent*.bak*
+
+.trae/memory
