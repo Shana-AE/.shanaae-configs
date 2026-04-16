@@ -28,6 +28,7 @@ Load the **memo-api** skill, then use `get_study_progress` and `get_today_items`
 - `VAGUE` → secondary targets
 - `FAMILIAR` → selectively use hard/rare ones
 
+> **Note**: This skill assumes you have set up the **memo-api** skill and have the required environment variables set. if you haven't install memo-api skill, you can install it by running `npx skills add maimemo/memo-skills`.
 > **Note**: MaiMemo's day starts at **4:00 AM Beijing time** (UTC+8). If current time is between 00:00-4:00 Beijing time, use yesterday's date for file naming.
 
 ### 2. Generate Article
