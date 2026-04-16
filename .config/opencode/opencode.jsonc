@@ -8,9 +8,9 @@
     "@mohak34/opencode-notifier@latest",
     "@ramtinj95/opencode-tokenscope@latest",
     "opencode-vibeguard",
-    "@tarquinen/opencode-dcp@latest",
+    // "@tarquinen/opencode-dcp@latest",
     "opencode-pty",
-    "opencode-websearch-cite"
+    "opencode-websearch-cited"
   ],
   "mcp": {
     "Git": {
