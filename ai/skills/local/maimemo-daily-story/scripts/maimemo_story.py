@@ -37,18 +37,12 @@ def save_to_obsidian(content, date_str=None):
     else:
         dt = maimemo_today()
     path = f"{render_template(OBSIDIAN_BASE_PATH, dt)}/{render_template(FILE_TEMPLATE, dt)}"
-    escaped_content = (
-        content.replace("\\", "\\\\")
-        .replace("\n", "\\n")
-        .replace("\t", "\\t")
-        .replace('"', '\\"')
-    )
     result = subprocess.run(
         [
             "obsidian",
             "create",
             f"path={path}",
-            f"content={escaped_content}",
+            f"content={content}",
             "silent",
             "overwrite",
         ],
