@@ -3,42 +3,51 @@
   "google_auth": true,
   "agents": {
     "sisyphus": {
-      "model": "qiniu/claude-4.6-sonnet",
+      "model": "qiniu/claude-4.7-opus",
       "fallback_models": [
+        "qiniu/deepseek/deepseek-v4-pro",
+        "deepseek/deepseek-v4-pro",
         "zhipuai-coding-plan/glm-5.1",
-        "qiniu/deepseek/deepseek-v3.2"
+        "qiniu/deepseek/deepseek-v4-flash"
       ]
     },
     "librarian": {
       "model": "zhipuai-coding-plan/glm-5.1",
       "fallback_models": [
+        "qiniu/deepseek/deepseek-v4-flash",
+        "deepseek/deepseek-v4-flash",
         "minimax-cn-coding-plan/MiniMax-M2.5-highspeed"
       ]
     },
     "explore": {
-      "model": "minimax-cn-coding-plan/MiniMax-M2.5-highspeed",
+      "model": "qiniu/deepseek/deepseek-v4-flash",
       "fallback_models": [
+        "deepseek/deepseek-v4-flash",
+        "minimax-cn-coding-plan/MiniMax-M2.5-highspeed",
         "zhipuai-coding-plan/glm-5.1"
       ]
     },
     "oracle": {
-      "model": "zhipuai-coding-plan/glm-5.1",
+      "model": "qiniu/deepseek/deepseek-v4-pro",
       "fallback_models": [
-        "qiniu/deepseek/deepseek-v3.2",
+        "deepseek/deepseek-v4-pro",
+        "zhipuai-coding-plan/glm-5.1",
         "minimax-cn-coding-plan/MiniMax-M2.7"
       ]
     },
     "frontend-ui-ux-engineer": {
-      "model": "zhipuai-coding-plan/glm-5.1",
+      "model": "qiniu/deepseek/deepseek-v4-pro",
       "fallback_models": [
+        "zhipuai-coding-plan/glm-5.1",
         "qiniu/claude-4.6-sonnet",
         "minimax-cn-coding-plan/MiniMax-M2.7"
       ]
     },
     "document-writer": {
-      "model": "zhipuai-coding-plan/glm-5.1",
+      "model": "qiniu/deepseek/deepseek-v4-pro",
       "fallback_models": [
-        "qiniu/deepseek/deepseek-v3.2",
+        "zhipuai-coding-plan/glm-5.1",
+        "deepseek/deepseek-v4-pro",
         "minimax-cn-coding-plan/MiniMax-M2.7"
       ]
     },

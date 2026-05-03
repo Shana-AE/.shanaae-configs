@@ -143,6 +143,33 @@
       "headers": {
         "Authorization": "Bearer {env:BIGMODEL_API_KEY}"
       }
+    },
+    "MiniMax": {
+      "type": "local",
+      "command": [
+        "uvx",
+        "minimax-mcp"
+      ],
+      "environment": {
+        "MINIMAX_API_KEY": "{env:MINIMAX_TOKEN_PLAN_API_KEY}",
+        "MINIMAX_API_HOST": "https://api.minimaxi.com",
+        "MINIMAX_MCP_BASE_PATH": "/home/shanaae/minimax-output",
+        "MINIMAX_API_RESOURCE_MODE": "local"
+      },
+      "enabled": true
+    },
+    "MiniMax-TokenPlan": {
+      "type": "local",
+      "command": [
+        "uvx",
+        "minimax-coding-plan-mcp",
+        "-y"
+      ],
+      "environment": {
+        "MINIMAX_API_KEY": "{env:MINIMAX_TOKEN_PLAN_API_KEY}",
+        "MINIMAX_API_HOST": "https://api.minimaxi.com"
+      },
+      "enabled": true
     }
   },
   "instructions": [
@@ -280,6 +307,51 @@
         }
       }
     },
+    "deepseek": {
+      "options": {
+        "baseURL": "https://api.deepseek.com",
+        "apiKey": "{env:DEEPSEEK_API_KEY}"
+      },
+      "models": {
+        "deepseek-v4-flash": {
+          "name": "DeepSeek V4 Flash",
+          "limit": {
+            "context": 1048576,
+            "output": 262144
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "deepseek-v4-pro": {
+          "name": "DeepSeek V4 Pro",
+          "thinking": true,
+          "limit": {
+            "context": 1048576,
+            "output": 262144
+          },
+          "options": {
+            "reasoningEffort": "max",
+            "thinking": {
+              "type": "enabled"
+            }
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        }
+      }
+    },
     "qiniu": {
       "options": {
         "baseURL": "https://api.qnaigc.com/v1",
@@ -308,6 +380,10 @@
         },
         "claude-4.5-haiku": {
           "name": "Claude 4.5 Haiku (Qiniu)",
+          "thinking": true
+        },
+        "claude-4.7-opus": {
+          "name": "Claude 4.7 Opus (Qiniu)",
           "thinking": true
         },
         "claude-4.6-opus": {
@@ -351,6 +427,23 @@
         },
         "deepseek/deepseek-v3.2-exp-thinking": {
           "name": "DeepSeek V3.2 Exp Thinking (Qiniu)",
+          "thinking": true
+        },
+        "deepseek/deepseek-v4-pro": {
+          "name": "DeepSeek V4 Pro (Qiniu)",
+          "thinking": true,
+          "options": {
+            "reasoningEffort": "max"
+          }
+        },
+        "deepseek/deepseek-v4-flash": {
+          "name": "DeepSeek V4 Flash (Qiniu)",
+          "options": {
+            "reasoningEffort": "max"
+          }
+        },
+        "openai/gpt-5.5": {
+          "name": "GPT-5.5 (Qiniu)",
           "thinking": true
         },
         "openai/gpt-5": {
@@ -647,9 +740,6 @@
         "qwen3-max": {
           "name": "Qwen3 Max (Qiniu)"
         },
-        "qwen3-max-preview": {
-          "name": "Qwen3 Max Preview (Qiniu)"
-        },
         "qwen3-next-80b-a3b-instruct": {
           "name": "Qwen3 Next 80B Instruct (Qiniu)"
         },
@@ -714,6 +804,10 @@
           "name": "Kimi K2 Thinking (Qiniu)",
           "thinking": true
         },
+        "moonshotai/kimi-k2.6": {
+          "name": "Kimi K2.6 (Qiniu)",
+          "thinking": true
+        },
         "moonshotai/kimi-k2.5": {
           "name": "Kimi K2.5 (Qiniu)",
           "attachment": true,
@@ -750,9 +844,6 @@
           "name": "MiniMax M1 (Qiniu)",
           "thinking": true
         },
-        "minimax/minimax-m2": {
-          "name": "MiniMax M2 (Qiniu)"
-        },
         "minimax/minimax-m2.1": {
           "name": "MiniMax M2.1 (Qiniu)"
         },
@@ -770,28 +861,11 @@
         "doubao-1.5-pro-32k": {
           "name": "Doubao 1.5 Pro 32K (Qiniu)"
         },
-        "doubao-1.5-vision-pro": {
-          "name": "Doubao 1.5 Vision Pro (Qiniu)",
-          "attachment": true,
-          "modalities": {
-            "input": [
-              "text",
-              "image"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
         "doubao-seed-1.6": {
           "name": "Doubao Seed 1.6 (Qiniu)"
         },
         "doubao-seed-1.6-flash": {
           "name": "Doubao Seed 1.6 Flash (Qiniu)",
-          "thinking": true
-        },
-        "doubao-seed-1.6-thinking": {
-          "name": "Doubao Seed 1.6 Thinking (Qiniu)",
           "thinking": true
         },
         "doubao-seed-2.0-lite": {
