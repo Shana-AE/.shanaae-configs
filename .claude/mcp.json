@@ -8,13 +8,9 @@
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
     },
-    "Puppeteer": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
-    },
     "Chrome-DevTools-MCP": {
       "command": "npx",
-      "args": ["-y", "chrome-devtools-mcp@latest"]
+      "args": ["-y", "chrome-devtools-mcp@latest", "--browser-url=http://127.0.0.1:9222", "--no-usage-statistics"]
     },
     "Memory": {
       "command": "npx",
@@ -33,7 +29,7 @@
     },
     "Playwright": {
       "command": "npx",
-      "args": ["-y", "@executeautomation/playwright-mcp-server"]
+      "args": ["-y", "@playwright/mcp@latest", "--cdp-endpoint", "http://127.0.0.1:9222"]
     },
     "context7": {
       "command": "npx",
@@ -48,10 +44,6 @@
     },
     "Figma-Desktop": {
       "url": "http://127.0.0.1:3845/mcp"
-    },
-    "Package-Version": {
-      "command": "npx",
-      "args": ["-y", "mcp-package-version"]
     }
   }
 }

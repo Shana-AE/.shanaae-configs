@@ -31,21 +31,12 @@
         "@modelcontextprotocol/server-sequential-thinking"
       ]
     },
-    "Puppeteer": {
-      "enabled": false,
-      "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "@modelcontextprotocol/server-puppeteer"
-      ]
-    },
     // Connects to Brave on Windows via the debug port. Brave must be running with:
     //   brave.exe --remote-debugging-port=9222 --user-data-dir="C:\Users\shana\brave-debug"
     // WSL is in Mirrored mode (.wslconfig: networkingMode=Mirrored + hostAddressLoopback=true),
     // so 127.0.0.1 in WSL reaches Windows directly — no 0.0.0.0 binding needed.
     "Chrome-DevTools-MCP": {
-      "enabled": false,
+      "enabled": true,
       "type": "local",
       "command": [
         "npx",
@@ -109,15 +100,6 @@
     "Figma-Desktop": {
       "type": "remote",
       "url": "http://127.0.0.1:3845/mcp"
-    },
-    "Package-Version": {
-      "enabled": false,
-      "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "mcp-package-version"
-      ]
     },
     "zai-mcp-server": {
       "enabled": false,
