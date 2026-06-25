@@ -16,22 +16,30 @@ control. Some ship as `.example` templates with placeholders; others use
 ## Required Secrets
 
 Create a `.secrets` file in the **repo root** (this directory). It is a plain
-`KEY=value` file (an `export` prefix is tolerated). It must contain:
+`KEY=value` file (an `export` prefix is tolerated).
 
-| Placeholder in `.example` | Key in `.secrets`      | Description                                                  |
-| ------------------------- | ---------------------- | ------------------------------------------------------------ |
-| `YOUR_FIGMA_API_KEY`        | `FIGMA_ACCESS_TOKEN`     | Figma Personal Access Token for the Figma MCP.               |
-| `YOUR_CONTEXT7_API_KEY`     | `CONTEXT7_API_KEY`       | API Key for Context7 service.                                |
-| `YOUR_EUDIC_AUTH_TOKEN`     | `EUDIC_TOKEN`            | Authorization token for Eudic (欧路词典).                      |
-| `YOUR_GITHUB_TOKEN`         | `GITHUB_TOKEN_MCP`       | GitHub PAT for the GitHub MCP.                               |
-| `YOUR_OBSIDIAN_API_KEY`     | `OBSIDIAN_API_KEY`       | Local REST API Key for Obsidian.                             |
-| `YOUR_Z_AI_API_KEY`         | `BIGMODEL_API_KEY`       | API Key for Zhipu AI / BigModel (Z_AI + Web Search).         |
-| `YOUR_ZHIPU_API_KEY`        | `BIGMODEL_API_KEY`       | Same key, used for the Zhipu Coding Plan provider.           |
-| `YOUR_QINIU_API_KEY`        | `QINIU_AI_API_KEY`       | API Key for Qiniu AI services.                               |
+Only one config is still rendered from a `.example` template — `ai/mcp/trae.json`
+(from `ai/mcp/trae.json.example`) — which uses this placeholder:
 
-Additional keys read directly from the environment by OpenCode / the router
-(not via `.example` placeholders): `DEEPSEEK_API_KEY`, `OPENROUTER_API_KEY`,
-`SILICONFLOW_API_KEY`, `CCR_API_KEY`, `MAIMEMO_TOKEN`, `MINIMAX_*`, etc.
+| Placeholder in `trae.json.example` | Key in `.secrets`   | Description                          |
+| ---------------------------------- | ------------------- | ------------------------------------ |
+| `YOUR_GITHUB_TOKEN`                  | `GITHUB_TOKEN_MCP`    | GitHub PAT for the GitHub MCP.       |
+
+All other secrets are read directly from `.secrets` / the environment at runtime
+(via OpenCode `{env:VAR}`, the router `$VAR`, or skills via curl):
+
+| Key                    | Used by                                                            |
+| ---------------------- | ------------------------------------------------------------------ |
+| `QINIU_AI_API_KEY`       | Qiniu AI provider (router + OpenCode)                              |
+| `BIGMODEL_API_KEY`       | Zhipu / BigModel (router + OpenCode + Zhipu hosted MCPs)           |
+| `DEEPSEEK_API_KEY`       | DeepSeek provider (router)                                         |
+| `OPENROUTER_API_KEY`     | OpenRouter provider (router)                                       |
+| `SILICONFLOW_API_KEY`    | SiliconFlow provider (router)                                      |
+| `CCR_API_KEY`            | Claude Code Router authentication                                  |
+| `CONTEXT7_API_KEY`       | `context7` skill (curl API — higher rate limit)                    |
+| `EUDIC_TOKEN`            | `eudic-manager` skill                                              |
+| `MAIMEMO_TOKEN`          | MaiMemo skills                                                     |
+| `MINIMAX_*`              | MiniMax MCPs (if enabled)                                          |
 
 > **Cross-platform note:** the design spec also moves OS-specific *paths*
 > (`PROJECTS_DIR`, `MINIMAX_OUTPUT_DIR`, `OBSIDIAN_VAULT_DIR`) into `.secrets`

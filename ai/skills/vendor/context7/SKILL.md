@@ -9,6 +9,10 @@ description: Retrieve up-to-date documentation for software libraries, framework
 
 This skill enables retrieval of current documentation for software libraries and components by querying the Context7 API via curl. Use it instead of relying on potentially outdated training data.
 
+> **Auth:** pass your Context7 API key (stored in `.secrets` as `CONTEXT7_API_KEY`) on
+> every request via the `Authorization: Bearer` header for a much higher rate limit.
+> Load it first: `export CONTEXT7_API_KEY="$(grep CONTEXT7_API_KEY ~/.shanaae/configs/.secrets | cut -d= -f2- | tr -d '"')"`
+
 ## Workflow
 
 ### Step 1: Search for the Library
@@ -16,7 +20,7 @@ This skill enables retrieval of current documentation for software libraries and
 To find the Context7 library ID, query the search endpoint:
 
 ```bash
-curl -s "https://context7.com/api/v2/libs/search?libraryName=LIBRARY_NAME&query=TOPIC" | jq '.results[0]'
+curl -s -H "Authorization: Bearer $CONTEXT7_API_KEY" "https://context7.com/api/v2/libs/search?libraryName=LIBRARY_NAME&query=TOPIC" | jq '.results[0]'
 ```
 
 **Parameters:**
@@ -34,7 +38,7 @@ curl -s "https://context7.com/api/v2/libs/search?libraryName=LIBRARY_NAME&query=
 To retrieve documentation, use the library ID from step 1:
 
 ```bash
-curl -s "https://context7.com/api/v2/context?libraryId=LIBRARY_ID&query=TOPIC&type=txt"
+curl -s -H "Authorization: Bearer $CONTEXT7_API_KEY" "https://context7.com/api/v2/context?libraryId=LIBRARY_ID&query=TOPIC&type=txt"
 ```
 
 **Parameters:**
@@ -82,4 +86,4 @@ curl -s "https://context7.com/api/v2/context?libraryId=/fastapi/fastapi&query=de
 - Be specific with the `query` parameter to improve relevance ranking
 - If the first search result is not correct, check additional results in the array
 - URL-encode query parameters containing spaces (use `+` or `%20`)
-- No API key is required for basic usage (rate-limited)
+- Without a key the API works but is rate-limited / may time out; always pass `$CONTEXT7_API_KEY` (from `.secrets`) via the `Authorization: Bearer` header

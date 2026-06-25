@@ -45,7 +45,7 @@ The Obsidian vault lives on the **Windows** side. Always operate on it there —
 
 ## MCP Tools Usage
 
-- Use `context7` tools when you need to search documentation
+- Use the **context7 skill** (curl to context7.com API with `CONTEXT7_API_KEY`) when you need to search documentation — the MCP was removed to save per-message tokens
 - Use `Git` tools for git operations
 - Use `Filesystem` tools for file operations
 - Use `Sequential Thinking` tools for complex problem solving

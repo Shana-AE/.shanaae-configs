@@ -123,11 +123,13 @@ MCP servers are configured in multiple locations (keep in sync):
 |--------|---------|---------|
 | Git | `uvx mcp-server-git` | Git operations |
 | Filesystem | `npx @modelcontextprotocol/server-filesystem <PROJECTS_DIR>` | File operations (path is OS-specific; currently `/home/shanaae/projects` on WSL) |
-| Playwright | `npx @playwright/mcp@latest --cdp-endpoint http://127.0.0.1:9222` | Browser automation (CDP into the Brave debug instance) |
 | Chrome DevTools | `npx chrome-devtools-mcp@latest --browser-url=http://127.0.0.1:9222` | Chrome/Brave debugging — **globally disabled; enabled only inside the `web-devtools` subagent** to save context tokens |
-| context7 | `npx @upstash/context7-mcp@latest` | Documentation lookup |
 | Memory | `npx @modelcontextprotocol/server-memory` | Knowledge graph |
 | Sequential Thinking | `npx @modelcontextprotocol/server-sequential-thinking` | Complex reasoning |
+
+> **Replaced by skills (no longer MCP):** documentation lookup → `context7` skill
+> (curl API + `CONTEXT7_API_KEY`); browser automation → `agent-browser` / `browser-use`
+> skills; URL fetching → `webfetch` + `defuddle` skill.
 
 ## Claude Code Router
 

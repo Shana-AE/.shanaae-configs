@@ -33,19 +33,6 @@
             "env": {},
             "fromGalleryId": "byted-mcp.chrome-devtools-mcp"
         },
-        "context7": {
-          "command": "npx",
-          "args": [
-            "-y",
-            "@upstash/context7-mcp@latest",
-            "--api-key",
-            "YOUR_CONTEXT7_API_KEY"
-          ],
-          "url": null,
-          "env": null,
-          "headers": null,
-          "fromGalleryId": "upstash.context7"
-        },
         "Memory": {
           "command": "npx",
           "args": [
