@@ -17,16 +17,6 @@
             "env": {},
             "fromGalleryId": "modelcontextprotocol.servers_sequentialthinking"
         },
-        "shadcn-ui": {
-            "command": "npx",
-            "args": [
-                "shadcn@latest",
-                "mcp"
-            ],
-            "env": {},
-            "fromGalleryId": "byted-mcp.shadcn-ui",
-            "disabled": true
-        },
         "Figma-Desktop": {
             "url": "http://127.0.0.1:3845/mcp",
             "type": "http",
@@ -78,28 +68,6 @@
           ],
           "env": {},
           "fromGalleryId": "modelcontextprotocol.servers_filesystem"
-        },
-        "Fetch": {
-          "command": "uvx",
-          "args": [
-            "mcp-server-fetch"
-          ],
-          "env": {},
-          "url": null,
-          "headers": null,
-          "fromGalleryId": "modelcontextprotocol.servers_fetch"
-        },
-        "Playwright": {
-          "command": "npx",
-          "args": [
-            "-y",
-            "@playwright/mcp@latest",
-            "--cdp-endpoint",
-            "http://127.0.0.1:9222"
-          ],
-          "env": {},
-          "url": null,
-          "headers": null
         },
         "github": {
           "url": "https://api.githubcopilot.com/mcp/",
