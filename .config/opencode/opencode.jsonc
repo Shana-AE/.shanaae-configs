@@ -68,28 +68,6 @@
         "/home/shanaae/projects"
       ]
     },
-    "Fetch": {
-      "enabled": false,
-      "type": "local",
-      "command": [
-        "uvx",
-        "mcp-server-fetch"
-      ]
-    },
-    // Connects to the SAME Brave debug instance as Chrome-DevTools-MCP (127.0.0.1:9222).
-    // Uses official @playwright/mcp — the @executeautomation one lacks --cdp-endpoint.
-    // Kept disabled; enable when you want Playwright's selectors/traces on the live browser.
-    "Playwright": {
-      "enabled": false,
-      "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "@playwright/mcp@latest",
-        "--cdp-endpoint",
-        "http://127.0.0.1:9222"
-      ]
-    },
     "context7": {
       "type": "remote",
       "url": "https://mcp.context7.com/mcp",
@@ -115,23 +93,15 @@
       }
     },
     "web-search-prime": {
-      "enabled": false,
+      "enabled": true,
       "type": "remote",
       "url": "https://open.bigmodel.cn/api/mcp/web_search_prime/mcp",
       "headers": {
         "Authorization": "Bearer {env:BIGMODEL_API_KEY}"
       }
     },
-    "web-reader": {
-      "enabled": false,
-      "type": "remote",
-      "url": "https://open.bigmodel.cn/api/mcp/web_reader/mcp",
-      "headers": {
-        "Authorization": "Bearer {env:BIGMODEL_API_KEY}"
-      }
-    },
     "zread": {
-      "enabled": false,
+      "enabled": true,
       "type": "remote",
       "url": "https://open.bigmodel.cn/api/mcp/zread/mcp",
       "headers": {
