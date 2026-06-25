@@ -17,19 +17,6 @@
             "env": {},
             "fromGalleryId": "modelcontextprotocol.servers_sequentialthinking"
         },
-        "Figma AI Bridge": {
-            "command": "npx",
-            "args": [
-                "-y",
-                "figma-developer-mcp",
-                "--stdio"
-            ],
-            "env": {
-                "FIGMA_API_KEY": "YOUR_FIGMA_API_KEY"
-            },
-            "fromGalleryId": "GLips.Figma-Context-MCP",
-            "disabled": true
-        },
         "shadcn-ui": {
             "command": "npx",
             "args": [
@@ -45,27 +32,16 @@
             "type": "http",
             "disabled": false
         },
-        "Puppeteer": {
-            "command": "npx",
-            "args": [
-                "-y",
-                "@modelcontextprotocol/server-puppeteer"
-            ],
-            "env": {},
-            "fromGalleryId": "modelcontextprotocol.servers_puppeteer"
-        },
         "Chrome-DevTools-MCP": {
             "command": "npx",
             "args": [
                 "-y",
-                "chrome-devtools-mcp@latest"
+                "chrome-devtools-mcp@latest",
+                "--browser-url=http://127.0.0.1:9222",
+                "--no-usage-statistics"
             ],
             "env": {},
             "fromGalleryId": "byted-mcp.chrome-devtools-mcp"
-        },
-        "swiper": {
-            "url": "https://swiperjs.com/mcp",
-            "disabled": true
         },
         "context7": {
           "command": "npx",
@@ -117,40 +93,13 @@
           "command": "npx",
           "args": [
             "-y",
-            "@executeautomation/playwright-mcp-server"
+            "@playwright/mcp@latest",
+            "--cdp-endpoint",
+            "http://127.0.0.1:9222"
           ],
           "env": {},
           "url": null,
-          "headers": null,
-          "fromGalleryId": "executeautomation.mcp-playwright"
-        },
-        "Desktop Commander": {
-          "command": "npx desktop-commander",
-          "args": [],
-          "env": {},
-          "fromGalleryId": "wonderwhy-er.ClaudeComputerCommander",
-          "disabled": true
-        },
-        "Package Version": {
-          "command": "npx",
-          "args": [
-            "-y",
-            "mcp-package-version"
-          ],
-          "env": {},
-          "url": null,
-          "headers": null,
-          "fromGalleryId": "sammcj.mcp-package-version"
-        },
-        "eudic-mcp": {
-          "command": "npx eudic-mcp",
-          "env": {
-            "EUDIC_AUTH_TOKEN": "YOUR_EUDIC_AUTH_TOKEN"
-          },
-          "url": null,
-          "args": null,
-          "headers": null,
-          "disabled": true
+          "headers": null
         },
         "github": {
           "url": "https://api.githubcopilot.com/mcp/",
@@ -160,37 +109,6 @@
           "command": null,
           "args": null,
           "env": null
-        },
-        "ticktick": {
-          "command": "uv",
-          "args": [
-            "run",
-            "--directory",
-            "/home/shanaae/projects/ticktick-mcp",
-            "-m",
-            "ticktick_mcp.cli",
-            "run"
-          ],
-          "url": null,
-          "env": null,
-          "headers": null,
-          "disabled": true
-        },
-        "obsidian-mcp-server": {
-          "command": "npx",
-          "args": [
-            "obsidian-mcp-server"
-          ],
-          "env": {
-            "OBSIDIAN_API_KEY": "YOUR_OBSIDIAN_API_KEY",
-            "OBSIDIAN_BASE_URL": "http://127.0.0.1:27123",
-            "OBSIDIAN_VERIFY_SSL": "false",
-            "OBSIDIAN_ENABLE_CACHE": "true"
-          },
-          "autoApprove": [],
-          "url": null,
-          "headers": null,
-          "disabled": true
         }
     }
 }
