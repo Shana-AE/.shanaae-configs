@@ -5,8 +5,24 @@ This is the central configuration hub for AI development tools (Claude Code, Ope
 ## Repository Overview
 
 - **Purpose**: Source of Truth for AI agent configurations, skills, and rules
-- **Platform**: Linux (WSL2), symlinked to multiple AI tool directories
-- **Primary Tools**: Claude Code, OpenCode, Trae
+- **Platform**: Linux (WSL2) today; **cross-platform (Linux / Windows / macOS) in design** — see [design spec](docs/superpowers/specs/2026-06-25-cross-platform-configs-design.md)
+- **Active Tools**: Claude Code, OpenCode, Trae
+- **Planned Tools (WIP)**: Cursor, Codex CLI
+
+## Cross-Platform Support (WIP)
+
+The repo is being made portable across **Linux (WSL2), Windows, and macOS**.
+Full design: [`docs/superpowers/specs/2026-06-25-cross-platform-configs-design.md`](docs/superpowers/specs/2026-06-25-cross-platform-configs-design.md).
+
+Summary of the planned model:
+- **Portable core** — repo configs contain no OS-specific literals.
+- **Env-var values** — OS-specific paths live in `.secrets` and are resolved by
+  each tool at read time (`{env:VAR}` in OpenCode, `$VAR` in Claude Code).
+- **Link manifest + `install.py`** — one-time installer live-links each tool's
+  native config location into the repo (symlink on *nix, junction on Windows).
+
+> Until the installer lands, paths shown in this doc (e.g. `/home/shanaae/projects`)
+> are the current **Linux/WSL** values.
 
 ## Directory Structure
 
@@ -22,23 +38,24 @@ configs/
 ├── .config/
 │   └── opencode/      # OpenCode configuration
 │       ├── AGENTS.md  # OpenCode-specific rules
-│       └── opencode.json
+│       ├── opencode.jsonc  # OpenCode config (uses {env:VAR} substitution)
+│       ├── oh-my-openagent.jsonc  # oh-my-openagent agent routing
+│       ├── agents/    # Subagents (image-op, web-devtools)
+│       └── plugin/    # Vendored plugins (shell-strategy)
 ├── .trae/             # Trae configuration
 │   ├── skills -> ai/skills/for-tools
 │   └── user_rules -> ai/user_rules
 ├── .local/            # Runtime data (gitignored)
 ├── ai/
-│   ├── mcp/           # MCP server configs (trae.json)
+│   ├── mcp/           # MCP server configs (trae.json + .example)
 │   ├── skills/        # Skills repository
 │   │   ├── vendor/    # Third-party/installed skills
 │   │   ├── local/     # Custom skills (eudic-manager, get-secret-token, etc.)
-│   │   ├── for-tools/ # Symlinked skills for AI tools
+│   │   ├── for-tools/ # Symlinked skills for AI tools (auto-generated)
 │   │   └── link-skills.sh
 │   └── user_rules/    # User rule definitions
 ├── .claude-code-router/  # Claude Code Router config
 │   └── config.json       # Router configuration
-└── .secrets           # API tokens and secrets (gitignored)
-```
 └── .secrets           # API tokens and secrets (gitignored)
 ```
 
@@ -96,18 +113,18 @@ skill-name/
 ## MCP Configuration
 
 MCP servers are configured in multiple locations (keep in sync):
-- `ai/mcp/trae.json` - Master config
+- `ai/mcp/trae.json` - Master config (rendered from `trae.json.example`)
 - `.claude/mcp.json` - Claude Code
-- `.config/opencode/opencode.json` - OpenCode
+- `.config/opencode/opencode.jsonc` - OpenCode
 
 ### Common MCP Servers
 
 | Server | Command | Purpose |
 |--------|---------|---------|
 | Git | `uvx mcp-server-git` | Git operations |
-| Filesystem | `npx @modelcontextprotocol/server-filesystem /home/shanaae/projects` | File operations |
-| Playwright | `npx @executeautomation/playwright-mcp-server` | Browser automation |
-| Chrome DevTools | `npx chrome-devtools-mcp@latest` | Chrome debugging |
+| Filesystem | `npx @modelcontextprotocol/server-filesystem <PROJECTS_DIR>` | File operations (path is OS-specific; currently `/home/shanaae/projects` on WSL) |
+| Playwright | `npx @playwright/mcp@latest --cdp-endpoint http://127.0.0.1:9222` | Browser automation (CDP into the Brave debug instance) |
+| Chrome DevTools | `npx chrome-devtools-mcp@latest --browser-url=http://127.0.0.1:9222` | Chrome/Brave debugging — **globally disabled; enabled only inside the `web-devtools` subagent** to save context tokens |
 | context7 | `npx @upstash/context7-mcp@latest` | Documentation lookup |
 | Memory | `npx @modelcontextprotocol/server-memory` | Knowledge graph |
 | Sequential Thinking | `npx @modelcontextprotocol/server-sequential-thinking` | Complex reasoning |
@@ -122,21 +139,23 @@ Claude Code Router allows routing Claude Code requests to different model provid
 
 ### Supported Providers
 
-| Provider | Base URL | Models |
+| Provider | Base URL | Models (representative) |
 |----------|----------|--------|
-| Qiniu | `api.qnaigc.com` | Claude, DeepSeek, Qwen, GLM, Kimi, Doubao |
-| Zhipu Coding Plan | `open.bigmodel.cn` | GLM-4.x, GLM-Z1 |
+| Qiniu | `api.qnaigc.com` | Claude, DeepSeek, Qwen, GLM, Kimi, Doubao, Grok, GPT |
+| Zhipu Coding Plan | `open.bigmodel.cn` | GLM-4.x, GLM-5, GLM-Z1 |
 | DeepSeek | `api.deepseek.com` | deepseek-chat, deepseek-reasoner |
 | OpenRouter | `openrouter.ai` | Claude, Gemini, DeepSeek |
 | SiliconFlow | `api.siliconflow.cn` | Kimi-K2, DeepSeek-V3, Qwen3 |
 
 ### Router Configuration
 
+Routes map Claude Code request types to a provider+model. Current defaults:
+
 | Route | Default Model |
 |-------|---------------|
-| default | qiniu,deepseek-v3.1 |
-| background | qiniu,deepseek-v3 |
-| think | qiniu,deepseek-r1 |
+| default | qiniu,claude-4.6-sonnet |
+| background | qiniu,claude-4.5-haiku |
+| think | qiniu,deepseek/deepseek-v3.2 |
 | longContext | qiniu,qwen3-max |
 | webSearch | qiniu,qwen3-max |
 | image | qiniu,qwen-vl-max-2025-01-25 |
@@ -261,7 +280,7 @@ The `.gitignore` uses a layered approach:
 
 - `.secrets` - API tokens
 - `ai/mcp/trae.json` - Contains embedded tokens
-- `.config/opencode/opencode.json` - Contains tokens
+- `.config/opencode/opencode.jsonc` - Contains tokens (via `{env:VAR}`)
 - `.local/share/opencode/auth.json` - Authentication
 
 ## Symlink Management
@@ -280,11 +299,8 @@ Key symlinks in this repository:
 # Agents CLI
 .agents/skills -> ../ai/skills/vendor
 
-# Claude Code Router
+# Claude Code Router (whole dir, including config.json)
 ~/.claude-code-router -> configs/.claude-code-router
-
-
-# Claude Code Router
 ~/.claude-code-router/config.json -> configs/.claude-code-router/config.json
 ```
 
