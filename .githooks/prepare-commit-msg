@@ -16,9 +16,6 @@ call_lefthook()
   elif lefthook -h >/dev/null 2>&1
   then
     lefthook "$@"
-  elif /home/shanaae/.nvm/versions/node/v22.17.0/lib/node_modules/lefthook/node_modules/lefthook-linux-x64/bin/lefthook -h >/dev/null 2>&1
-  then
-    /home/shanaae/.nvm/versions/node/v22.17.0/lib/node_modules/lefthook/node_modules/lefthook-linux-x64/bin/lefthook "$@"
   else
     dir="$(git rev-parse --show-toplevel)"
     osArch=$(uname | tr '[:upper:]' '[:lower:]')
