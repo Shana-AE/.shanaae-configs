@@ -102,7 +102,24 @@
         "doubao-seed-1.6-flash",
         "doubao-1.5-pro-32k",
         "xiaomi/mimo-v2-flash",
-        "meituan/longcat-flash-lite"
+        "meituan/longcat-flash-lite",
+        "anthropic/claude-4.7-opus",
+        "anthropic/claude-4.8-opus",
+        "z-ai/glm-5.2",
+        "moonshotai/kimi-k2.7-code",
+        "google/gemini-3.5-flash",
+        "google/gemini-3.1-flash-lite",
+        "deepseek/deepseek-v4-pro-202606",
+        "qwen/qwen3.7-max",
+        "qwen/qwen3.6-27b",
+        "minimax/minimax-m3",
+        "tencent/hy3-preview",
+        "x-ai/grok-4.3",
+        "x-ai/grok-4.2-reasoning",
+        "x-ai/grok-4.2-fast-reasoning",
+        "arcee-ai/trinity-mini",
+        "hunter-alpha",
+        "healer-alpha"
       ]
     },
     {
@@ -110,6 +127,8 @@
       "api_base_url": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
       "api_key": "$BIGMODEL_API_KEY",
       "models": [
+        "glm-5.2",
+        "glm-5.1",
         "glm-5",
         "glm-4.5",
         "glm-4.5-air",
