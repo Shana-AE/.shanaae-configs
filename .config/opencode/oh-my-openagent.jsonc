@@ -1,61 +1,179 @@
 {
-  "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json",
-  "google_auth": true,
+  "$schema": "https://unpkg.com/oh-my-openagent@latest/schema.json",
+
+  // ─────────────────────────────────────────────────────────────
+  //  oh-my-openagent v4.13.0  —  GLM-5.2-centric, Kimi in fallbacks, GPT kept
+  //
+  //  Fallback ordering principle: cheapest capable first, GPT last resort.
+  //    glm-5.2(zhipuai) → glm-5.2(qiniu) → kimi-k2.7-code → gpt-5.5
+  //  (provider diversity → model diversity → expensive GPT only if all fail)
+  //
+  //  HARD RULE (Sisyphus): only Claude/Kimi/GLM/GPT — all of these qualify.
+  //  hephaestus = GPT-native (no fallback; non-GPT can't run its prompt).
+  // ─────────────────────────────────────────────────────────────
+
+  "sisyphus_agent": {
+    "disabled": false,
+    "default_builder_enabled": false,
+    "planner_enabled": true,
+    "replace_plan": true
+  },
+
   "agents": {
+    // ── Core orchestrator + autonomous worker ──
     "sisyphus": {
-      "model": "qiniu/claude-4.7-opus",
+      "model": "zhipuai-coding-plan/glm-5.2",
+      "variant": "high",
       "fallback_models": [
-        "qiniu/deepseek/deepseek-v4-pro",
-        "deepseek/deepseek-v4-pro",
-        "zhipuai-coding-plan/glm-5.1",
-        "qiniu/deepseek/deepseek-v4-flash"
+        "qiniu/z-ai/glm-5.2",
+        "qiniu/moonshotai/kimi-k2.7-code",
+        "qiniu/openai/gpt-5.5"
+      ]
+    },
+    "hephaestus": {
+      // GPT-NATIVE — non-GPT won't activate; no fallback (per docs).
+      "model": "qiniu/openai/gpt-5.5",
+      "variant": "medium"
+    },
+
+    // ── Planning pipeline (Prometheus → Metis → Momus → Atlas) ──
+    "prometheus": {
+      "model": "zhipuai-coding-plan/glm-5.2",
+      "variant": "high",
+      "fallback_models": [
+        "qiniu/z-ai/glm-5.2",
+        "qiniu/moonshotai/kimi-k2.7-code",
+        "qiniu/openai/gpt-5.5"
+      ]
+    },
+    "metis": {
+      "model": "zhipuai-coding-plan/glm-5.2",
+      "variant": "high",
+      "fallback_models": [
+        "qiniu/z-ai/glm-5.2",
+        "qiniu/moonshotai/kimi-k2.7-code",
+        "qiniu/openai/gpt-5.5"
+      ]
+    },
+    "momus": {
+      // GPT-preferred (xhigh) primary; Kimi added before GLM as cheap diversity.
+      "model": "qiniu/openai/gpt-5.5",
+      "variant": "xhigh",
+      "fallback_models": [
+        "zhipuai-coding-plan/glm-5.2",
+        "qiniu/z-ai/glm-5.2",
+        "qiniu/moonshotai/kimi-k2.7-code"
+      ]
+    },
+    "atlas": {
+      "model": "zhipuai-coding-plan/glm-5.2",
+      "fallback_models": [
+        "qiniu/z-ai/glm-5.2",
+        "qiniu/moonshotai/kimi-k2.7-code",
+        "qiniu/openai/gpt-5.5"
+      ]
+    },
+    "sisyphus-junior": {
+      "model": "qiniu/deepseek/deepseek-v4-flash",
+      "fallback_models": [
+        "zhipuai-coding-plan/glm-5.2",
+        "qiniu/moonshotai/kimi-k2.7-code",
+        "qiniu/minimax/minimax-m3"
+      ]
+    },
+
+    // ── Specialist teammates ──
+    "oracle": {
+      // GPT-preferred (high-IQ debugging) primary; Kimi added for cheap diversity.
+      "model": "qiniu/openai/gpt-5.5",
+      "variant": "high",
+      "fallback_models": [
+        "zhipuai-coding-plan/glm-5.2",
+        "qiniu/z-ai/glm-5.2",
+        "qiniu/moonshotai/kimi-k2.7-code"
       ]
     },
     "librarian": {
-      "model": "zhipuai-coding-plan/glm-5.1",
+      "model": "qiniu/deepseek/deepseek-v4-flash",
       "fallback_models": [
-        "qiniu/deepseek/deepseek-v4-flash",
-        "deepseek/deepseek-v4-flash",
-        "minimax-cn-coding-plan/MiniMax-M2.5-highspeed"
+        "zhipuai-coding-plan/glm-5.2",
+        "qiniu/moonshotai/kimi-k2.7-code"
       ]
     },
     "explore": {
       "model": "qiniu/deepseek/deepseek-v4-flash",
       "fallback_models": [
-        "deepseek/deepseek-v4-flash",
-        "minimax-cn-coding-plan/MiniMax-M2.5-highspeed",
-        "zhipuai-coding-plan/glm-5.1"
-      ]
-    },
-    "oracle": {
-      "model": "qiniu/deepseek/deepseek-v4-pro",
-      "fallback_models": [
-        "deepseek/deepseek-v4-pro",
-        "zhipuai-coding-plan/glm-5.1",
-        "minimax-cn-coding-plan/MiniMax-M2.7"
-      ]
-    },
-    "frontend-ui-ux-engineer": {
-      "model": "qiniu/deepseek/deepseek-v4-pro",
-      "fallback_models": [
-        "zhipuai-coding-plan/glm-5.1",
-        "qiniu/claude-4.6-sonnet",
-        "minimax-cn-coding-plan/MiniMax-M2.7"
-      ]
-    },
-    "document-writer": {
-      "model": "qiniu/deepseek/deepseek-v4-pro",
-      "fallback_models": [
-        "zhipuai-coding-plan/glm-5.1",
-        "deepseek/deepseek-v4-pro",
-        "minimax-cn-coding-plan/MiniMax-M2.7"
+        "qiniu/minimax/minimax-m2.7",
+        "qiniu/moonshotai/kimi-k2.7-code",
+        "zhipuai-coding-plan/glm-5.2"
       ]
     },
     "multimodal-looker": {
-      "model": "qiniu/qwen-vl-max-2025-01-25",
+      // VISION — Gemini/Qwen primary; Kimi (attachment-capable) as last resort.
+      "model": "qiniu/google/gemini-3.5-flash",
       "fallback_models": [
-        "qiniu/qwen3-vl-30b-a3b-thinking",
-        "zhipuai-coding-plan/glm-5.1"
+        "qiniu/qwen/qwen3.6-plus",
+        "qiniu/qwen/qwen3.7-max",
+        "qiniu/moonshotai/kimi-k2.7-code"
+      ]
+    }
+  },
+
+  // ── Categories (delegate_task → Sisyphus-Junior) ──
+  "categories": {
+    "visual-engineering": {
+      // Frontend/UI/UX — Gemini/Qwen (docs: never Kimi/GLM for visual).
+      "model": "qiniu/gemini-3.1-pro-preview",
+      "fallback_models": [
+        "qiniu/qwen/qwen3.7-max",
+        "qiniu/google/gemini-3.5-flash"
+      ]
+    },
+    "writing": {
+      "model": "zhipuai-coding-plan/glm-5.2",
+      "fallback_models": [
+        "qiniu/z-ai/glm-5.2",
+        "qiniu/moonshotai/kimi-k2.7-code"
+      ]
+    },
+    "ultrabrain": {
+      "model": "zhipuai-coding-plan/glm-5.2",
+      "fallback_models": [
+        "qiniu/z-ai/glm-5.2",
+        "qiniu/moonshotai/kimi-k2.7-code",
+        "qiniu/deepseek/deepseek-v4-pro"
+      ]
+    },
+    "deep": {
+      "model": "zhipuai-coding-plan/glm-5.2",
+      "fallback_models": [
+        "qiniu/z-ai/glm-5.2",
+        "qiniu/moonshotai/kimi-k2.7-code",
+        "qiniu/deepseek/deepseek-v4-pro"
+      ]
+    },
+    "artistry": {
+      // Creative — requires Gemini family.
+      "model": "qiniu/gemini-3.1-pro-preview",
+      "fallback_models": ["qiniu/google/gemini-3.5-flash"]
+    },
+    "quick": {
+      "model": "qiniu/deepseek/deepseek-v4-flash",
+      "fallback_models": ["qiniu/minimax/minimax-m2.7"]
+    },
+    "unspecified-low": {
+      "model": "qiniu/deepseek/deepseek-v4-flash",
+      "fallback_models": [
+        "zhipuai-coding-plan/glm-5.2",
+        "qiniu/moonshotai/kimi-k2.7-code"
+      ]
+    },
+    "unspecified-high": {
+      "model": "zhipuai-coding-plan/glm-5.2",
+      "fallback_models": [
+        "qiniu/z-ai/glm-5.2",
+        "qiniu/moonshotai/kimi-k2.7-code",
+        "qiniu/openai/gpt-5.5"
       ]
     }
   }
