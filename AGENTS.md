@@ -140,12 +140,15 @@ Claude Code Router allows routing Claude Code requests to different model provid
 ### Supported Providers
 
 | Provider | Base URL | Models (representative) |
-|----------|----------|--------|
-| Qiniu | `api.qnaigc.com` | Claude, DeepSeek, Qwen, GLM, Kimi, Doubao, Grok, GPT |
-| Zhipu Coding Plan | `open.bigmodel.cn` | GLM-4.x, GLM-5, GLM-Z1 |
+|----------|----------|------------------------|
+| Qiniu | `api.qnaigc.com` | Claude 4.8 Opus, GLM-5.2, Kimi-K2.7-Code, Gemini 3.5 Flash, DeepSeek V4, Qwen3.7-Max, Grok 4.3 |
+| Zhipu Coding Plan | `open.bigmodel.cn` | GLM-5.2, GLM-5.1, GLM-5, GLM-Z1 |
 | DeepSeek | `api.deepseek.com` | deepseek-chat, deepseek-reasoner |
 | OpenRouter | `openrouter.ai` | Claude, Gemini, DeepSeek |
 | SiliconFlow | `api.siliconflow.cn` | Kimi-K2, DeepSeek-V3, Qwen3 |
+
+> The `/v1/models` endpoint is **not authoritative** (it omits many working
+> models). Model availability was verified by live chat-completion probes.
 
 ### Router Configuration
 
@@ -159,6 +162,10 @@ Routes map Claude Code request types to a provider+model. Current defaults:
 | longContext | qiniu,qwen3-max |
 | webSearch | qiniu,qwen3-max |
 | image | qiniu,qwen-vl-max-2025-01-25 |
+
+> `claude-4.6-sonnet` is the **newest available Sonnet** (4.7/4.8/4.9-sonnet
+> return "no available channels"); for heavy lifting, switch to
+> `claude-4.8-opus` via `ccr model`. Routes are already current-generation.
 
 ### Environment Variables
 
