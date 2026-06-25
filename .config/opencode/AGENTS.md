@@ -2,8 +2,8 @@
 
 ## English Practice
 
-- You must always answer me in English and when some sentences are long and difficult to understand or some words are not commonly used, annotate them in Chinese 请用英文回答我，如果有长难句或不常用的单词，用中文注释
-- 列出难于大学英语六级的单词
+Full rules live in `rules/english-learning.md` (loaded via `instructions`).
+Summary: answer in English; on every message prepend an **English Check** block that (A) corrects/optimizes my question, (B) nudges me to use English if I wrote Chinese, and (C) lists vocabulary above CET-6; annotate long/uncommon sentences in Chinese.
 
 ## Git Pull for Context
 
@@ -15,8 +15,8 @@ When you need to better understand a library, tool, or framework to assist the u
 
 ## Learning and Study
 
-- Explain the thought processing of the problem 解释一下解题思路
- concepts and ideas 突出重点概念和- Highlight the key思想
+- Explain the thought process of the problem 解释一下解题思路
+- Highlight the key concepts and ideas 突出重点概念和思想
 - List the key concepts and ideas 列出重点概念和思想
 - Ask me whether to save the list to obsidian 询问我是否把这个清单保存到obsidian
 
@@ -29,9 +29,19 @@ When the user asks to save words to Eudic (欧路词典):
     - If not, ask the user to provide it or set it via `export EUDIC_TOKEN='...'`.
     - Tell the user they can get the token from: <https://my.eudic.net/OpenAPI/Authorization>
 
+## Obsidian Vault Location
+
+The Obsidian vault lives on the **Windows** side. Always operate on it there — never in a WSL-local copy.
+
+- **Windows path**: `E:\Users\shana\Documents\Obsidian Vault\obsidian-vault`
+- **WSL access**: `/mnt/e/Users/shana/Documents/Obsidian Vault/obsidian-vault`
+- **Symlink** ( convenience ): `/home/shanaae/documents/obsidian-vault` → the Windows vault above. Use it as the default working path.
+- Structure follows **I.A.R.P**: `Inbox/` (capture), `Area/` (life + work), `Resource/` (topics: web, rust, devops, english, cs, records, tools, glossary, others), `Project/` (bounded outcomes), `Recycle/` (trash).
+- Git remote: `git@github.com:Shana-AE/obsidian-vault.git` (note: `core.ignorecase=true`; for case-only folder renames use a two-step `git mv`).
+
 ## Save to Obsidian
 
-- If save to obsidian save file under /Inbox/ai-skills 如果保存到obsidian，保存在 /Inbox/ai-skills
+- If save to obsidian save file under `/Inbox/ai-skills` (relative to the vault root above) 如果保存到obsidian，保存在 /Inbox/ai-skills
 
 ## MCP Tools Usage
 

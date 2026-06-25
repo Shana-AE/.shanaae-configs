@@ -136,5 +136,9 @@ ai/mcp/trae.json
 ai/skills/local/backend-api-generator-skill
 
 oh-my-openagent*.bak*
+*.bak
+*.bak-*
 
 .trae/memory
+.trae/builtin
+.trae/builtin_skills

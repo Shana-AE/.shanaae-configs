@@ -205,7 +205,7 @@ Also add a `## Consumer Analysis` emergent category in the entries section listi
 3-5 consumer modules and their usage patterns. This is mandatory for component-like nodes.
 
 Consumer analysis process:
-1. Search for imports of this module across the codebase
+1. Search for imports of this module across Git-visible codebase files
 2. Record top 3-5 consumer modules by import frequency
 3. Sample 3-5 consumer call sites for Usage Examples
 4. Detect misuse or inconsistency across consumers → record as Gotchas
@@ -268,7 +268,7 @@ Line numbers change frequently and become stale quickly. Use file paths only.
 When updating (not creating fresh), follow these rules:
 
 1. **Check for duplicates** — search existing entries before adding new ones
-2. **Update in place** — if the insight exists but the source path changed, update the source reference
+2. **Update in place** — if the insight exists but the source path changed, update the source reference to a Git-visible path
 3. **Mark stale entries** — if a source file was deleted or heavily refactored, verify the knowledge still holds. Remove entries whose facts are no longer true.
 4. **Preserve git provenance** — when updating an entry, keep the original source reference and append the new one: `src/old.py` → `src/old.py, src/new.py`
 5. **Bump the description** — if new entries shift the knowledge node's scope, update the frontmatter description to improve future recall

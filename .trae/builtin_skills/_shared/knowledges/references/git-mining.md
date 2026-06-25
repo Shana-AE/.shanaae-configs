@@ -24,6 +24,11 @@ insights is hollow — it contains only surface-level information.
 
 Before launching subagents, batch-launch ALL git mining commands. Build a tracking checklist:
 
+Git mining must respect Git ignore rules. Use only Git-visible source path inputs, and do
+not pass ignored generated/vendor/build paths to the history script. The script filters
+ignored files in diffs as a final guard, but command planning must still avoid ignored
+locations.
+
 ```
 === Git Mining Checklist ===
 [ ] domain-1 (top-level)   → output: <knowledges-root>/.knowledges-task/git/domain-1-history.md
@@ -44,6 +49,7 @@ python3 <skill-path>/scripts/git-agent-history.py \
 
 - Launch multiple commands in parallel
 - Adjust `--max-count` per domain size (50–200)
+- Keep path inputs limited to Git-visible project files or directories
 - Mark each item `[done]` after completion
 - ALL items must be checked before proceeding to knowledge extraction
 
@@ -53,8 +59,8 @@ When reading a git history output file, apply these 5 patterns:
 
 ### Pattern A — Co-change Detection (→ coupling/dependency entries)
 
-Scan for commits touching 2+ files across different subdirectories. If files A and B change
-together in 3+ commits, they have an implicit coupling worth recording.
+Scan for commits touching 2+ Git-visible files across different subdirectories. If files A
+and B change together in 3+ commits, they have an implicit coupling worth recording.
 
 Example: `commit:287a7a50` modified both `terminal-mirror/runner.tsx` and `chat-input/index.tsx`
 → Entry: `Modifying terminal mirror run state requires syncing chat input panel settings

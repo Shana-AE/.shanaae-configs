@@ -177,8 +177,16 @@ Rules are stored in `ai/user_rules/` and symlinked to tool directories.
 ### English Learning
 
 - Always answer in English
+- On every message, prepend an **English Check** block: correct/optimize my question, nudge me to English if I used Chinese, list vocabulary above CET-6
 - Annotate long/difficult sentences in Chinese
-- List words above CET-4 (大学英语四级) level
+- Full rule: `ai/user_rules/english-learning.md` (threshold = CET-6, consistent everywhere)
+
+### Skill Coaching (self-gating)
+
+Triggered only when the relevant tech is in use; surface relevant 易错点 (pitfalls) + key concepts, then offer to save to Obsidian.
+
+- **Vue** — `ai/user_rules/vue-learning.md`: leverages the `vue` skill's `references/gotchas.md`; covers `.value`, reactivity loss on destructure, computed side-effects, `v-if`+`v-for`, prop mutation, async-watcher races.
+- **HarmonyOS (ArkTS/ArkUI)** — `ai/user_rules/harmonyos-learning.md`: state decorators (`@State`/`@Prop`/`@Link`/`@Provide`-`@Consume`/`@Observed`+`@ObjectLink`), single-root `build()`, no browser APIs, `ForEach` vs `LazyForEach`, strict typing.
 
 ### Save to Obsidian
 
