@@ -51,6 +51,22 @@ The **Livesync** plugin syncs Obsidian's *in-memory* vault state, not raw disk. 
 ## Save to Obsidian
 
 - If save to obsidian save file under `/Inbox/ai-skills` (relative to the vault root above) 如果保存到obsidian，保存在 /Inbox/ai-skills
+- **Always categorize into the appropriate subfolder** based on the note's topic. Create the subfolder via `obsidian create path="Inbox/ai-skills/<category>/.folder"` first if it doesn't exist.
+- 保存到 ai-skills 时，**必须按主题归类到对应子文件夹**，不要散落在根目录
+
+### Category Map
+
+| Subfolder         | Save when the note is about…                                              |
+| ----------------- | ------------------------------------------------------------------------ |
+| `frontend/`       | CSS, HTML, JS/DOM APIs, Vue/React, browser behavior, third-party frontend SDKs |
+| `tooling/`        | Build tools (Vite, webpack), package managers (pnpm, npm), bundlers, CI    |
+| `shell/`          | Shell scripting, env vars, Linux/WSL, terminal tools                      |
+| `debugging/`      | Bug investigation writeups, root-cause analysis, postmortems              |
+| `finance/`        | Insurance, pension, investment, personal financial planning               |
+| `english-learning/` | English vocabulary, grammar, study notes (existing)                     |
+| `2026-01/`        | Archive (legacy notes, don't add new files here)                           |
+
+If a note doesn't fit any existing category, **create a new subfolder** with a sensible short name (e.g. `database/`, `security/`, `networking/`) via `obsidian create path="Inbox/ai-skills/<new-category>/.folder"`, save the note there, then add the new category to the table above and **flag it to the user** so they can rename or merge it later. Never leave notes loose at the `ai-skills/` root.
 
 ## MCP Tools Usage
 
