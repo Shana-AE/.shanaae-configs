@@ -11,7 +11,7 @@
     "opencode-vibeguard",
     // "@tarquinen/opencode-dcp@latest",
     "opencode-pty",
-    // "opencode-websearch-cited"
+    // "opencode-websearch-cited"  // disabled: its WebsearchCitedOpenAIPlugin export overrides the built-in ChatGPT Plus/Pro OAuth login methods
   ],
   "mcp": {
     "Git": {
@@ -65,7 +65,7 @@
         "npx",
         "-y",
         "@modelcontextprotocol/server-filesystem",
-        "/home/shanaae/projects"
+        "{env:PROJECTS_DIR}"
       ]
     },
     "Figma-Desktop": {
@@ -110,7 +110,7 @@
       "environment": {
         "MINIMAX_API_KEY": "{env:MINIMAX_TOKEN_PLAN_API_KEY}",
         "MINIMAX_API_HOST": "https://api.minimaxi.com",
-        "MINIMAX_MCP_BASE_PATH": "/home/shanaae/minimax-output",
+        "MINIMAX_MCP_BASE_PATH": "{env:MINIMAX_OUTPUT_DIR}",
         "MINIMAX_API_RESOURCE_MODE": "local"
       },
       "enabled": false
