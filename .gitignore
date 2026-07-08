@@ -145,6 +145,7 @@ ai/skills/for-tools/
 oh-my-openagent*.bak*
 *.bak
 *.bak-*
+*.bak.*
 
 .trae/memory
 .trae/builtin
