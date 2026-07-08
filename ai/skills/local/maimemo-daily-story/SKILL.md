@@ -147,7 +147,43 @@ Or directly via `obsidian` CLI:
 obsidian create path="Inbox/ai-skills/english-learning/2026/04/MaiMemo Daily Story - 2026-04-16.md" content="$(cat /tmp/maimemo-story.md)" silent overwrite
 ```
 
-### 5. Cleanup (Optional)
+### 5. Generate TTS Audio (钉宫理恵 voice)
+
+After saving to Obsidian, generate audio from the English story content using GPT-SoVITS:
+
+```bash
+python3 scripts/maimemo_tts.py --file /tmp/maimemo-story.md
+```
+
+This will:
+- Extract English paragraphs from the article (skipping Chinese translations, word notes, etc.)
+- Send text to GPT-SoVITS API (port 9880) with 钉宫理恵 voice model
+- Save MP3 to `~/maimemo-audio/` with filename matching the article title
+
+**Prerequisites:**
+- GPT-SoVITS API must be running on `http://127.0.0.1:9880/`
+- Reference audio: `GPT-SoVITS/reference_audios/ailini_ref.wav`
+- ffmpeg must be installed (for WAV→MP3 conversion)
+
+**Environment variables (optional):**
+- `MAIMEMO_TTS_API` — TTS API URL (default: `http://127.0.0.1:9880/`)
+- `MAIMEMO_TTS_REF_AUDIO` — Reference audio path
+- `MAIMEMO_TTS_PROMPT_TEXT` — Prompt text for reference (default: Japanese)
+- `MAIMEMO_AUDIO_DIR` — Output directory (default: `~/maimemo-audio`)
+
+**Audio server:** Audio files are served via a lightweight HTTP server for download:
+```bash
+# Start server (if not already running)
+nohup python3 scripts/maimemo_audio_server.py --port 28888 &
+```
+Server endpoints:
+- `http://127.0.0.1:28888/` — HTML file listing with inline player
+- `http://127.0.0.1:28888/list` — JSON file list
+- `http://127.0.0.1:28888/<filename>` — Download audio file
+
+> **Note**: Audio files are NOT stored in Obsidian (to avoid sync bloat). They live in `~/maimemo-audio/`.
+
+### 6. Cleanup (Optional)
 
 ```bash
 python3 scripts/maimemo_story.py delete "Inbox/ai-skills/english-learning/2026/04/MaiMemo Daily Story - 2026-04-14.md"
@@ -163,6 +199,10 @@ obsidian trash path="Inbox/ai-skills/english-learning/2026/04/MaiMemo Daily Stor
    ```bash
    # Write article to temp file, then save
    python3 scripts/maimemo_story.py save --file /tmp/maimemo-story.md
+   ```
+4. Generate TTS audio:
+   ```bash
+   python3 scripts/maimemo_tts.py --file /tmp/maimemo-story.md
    ```
 
 ## Key Concepts
