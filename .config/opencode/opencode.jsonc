@@ -14,29 +14,11 @@
     // "opencode-websearch-cited"  // disabled: its WebsearchCitedOpenAIPlugin export overrides the built-in ChatGPT Plus/Pro OAuth login methods
   ],
   "mcp": {
-    "Git": {
-      "enabled": false,
-      "type": "local",
-      "command": [
-        "uvx",
-        "mcp-server-git"
-      ]
-    },
-    "Sequential-Thinking": {
-      "enabled": false,
-      "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ]
-    },
     // Connects to Brave on Windows via the debug port. Brave must be running with:
-    //   brave.exe --remote-debugging-port=9222 --user-data-dir="C:\Users\shana\brave-debug"
+    // brave.exe --remote-debugging-port=9222 --user-data-dir="C:\Users\shana\brave-debug"
     // WSL is in Mirrored mode (.wslconfig: networkingMode=Mirrored + hostAddressLoopback=true),
     // so 127.0.0.1 in WSL reaches Windows directly — no 0.0.0.0 binding needed.
     "Chrome-DevTools-MCP": {
-      "enabled": true,
       "type": "local",
       "command": [
         "npx",
@@ -46,34 +28,18 @@
         "--no-usage-statistics"
       ]
     },
-    "Memory": {
-      "enabled": false,
-      "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "@modelcontextprotocol/server-memory"
-      ],
-      "environment": {
-        "MEMORY_FILE_PATH": "memory.json"
-      }
-    },
-    "Filesystem": {
-      "enabled": false,
-      "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "{env:PROJECTS_DIR}"
-      ]
-    },
     "Figma-Desktop": {
       "type": "remote",
       "url": "http://127.0.0.1:3845/mcp"
     },
+    "web-search-prime": {
+      "type": "remote",
+      "url": "https://open.bigmodel.cn/api/mcp/web_search_prime/mcp",
+      "headers": {
+        "Authorization": "Bearer {env:BIGMODEL_API_KEY}"
+      }
+    },
     "zai-mcp-server": {
-      "enabled": false,
       "type": "local",
       "command": [
         "npx",
@@ -85,21 +51,58 @@
         "Z_AI_API_KEY": "{env:BIGMODEL_API_KEY}"
       }
     },
-    "web-search-prime": {
-      "enabled": true,
-      "type": "remote",
-      "url": "https://open.bigmodel.cn/api/mcp/web_search_prime/mcp",
-      "headers": {
-        "Authorization": "Bearer {env:BIGMODEL_API_KEY}"
-      }
-    },
     "zread": {
-      "enabled": true,
       "type": "remote",
       "url": "https://open.bigmodel.cn/api/mcp/zread/mcp",
       "headers": {
         "Authorization": "Bearer {env:BIGMODEL_API_KEY}"
       }
+    },
+    "Fetch": {
+      "type": "local",
+      "command": [
+        "uvx",
+        "mcp-server-fetch"
+      ],
+      "enabled": false
+    },
+    "Filesystem": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "{env:PROJECTS_DIR}"
+      ],
+      "enabled": false
+    },
+    "Git": {
+      "type": "local",
+      "command": [
+        "uvx",
+        "mcp-server-git"
+      ],
+      "enabled": false
+    },
+    "github": {
+      "type": "remote",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer {env:GITHUB_TOKEN_MCP}"
+      },
+      "enabled": false
+    },
+    "Memory": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "environment": {
+        "MEMORY_FILE_PATH": "memory.json"
+      },
+      "enabled": false
     },
     "MiniMax": {
       "type": "local",
@@ -125,6 +128,50 @@
       "environment": {
         "MINIMAX_API_KEY": "{env:MINIMAX_TOKEN_PLAN_API_KEY}",
         "MINIMAX_API_HOST": "https://api.minimaxi.com"
+      },
+      "enabled": false
+    },
+    "Package-Version": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "mcp-package-version"
+      ],
+      "enabled": false
+    },
+    "Playwright": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@executeautomation/playwright-mcp-server"
+      ],
+      "enabled": false
+    },
+    "Puppeteer": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-puppeteer"
+      ],
+      "enabled": false
+    },
+    "Sequential-Thinking": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "enabled": false
+    },
+    "web-reader": {
+      "type": "remote",
+      "url": "https://open.bigmodel.cn/api/mcp/web_reader/mcp",
+      "headers": {
+        "Authorization": "Bearer {env:BIGMODEL_API_KEY}"
       },
       "enabled": false
     }
@@ -153,200 +200,344 @@
         "apiKey": "{env:QINIU_AI_API_KEY}"
       },
       "models": {
-        "arcee-ai/trinity-mini": {
-          "name": "Arcee-Ai/Trinity Mini (Qiniu)",
-          "limit": {"context": 128000, "output": 128000}
+        "anthropic/claude-fable-5": {
+          "name": "Anthropic/Claude Fable 5 (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 1000000, "output": 128000}
         },
-        "qwen/qwen3.7-max": {
-          "name": "Qwen/Qwen3.7-Max (Qiniu)",
-          "reasoning": true,
-          "limit": {"context": 1000000, "output": 64000}
-        },
-        "qwen/qwen3.6-27b": {
-          "name": "Qwen/Qwen3.6-27B (Qiniu)",
-          "reasoning": true,
-          "attachment": true,
-          "limit": {"context": 262100, "output": 262100}
-        },
-        "qwen/qwen3.6-plus": {
-          "name": "Qwen/Qwen3.6-Plus (Qiniu)",
-          "reasoning": true,
-          "attachment": true,
-          "limit": {"context": 1000000, "output": 64000}
-        },
-        "minimax/minimax-m3": {
-          "name": "Minimax/Minimax-M3 (Qiniu)",
-          "reasoning": true,
-          "attachment": true,
-          "limit": {"context": 1000000, "output": 128000}
-        },
-        "minimax/minimax-m2.7": {
-          "name": "Minimax/Minimax-M2.7 (Qiniu)",
-          "reasoning": true,
-          "limit": {"context": 204800, "output": 128000}
-        },
-        "minimax/minimax-m2.5": {
-          "name": "Minimax/Minimax-M2.5 (Qiniu)",
-          "reasoning": true,
-          "limit": {"context": 204800, "output": 128000}
-        },
-        "meituan/longcat-flash-lite": {
-          "name": "Meituan/Longcat-Flash-Lite (Qiniu)",
-          "limit": {"context": 256000, "output": 320000}
-        },
-        "moonshotai/kimi-k2.7-code": {
-          "name": "Moonshotai/Kimi-K2.7-Code (Qiniu)",
-          "reasoning": true,
-          "attachment": true,
-          "limit": {"context": 262144, "output": 262144}
-        },
-        "moonshotai/kimi-k2.6": {
-          "name": "Moonshotai/Kimi-K2.6 (Qiniu)",
-          "reasoning": true,
-          "attachment": true,
-          "limit": {"context": 262000, "output": 262000}
-        },
-        "moonshotai/kimi-k2.5": {
-          "name": "Moonshotai/Kimi-K2.5 (Qiniu)",
-          "attachment": true,
-          "limit": {"context": 256000, "output": 256000}
-        },
-        "tencent/hy3-preview": {
-          "name": "Tencent/Hy3 Preview (Qiniu)",
-          "reasoning": true,
-          "limit": {"context": 262144, "output": 262144}
-        },
-        "hunter-alpha": {
-          "name": "Hunter-Alpha (Qiniu)",
-          "limit": {"context": 1000000, "output": 64000}
-        },
-        "healer-alpha": {
-          "name": "Healer-Alpha (Qiniu)",
-          "attachment": true,
-          "limit": {"context": 262144, "output": 64000}
-        },
-        "x-ai/grok-4.3": {
-          "name": "X-Ai/Grok 4.3 (Qiniu)",
-          "reasoning": true,
-          "attachment": true,
-          "limit": {"context": 1000000, "output": 1000000}
-        },
-        "x-ai/grok-4.2-fast-reasoning": {
-          "name": "X-Ai/Grok 4.2 Fas Reasoning (Qiniu)",
-          "reasoning": true,
-          "attachment": true,
-          "limit": {"context": 2000000, "output": 2000000}
-        },
-        "x-ai/grok-4.2-reasoning": {
-          "name": "X-Ai/Grok 4.2 Reasoning (Qiniu)",
-          "attachment": true,
-          "limit": {"context": 2000000, "output": 2000000}
-        },
-        "gpt-oss-120b": {
-          "name": "gpt-oss-120b (Qiniu)",
-          "reasoning": true,
-          "limit": {"context": 128000, "output": 4096}
-        },
-        "openai/gpt-5.5": {
-          "name": "Openai/GPT-5.5 (Qiniu)",
-          "reasoning": true,
-          "attachment": true,
-          "limit": {"context": 1000000, "output": 128000}
-        },
-        "openai/gpt-5.4-pro": {
-          "name": "Openai/GPT-5.4 Pro (Qiniu)",
-          "reasoning": true,
-          "attachment": true,
-          "limit": {"context": 1000000, "output": 128000}
-        },
-        "openai/gpt-5.4-mini": {
-          "name": "Openai/GPT-5.4 Mini (Qiniu)",
-          "reasoning": true,
-          "attachment": true,
-          "limit": {"context": 400000, "output": 128000}
-        },
-        "z-ai/glm-5.2": {
-          "name": "Z-AI/GLM-5.2 (Qiniu)",
-          "reasoning": true,
-          "limit": {"context": 1000000, "output": 128000}
-        },
-        "z-ai/glm-5.1": {
-          "name": "Z-AI/GLM 5.1 (Qiniu)",
-          "reasoning": true,
-          "limit": {"context": 200000, "output": 128000}
-        },
-        "z-ai/glm-5": {
-          "name": "Z-AI/GLM 5 (Qiniu)",
-          "reasoning": true,
-          "limit": {"context": 200000, "output": 128000}
-        },
-        "google/gemini-3.5-flash": {
-          "name": "Gemini 3.5 Flash (Qiniu)",
-          "reasoning": true,
-          "attachment": true,
-          "limit": {"context": 1000000, "output": 64000}
-        },
-        "gemini-3.1-pro-preview": {
-          "name": "Gemini 3.1 Pro Preview (Qiniu)",
-          "reasoning": true,
-          "attachment": true,
-          "limit": {"context": 1000000, "output": 64000}
-        },
-        "google/gemini-3.1-flash-lite": {
-          "name": "Gemini 3.1 Flash Lite (Qiniu)",
-          "reasoning": true,
-          "attachment": true,
-          "limit": {"context": 1000000, "output": 64000}
-        },
-        "doubao-seed-2.0-pro": {
-          "name": "Doubao Seed 2.0 Pro (Qiniu)",
-          "reasoning": true,
-          "attachment": true,
-          "limit": {"context": 256000, "output": 128000}
-        },
-        "doubao-seed-2.0-code": {
-          "name": "Doubao Seed 2.0 Code (Qiniu)",
-          "reasoning": true,
-          "attachment": true,
-          "limit": {"context": 256000, "output": 128000}
-        },
-        "doubao-seed-2.0-mini": {
-          "name": "Doubao Seed 2.0 Mini (Qiniu)",
-          "reasoning": true,
-          "attachment": true,
-          "limit": {"context": 256000, "output": 32000}
-        },
-        "deepseek/deepseek-v4-pro": {
-          "name": "DeepSeek-V4-Pro (Qiniu)",
-          "reasoning": true,
-          "limit": {"context": 1000000, "output": 384000}
-        },
-        "deepseek/deepseek-v4-pro-202606": {
-          "name": "Deepseek-v4-Pro-202606 (Qiniu)",
-          "reasoning": true,
-          "limit": {"context": 1000000, "output": 384000}
-        },
-        "deepseek/deepseek-v4-flash": {
-          "name": "DeepSeek-V4-Flash (Qiniu)",
-          "limit": {"context": 1000000, "output": 384000}
-        },
-        "anthropic/claude-4.8-opus": {
-          "name": "Claude 4.8 Opus (Qiniu)",
-          "reasoning": true,
-          "attachment": true,
-          "limit": {"context": 1000000, "output": 128000}
-        },
-        "anthropic/claude-4.7-opus": {
-          "name": "Claude 4.7 Opus (Qiniu)",
-          "reasoning": true,
-          "attachment": true,
-          "limit": {"context": 1000000, "output": 128000}
+        "claude-4.6-sonnet": {
+          "name": "Claude 4.6 Sonnet (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 1000000, "output": 64000}
         },
         "claude-4.6-opus": {
-          "name": "Claude 4.6 Opus (Qiniu)",
-          "reasoning": true,
-          "attachment": true,
-          "limit": {"context": 1000000, "output": 128000}
+          "name": "Claude 4.6 Opus (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 1000000, "output": 128000}
+        },
+        "claude-4.5-opus": {
+          "name": "Claude 4.5 Opus (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 200000, "output": 64000}
+        },
+        "claude-4.5-sonnet": {
+          "name": "Claude 4.5 Sonnet (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 200000, "output": 64000}
+        },
+        "claude-4.5-haiku": {
+          "name": "Claude 4.5 Haiku (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 200000, "output": 64000}
+        },
+        "claude-4.1-opus": {
+          "name": "Claude 4.1 Opus (Qiniu)", "reasoning": true, "limit": {"context": 200000, "output": 64000}
+        },
+        "anthropic/claude-4.8-opus": {
+          "name": "Claude 4.8 Opus (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 1000000, "output": 128000}
+        },
+        "anthropic/claude-4.7-opus": {
+          "name": "Claude 4.7 Opus (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 1000000, "output": 128000}
+        },
+        "openai/gpt-5.5": {
+          "name": "OpenAI/GPT-5.5 (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 1000000, "output": 128000}
+        },
+        "openai/gpt-5.4-pro": {
+          "name": "OpenAI/GPT-5.4 Pro (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 1000000, "output": 128000}
+        },
+        "openai/gpt-5.4-mini": {
+          "name": "OpenAI/GPT-5.4 Mini (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 400000, "output": 128000}
+        },
+        "openai/gpt-5.4-nano": {
+          "name": "OpenAI/GPT-5.4 Nano (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 400000, "output": 128000}
+        },
+        "openai/gpt-5.4": {
+          "name": "OpenAI/GPT-5.4 (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 1100000, "output": 128000}
+        },
+        "openai/gpt-5.3-codex": {
+          "name": "OpenAI/GPT-5.3 Codex (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 400000, "output": 128000}
+        },
+        "openai/gpt-5.2-codex": {
+          "name": "OpenAI/GPT-5.2 Codex (Qiniu)", "reasoning": true, "limit": {"context": 400000, "output": 128000}
+        },
+        "openai/gpt-5.2": {
+          "name": "OpenAI/GPT-5.2 (Qiniu)", "reasoning": true, "limit": {"context": 400000, "output": 128000}
+        },
+        "openai/gpt-5-pro": {
+          "name": "OpenAI/GPT-5 Pro (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 400000, "output": 128000}
+        },
+        "openai/gpt-5-mini": {
+          "name": "OpenAI/GPT-5 Mini (Qiniu)", "limit": {"context": 400000, "output": 128000}
+        },
+        "openai/gpt-5-nano": {
+          "name": "OpenAI/GPT-5 Nano (Qiniu)", "reasoning": true, "limit": {"context": 400000, "output": 128000}
+        },
+        "openai/gpt-5": {
+          "name": "OpenAI/GPT-5 (Qiniu)", "attachment": true, "limit": {"context": 400000, "output": 128000}
+        },
+        "x-ai/grok-4.3": {
+          "name": "xAI/Grok 4.3 (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 1000000, "output": 128000}
+        },
+        "x-ai/grok-4.2-reasoning": {
+          "name": "xAI/Grok 4.2 Reasoning (Qiniu)", "attachment": true, "limit": {"context": 2000000, "output": 128000}
+        },
+        "x-ai/grok-4.2-fast-reasoning": {
+          "name": "xAI/Grok 4.2 Fast Reasoning (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 2000000, "output": 128000}
+        },
+        "x-ai/grok-4.2-fast-non-reasoning": {
+          "name": "xAI/Grok 4.2 Fast Non-Reasoning (Qiniu)", "attachment": true, "limit": {"context": 2000000, "output": 128000}
+        },
+        "x-ai/grok-4.1-fast-reasoning": {
+          "name": "xAI/Grok 4.1 Fast Reasoning (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 2000000, "output": 128000}
+        },
+        "x-ai/grok-4.1-fast-non-reasoning": {
+          "name": "xAI/Grok 4.1 Fast Non-Reasoning (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 2000000, "output": 128000}
+        },
+        "x-ai/grok-4-fast-reasoning": {
+          "name": "xAI/Grok 4 Fast Reasoning (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 2000000, "output": 128000}
+        },
+        "x-ai/grok-4-fast-non-reasoning": {
+          "name": "xAI/Grok 4 Fast Non-Reasoning (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 2000000, "output": 128000}
+        },
+        "x-ai/grok-code-fast-1": {
+          "name": "xAI/Grok Code Fast 1 (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 256000, "output": 128000}
+        },
+        "google/gemini-3.5-flash": {
+          "name": "Gemini 3.5 Flash (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 1000000, "output": 64000}
+        },
+        "gemini-3.1-pro-preview": {
+          "name": "Gemini 3.1 Pro Preview (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 1000000, "output": 64000}
+        },
+        "google/gemini-3.1-flash-lite": {
+          "name": "Gemini 3.1 Flash Lite (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 1000000, "output": 64000}
+        },
+        "gemini-3.0-flash-preview": {
+          "name": "Gemini 3.0 Flash Preview (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 1000000, "output": 64000}
+        },
+        "gemini-2.5-pro": {
+          "name": "Gemini 2.5 Pro (Qiniu)", "attachment": true, "limit": {"context": 1000000, "output": 64000}
+        },
+        "gemini-2.5-flash": {
+          "name": "Gemini 2.5 Flash (Qiniu)", "attachment": true, "limit": {"context": 1000000, "output": 64000}
+        },
+        "gemini-2.5-flash-lite": {
+          "name": "Gemini 2.5 Flash Lite (Qiniu)", "attachment": true, "limit": {"context": 1000000, "output": 64000}
+        },
+        "deepseek/deepseek-v4-pro": {
+          "name": "DeepSeek-V4-Pro (Qiniu)", "reasoning": true, "limit": {"context": 1000000, "output": 384000}
+        },
+        "deepseek/deepseek-v4-pro-202606": {
+          "name": "DeepSeek-V4-Pro-202606 (Qiniu)", "reasoning": true, "limit": {"context": 1000000, "output": 384000}
+        },
+        "deepseek/deepseek-v4-flash": {
+          "name": "DeepSeek-V4-Flash (Qiniu)", "limit": {"context": 1000000, "output": 384000}
+        },
+        "deepseek/deepseek-v4-flash-202605": {
+          "name": "DeepSeek-V4-Flash-202605 (Qiniu)", "limit": {"context": 1000000, "output": 384000}
+        },
+        "deepseek/deepseek-v3.2-251201": {
+          "name": "DeepSeek-V3.2-251201 (Qiniu)", "reasoning": true, "limit": {"context": 128000, "output": 128000}
+        },
+        "deepseek/deepseek-v3.2-speciale-or": {
+          "name": "DeepSeek-V3.2-Speciale-OR (Qiniu)", "limit": {"context": 128000, "output": 128000}
+        },
+        "deepseek/deepseek-v3.2-exp": {
+          "name": "DeepSeek-V3.2-Exp (Qiniu)", "limit": {"context": 128000, "output": 128000}
+        },
+        "deepseek/deepseek-v3.2-exp-thinking": {
+          "name": "DeepSeek-V3.2-Exp-Thinking (Qiniu)", "reasoning": true, "limit": {"context": 128000, "output": 128000}
+        },
+        "deepseek/deepseek-v3.1-terminus": {
+          "name": "DeepSeek-V3.1-Terminus (Qiniu)", "limit": {"context": 128000, "output": 128000}
+        },
+        "deepseek/deepseek-v3.1-terminus-thinking": {
+          "name": "DeepSeek-V3.1-Terminus-Thinking (Qiniu)", "reasoning": true, "limit": {"context": 128000, "output": 128000}
+        },
+        "deepseek-v3.1": {
+          "name": "DeepSeek-V3.1 (Qiniu)", "reasoning": true, "limit": {"context": 128000, "output": 128000}
+        },
+        "deepseek-v3": {
+          "name": "DeepSeek-V3 (Qiniu)", "limit": {"context": 128000, "output": 128000}
+        },
+        "deepseek-v3-0324": {
+          "name": "DeepSeek-V3-0324 (Qiniu)", "limit": {"context": 128000, "output": 128000}
+        },
+        "deepseek-r1": {
+          "name": "DeepSeek-R1 (Qiniu)", "reasoning": true, "limit": {"context": 128000, "output": 128000}
+        },
+        "deepseek-r1-0528": {
+          "name": "DeepSeek-R1-0528 (Qiniu)", "reasoning": true, "limit": {"context": 128000, "output": 128000}
+        },
+        "qwen/qwen3.7-max": {
+          "name": "Qwen/Qwen3.7-Max (Qiniu)", "reasoning": true, "limit": {"context": 1000000, "output": 64000}
+        },
+        "qwen/qwen3.7-plus": {
+          "name": "Qwen/Qwen3.7-Plus (Qiniu)", "limit": {"context": 1000000, "output": 64000}
+        },
+        "qwen/qwen3.6-plus": {
+          "name": "Qwen/Qwen3.6-Plus (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 1000000, "output": 64000}
+        },
+        "qwen/qwen3.6-27b": {
+          "name": "Qwen/Qwen3.6-27B (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 262144, "output": 262144}
+        },
+        "qwen/qwen3.5-plus": {
+          "name": "Qwen/Qwen3.5-Plus (Qiniu)", "attachment": true, "limit": {"context": 1000000, "output": 64000}
+        },
+        "qwen3.5-397b-a17b": {
+          "name": "Qwen3.5-397B-A17B (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 256000, "output": 128000}
+        },
+        "qwen3-235b-a22b-thinking-2507": {
+          "name": "Qwen3-235B-A22B-Thinking-2507 (Qiniu)", "reasoning": true, "limit": {"context": 262144, "output": 262144}
+        },
+        "qwen3-235b-a22b-instruct-2507": {
+          "name": "Qwen3-235B-A22B-Instruct-2507 (Qiniu)", "limit": {"context": 262144, "output": 262144}
+        },
+        "qwen3-235b-a22b": {
+          "name": "Qwen3-235B-A22B (Qiniu)", "limit": {"context": 128000, "output": 128000}
+        },
+        "qwen3-coder-480b-a35b-instruct": {
+          "name": "Qwen3-Coder-480B-A35B-Instruct (Qiniu)", "limit": {"context": 262144, "output": 262144}
+        },
+        "qwen3-next-80b-a3b-thinking": {
+          "name": "Qwen3-Next-80B-A3B-Thinking (Qiniu)", "reasoning": true, "limit": {"context": 131072, "output": 131072}
+        },
+        "qwen3-next-80b-a3b-instruct": {
+          "name": "Qwen3-Next-80B-A3B-Instruct (Qiniu)", "limit": {"context": 131072, "output": 131072}
+        },
+        "qwen3-vl-30b-a3b-thinking": {
+          "name": "Qwen3-VL-30B-A3B-Thinking (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 128000, "output": 128000}
+        },
+        "qwen3-max": {
+          "name": "Qwen3-Max (Qiniu)", "limit": {"context": 262144, "output": 262144}
+        },
+        "qwen3-max-preview": {
+          "name": "Qwen3-Max-Preview (Qiniu)", "limit": {"context": 262144, "output": 262144}
+        },
+        "qwen3-32b": {
+          "name": "Qwen3-32B (Qiniu)", "reasoning": true, "limit": {"context": 40000, "output": 4096}
+        },
+        "qwen3-30b-a3b": {
+          "name": "Qwen3-30B-A3B (Qiniu)", "reasoning": true, "limit": {"context": 40000, "output": 4096}
+        },
+        "qwen3-30b-a3b-thinking-2507": {
+          "name": "Qwen3-30B-A3B-Thinking-2507 (Qiniu)", "reasoning": true, "limit": {"context": 126000, "output": 126000}
+        },
+        "qwen3-30b-a3b-instruct-2507": {
+          "name": "Qwen3-30B-A3B-Instruct-2507 (Qiniu)", "limit": {"context": 128000, "output": 128000}
+        },
+        "qwen-vl-max-2025-01-25": {
+          "name": "Qwen-VL-Max-2025-01-25 (Qiniu)", "attachment": true, "limit": {"context": 128000, "output": 128000}
+        },
+        "qwen2.5-vl-72b-instruct": {
+          "name": "Qwen2.5-VL-72B-Instruct (Qiniu)", "attachment": true, "limit": {"context": 128000, "output": 128000}
+        },
+        "qwen2.5-vl-7b-instruct": {
+          "name": "Qwen2.5-VL-7B-Instruct (Qiniu)", "attachment": true, "limit": {"context": 128000, "output": 128000}
+        },
+        "qwen-max-2025-01-25": {
+          "name": "Qwen-Max-2025-01-25 (Qiniu)", "limit": {"context": 128000, "output": 128000}
+        },
+        "qwen-turbo": {
+          "name": "Qwen-Turbo (Qiniu)", "reasoning": true, "limit": {"context": 1000000, "output": 64000}
+        },
+        "z-ai/glm-5.2": {
+          "name": "Z-AI/GLM-5.2 (Qiniu)", "reasoning": true, "limit": {"context": 1000000, "output": 128000}
+        },
+        "z-ai/glm-5.1": {
+          "name": "Z-AI/GLM-5.1 (Qiniu)", "reasoning": true, "limit": {"context": 200000, "output": 128000}
+        },
+        "z-ai/glm-5": {
+          "name": "Z-AI/GLM-5 (Qiniu)", "reasoning": true, "limit": {"context": 200000, "output": 128000}
+        },
+        "z-ai/glm-4.7": {
+          "name": "Z-AI/GLM-4.7 (Qiniu)", "reasoning": true, "limit": {"context": 200000, "output": 128000}
+        },
+        "z-ai/glm-4.6": {
+          "name": "Z-AI/GLM-4.6 (Qiniu)", "limit": {"context": 200000, "output": 128000}
+        },
+        "glm-4.5": {
+          "name": "GLM-4.5 (Qiniu)", "reasoning": true, "limit": {"context": 131072, "output": 131072}
+        },
+        "glm-4.5-air": {
+          "name": "GLM-4.5-Air (Qiniu)", "limit": {"context": 131072, "output": 131072}
+        },
+        "minimax/minimax-m3": {
+          "name": "MiniMax/Minimax-M3 (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 1000000, "output": 128000}
+        },
+        "minimax/minimax-m2.7": {
+          "name": "MiniMax/Minimax-M2.7 (Qiniu)", "reasoning": true, "limit": {"context": 205000, "output": 128000}
+        },
+        "minimax/minimax-m2.5": {
+          "name": "MiniMax/Minimax-M2.5 (Qiniu)", "reasoning": true, "limit": {"context": 205000, "output": 128000}
+        },
+        "minimax/minimax-m2.5-highspeed": {
+          "name": "MiniMax/Minimax-M2.5-Highspeed (Qiniu)", "reasoning": true, "limit": {"context": 205000, "output": 128000}
+        },
+        "minimax/minimax-m2.1": {
+          "name": "MiniMax/Minimax-M2.1 (Qiniu)", "reasoning": true, "limit": {"context": 205000, "output": 128000}
+        },
+        "minimax/minimax-m2": {
+          "name": "MiniMax/Minimax-M2 (Qiniu)", "reasoning": true, "limit": {"context": 200000, "output": 128000}
+        },
+        "MiniMax-M1": {
+          "name": "MiniMax-M1 (Qiniu)", "reasoning": true, "limit": {"context": 1000000, "output": 128000}
+        },
+        "moonshotai/kimi-k2.7-code": {
+          "name": "Moonshot-AI/Kimi-K2.7-Code (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 262144, "output": 262144}
+        },
+        "moonshotai/kimi-k2.6": {
+          "name": "Moonshot-AI/Kimi-K2.6 (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 262144, "output": 262144}
+        },
+        "moonshotai/kimi-k2.5": {
+          "name": "Moonshot-AI/Kimi-K2.5 (Qiniu)", "attachment": true, "limit": {"context": 256000, "output": 256000}
+        },
+        "moonshotai/kimi-k2-thinking": {
+          "name": "Moonshot-AI/Kimi-K2-Thinking (Qiniu)", "limit": {"context": 256000, "output": 128000}
+        },
+        "kimi-k2": {
+          "name": "Kimi-K2 (Qiniu)", "limit": {"context": 128000, "output": 128000}
+        },
+        "doubao-seed-2.0-pro": {
+          "name": "Doubao-Seed-2.0-Pro (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 256000, "output": 128000}
+        },
+        "doubao-seed-2.0-code": {
+          "name": "Doubao-Seed-2.0-Code (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 256000, "output": 128000}
+        },
+        "doubao-seed-2.0-mini": {
+          "name": "Doubao-Seed-2.0-Mini (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 256000, "output": 32000}
+        },
+        "doubao-seed-2.0-lite": {
+          "name": "Doubao-Seed-2.0-Lite (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 256000, "output": 128000}
+        },
+        "doubao-seed-1.6": {
+          "name": "Doubao-Seed-1.6 (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 256000, "output": 128000}
+        },
+        "doubao-seed-1.6-flash": {
+          "name": "Doubao-Seed-1.6-Flash (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 256000, "output": 128000}
+        },
+        "doubao-seed-1.6-thinking": {
+          "name": "Doubao-Seed-1.6-Thinking (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 256000, "output": 128000}
+        },
+        "doubao-1.5-thinking-pro": {
+          "name": "Doubao-1.5-Thinking-Pro (Qiniu)", "reasoning": true, "limit": {"context": 128000, "output": 128000}
+        },
+        "doubao-1.5-vision-pro": {
+          "name": "Doubao-1.5-Vision-Pro (Qiniu)", "attachment": true, "limit": {"context": 128000, "output": 128000}
+        },
+        "tencent/hy3-preview": {
+          "name": "Tencent/Hy3-Preview (Qiniu)", "reasoning": true, "limit": {"context": 262144, "output": 262144}
+        },
+        "meituan/longcat-flash-lite": {
+          "name": "Meituan/Longcat-Flash-Lite (Qiniu)", "limit": {"context": 256000, "output": 320000}
+        },
+        "arcee-ai/trinity-mini": {
+          "name": "Arcee-AI/Trinity-Mini (Qiniu)", "limit": {"context": 128000, "output": 128000}
+        },
+        "nvidia/nemotron-3-super-120b-a12b": {
+          "name": "Nvidia/Nemotron-3-Super-120B-A12B (Qiniu)", "limit": {"context": 262144, "output": 262144}
+        },
+        "hunter-alpha": {
+          "name": "Hunter-Alpha (Qiniu)", "limit": {"context": 1000000, "output": 64000}
+        },
+        "healer-alpha": {
+          "name": "Healer-Alpha (Qiniu)", "attachment": true, "limit": {"context": 262144, "output": 64000}
+        },
+        "gpt-oss-120b": {
+          "name": "GPT-OSS-120B (Qiniu)", "reasoning": true, "limit": {"context": 128000, "output": 4096}
+        },
+        "xiaomi/mimo-v2.5-pro": {
+          "name": "Xiaomi/MiMo-V2.5-Pro (Qiniu)", "limit": {"context": 128000, "output": 128000}
+        },
+        "xiaomi/mimo-v2.5": {
+          "name": "Xiaomi/MiMo-V2.5 (Qiniu)", "limit": {"context": 128000, "output": 128000}
         }
       }
     }
