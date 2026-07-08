@@ -29,7 +29,7 @@ configs/
 ├── .trae/                # Trae config (skills, user_rules)
 ├── ai/
 │   ├── mcp/              # Master MCP configs (trae.json + .example)
-│   ├── skills/           # vendor/ + local/ + for-tools/ (generated)
+│   ├── skills/           # vendor/ + local/ + private/ (gitignored) + for-tools/ (generated, gitignored)
 │   └── user_rules/       # English, Vue, HarmonyOS, learning, save-to-* rules
 ├── .claude-code-router/  # Claude Code Router (multi-provider routing)
 ├── .agents/              # `npx skills` CLI storage
@@ -78,6 +78,6 @@ cp .secrets.example .secrets   # when the cross-platform installer lands;
 # 3. Render MCP configs from .secrets
 python3 ai/skills/local/setup-configs/scripts/setup_configs.py
 
-# 4. Link skills into for-tools/
+# 4. Link skills into for-tools/ (mandatory — for-tools is gitignored & generated)
 bash ai/skills/link-skills.sh
 ```
