@@ -1,0 +1,200 @@
+{
+  "_doc": "Canonical MCP server definitions. Source of truth rendered into opencode.jsonc, ~/.claude.json, and .claude/mcp.json by sync_mcp.py. Edit this file, then run: python3 sync_mcp.py --dry-run",
+  "_secret_syntax": "Use {env:VAR_NAME} for any secret/OS-specific value. Renderer keeps it as-is for opencode, resolves to plaintext for ~/.claude.json, and converts to ${VAR_NAME} for .claude/mcp.json (committed repo file).",
+  "_enabled_semantics": "enabled=true -> active. enabled=false -> opencode emits 'enabled:false', claude emits 'disabled:true'. Servers in exclude_from_opencode are omitted from opencode.jsonc (managed by omo at runtime) but still written to claude configs.",
+  "exclude_from_opencode": [
+    "context7",
+    "codegraph"
+  ],
+  "servers": {
+    "Chrome-DevTools-MCP": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "chrome-devtools-mcp@latest",
+        "--browser-url=http://127.0.0.1:9222",
+        "--no-usage-statistics"
+      ],
+      "env": {},
+      "enabled": true,
+      "comment": "Connects to Brave on Windows via the debug port. Brave must be running with:\nbrave.exe --remote-debugging-port=9222 --user-data-dir=\"C:\\Users\\shana\\brave-debug\"\nWSL is in Mirrored mode (.wslconfig: networkingMode=Mirrored + hostAddressLoopback=true),\nso 127.0.0.1 in WSL reaches Windows directly — no 0.0.0.0 binding needed."
+    },
+    "web-search-prime": {
+      "type": "remote",
+      "url": "https://open.bigmodel.cn/api/mcp/web_search_prime/mcp",
+      "headers": {
+        "Authorization": "Bearer {env:BIGMODEL_API_KEY}"
+      },
+      "enabled": true
+    },
+    "zread": {
+      "type": "remote",
+      "url": "https://open.bigmodel.cn/api/mcp/zread/mcp",
+      "headers": {
+        "Authorization": "Bearer {env:BIGMODEL_API_KEY}"
+      },
+      "enabled": true
+    },
+    "Figma-Desktop": {
+      "type": "remote",
+      "url": "http://127.0.0.1:3845/mcp",
+      "enabled": true
+    },
+    "codegraph": {
+      "type": "local",
+      "command": [
+        "codegraph",
+        "serve",
+        "--mcp"
+      ],
+      "env": {},
+      "enabled": true
+    },
+    "zai-mcp-server": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@z_ai/mcp-server"
+      ],
+      "env": {
+        "Z_AI_MODE": "ZHIPU",
+        "Z_AI_API_KEY": "{env:BIGMODEL_API_KEY}"
+      },
+      "enabled": true
+    },
+    "Git": {
+      "type": "local",
+      "command": [
+        "uvx",
+        "mcp-server-git"
+      ],
+      "env": {},
+      "enabled": false
+    },
+    "Memory": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "env": {
+        "MEMORY_FILE_PATH": "memory.json"
+      },
+      "enabled": false
+    },
+    "Filesystem": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "{env:PROJECTS_DIR}"
+      ],
+      "env": {},
+      "enabled": false
+    },
+    "Sequential-Thinking": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "env": {},
+      "enabled": false
+    },
+    "MiniMax": {
+      "type": "local",
+      "command": [
+        "uvx",
+        "minimax-mcp"
+      ],
+      "env": {
+        "MINIMAX_API_KEY": "{env:MINIMAX_TOKEN_PLAN_API_KEY}",
+        "MINIMAX_API_HOST": "https://api.minimaxi.com",
+        "MINIMAX_MCP_BASE_PATH": "{env:MINIMAX_OUTPUT_DIR}",
+        "MINIMAX_API_RESOURCE_MODE": "local"
+      },
+      "enabled": false
+    },
+    "MiniMax-TokenPlan": {
+      "type": "local",
+      "command": [
+        "uvx",
+        "minimax-coding-plan-mcp",
+        "-y"
+      ],
+      "env": {
+        "MINIMAX_API_KEY": "{env:MINIMAX_TOKEN_PLAN_API_KEY}",
+        "MINIMAX_API_HOST": "https://api.minimaxi.com"
+      },
+      "enabled": false
+    },
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "{env:CONTEXT7_API_KEY}"
+      },
+      "enabled": false
+    },
+    "Puppeteer": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-puppeteer"
+      ],
+      "env": {},
+      "enabled": false
+    },
+    "Playwright": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@executeautomation/playwright-mcp-server"
+      ],
+      "env": {},
+      "enabled": false
+    },
+    "Package-Version": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "mcp-package-version"
+      ],
+      "env": {},
+      "enabled": false
+    },
+    "Fetch": {
+      "type": "local",
+      "command": [
+        "uvx",
+        "mcp-server-fetch"
+      ],
+      "env": {},
+      "enabled": false
+    },
+    "web-reader": {
+      "type": "remote",
+      "url": "https://open.bigmodel.cn/api/mcp/web_reader/mcp",
+      "headers": {
+        "Authorization": "Bearer {env:BIGMODEL_API_KEY}"
+      },
+      "enabled": false
+    },
+    "github": {
+      "type": "remote",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer {env:GITHUB_TOKEN_MCP}"
+      },
+      "enabled": false
+    }
+  }
+}

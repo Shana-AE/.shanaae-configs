@@ -2,6 +2,9 @@ pre-commit:
   jobs:
     - name: gitleaks
       run: gitleaks protect --staged --verbose
+    - name: mcp-sync
+      glob: "ai/skills/local/mcp-sync/scripts/mcp_servers.json"
+      run: python3 ai/skills/local/mcp-sync/scripts/sync_mcp.py --check --repo-only
 
 pre-push:
   jobs:

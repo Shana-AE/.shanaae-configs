@@ -71,6 +71,12 @@ python3 ai/skills/local/setup-configs/scripts/setup_configs.py
 # Or use the Trae skill
 trae run setup-configs
 
+# Sync MCP server config + enabled/disabled status across opencode, ~/.claude.json, and .claude/mcp.json
+# Source of truth: ai/skills/local/mcp-sync/scripts/mcp_servers.json
+python3 ai/skills/local/mcp-sync/scripts/sync_mcp.py --dry-run   # preview drift
+python3 ai/skills/local/mcp-sync/scripts/sync_mcp.py --apply     # write all targets
+python3 ai/skills/local/mcp-sync/scripts/sync_mcp.py --check     # CI/hook: exit 1 on drift
+
 # Manage skills with npx
 npx skills list
 npx skills install <skill-name>
@@ -112,10 +118,31 @@ skill-name/
 
 ## MCP Configuration
 
-MCP servers are configured in multiple locations (keep in sync):
-- `ai/mcp/trae.json` - Master config (rendered from `trae.json.example`)
-- `.claude/mcp.json` - Claude Code
-- `.config/opencode/opencode.jsonc` - OpenCode
+**Canonical source of truth:** `ai/skills/local/mcp-sync/scripts/mcp_servers.json`
+(format-agnostic: command/URL, `{env:VAR}` secret refs, `enabled` flag). The
+`mcp-sync` skill renders it into all live targets — edit the canonical, then run
+`python3 ai/skills/local/mcp-sync/scripts/sync_mcp.py --apply`.
+
+MCP servers are configured in multiple locations (kept in sync by `mcp-sync`):
+
+| Target | File | Secret style | Status style |
+|---|---|---|---|
+| OpenCode | `.config/opencode/opencode.jsonc` (`mcp` section) | `{env:VAR}` (kept) | `enabled: false` |
+| Claude (runtime) | `~/.claude.json` (`mcpServers`) — not in repo | resolved plaintext | `disabled: true` |
+| Claude (repo) | `.claude/mcp.json` — committed | `${VAR}` (shell) | `disabled: true` |
+| Trae | `ai/mcp/trae.json` (rendered from `trae.json.example` by `setup-configs`) | embedded tokens | — |
+
+> The OpenCode edit is surgical — only the `"mcp": {...}` block is rewritten; all
+> comments and other top-level keys are preserved. `~/.claude.json` is merged
+> (all its other keys are kept). A lefthook `pre-commit` job runs
+> `sync_mcp.py --check --repo-only` whenever `mcp_servers.json` is staged, so a
+> stale canonical that wasn't re-rendered blocks the commit.
+>
+> `exclude_from_opencode` (`context7`, `codegraph`) lists servers the
+> oh-my-openagent plugin provides at runtime in OpenCode; they are omitted from
+> `opencode.jsonc` (to avoid fighting omo) but still written to the Claude
+> configs. Note: omo **force-enables** its built-ins in OpenCode regardless of
+> the canonical `enabled` flag — disable those via omo's `disabled_mcps`.
 
 ### Common MCP Servers
 
@@ -333,5 +360,9 @@ ls -la ai/skills/for-tools/
 
 ### Configuration drift
 
-1. Compare `ai/mcp/trae.json` with `.claude/mcp.json`
-2. Re-run `python3 ai/skills/local/setup-configs/scripts/setup_configs.py`
+1. Run `python3 ai/skills/local/mcp-sync/scripts/sync_mcp.py --dry-run` to see
+   which MCP targets have drifted from the canonical (`mcp_servers.json`).
+2. If intentional, edit `mcp_servers.json` then `--apply` (regenerates all MCP
+   targets consistently).
+3. For Trae-only drift, compare `ai/mcp/trae.json` with `.claude/mcp.json` and
+   re-run `python3 ai/skills/local/setup-configs/scripts/setup_configs.py`.
