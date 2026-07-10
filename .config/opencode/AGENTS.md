@@ -68,6 +68,38 @@ The **Livesync** plugin syncs Obsidian's *in-memory* vault state, not raw disk. 
 
 If a note doesn't fit any existing category, **create a new subfolder** with a sensible short name (e.g. `database/`, `security/`, `networking/`) via `obsidian create path="Inbox/ai-skills/<new-category>/.folder"`, save the note there, then add the new category to the table above and **flag it to the user** so they can rename or merge it later. Never leave notes loose at the `ai-skills/` root.
 
+## AgentMemory — Persistent Cross-Session Memory
+
+AgentMemory is deployed on the NAS (`192.168.86.62:3111`) via Docker. It captures coding session events automatically via the `agentmemory-capture.ts` plugin (22 hooks). The MCP server (`@agentmemory/mcp`) provides 53 tools for structured memory operations.
+
+- **Server**: `http://192.168.86.62:3111` (env: `AGENTMEMORY_URL`)
+- **Secret**: env: `AGENTMEMORY_SECRET` (required for all API calls)
+- **Viewer**: `http://localhost:3113` via SSH tunnel: `ssh -L 3113:127.0.0.1:3113 -L 3112:127.0.0.1:3112 nas-fnos`
+- **No LLM provider**: compression/summarization disabled; raw observations + structured memories only
+
+### When to Proactively Save to AgentMemory
+
+Use `memory_save` (or `/remember`) when encountering:
+
+| Trigger | Type | Example |
+|---------|------|---------|
+| Business requirements | `fact` | "Company X needs invoice export in PDF format" |
+| Domain knowledge | `fact` | "The regulatory framework requires quarterly compliance reports" |
+| Architecture decisions | `architecture` | "Chose Honcho for conversational memory, AgentMemory for coding memory" |
+| Project constraints | `fact` | "Must support WSL2 + macOS + Windows clients" |
+| Workflow patterns | `workflow` | "Deploy Docker services to NAS at /vol1/1000/docker/" |
+| Bug insights | `bug` | "iii-exec watcher fails if src/ dir doesn't exist in Docker image" |
+| User preferences | `preference` | "User prefers Chinese annotations for difficult English" |
+
+**Do NOT save**: routine code snippets, tool outputs, file reads — these are captured automatically by the plugin hooks.
+
+### How to Recall
+
+- Use `memory_smart_search` (or `/recall`) for hybrid semantic+keyword search
+- Use `memory_recall` for keyword-based search
+- Use `memory_file_history` before editing a file to check past context
+- Use `memory_sessions` to list past sessions
+
 ## MCP Tools Usage
 
 - Use the **context7 skill** (curl to context7.com API with `CONTEXT7_API_KEY`) when you need to search documentation — the MCP was removed to save per-message tokens

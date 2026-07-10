@@ -21,5 +21,16 @@
         ]
       }
     ]
+  },
+  "extraKnownMarketplaces": {
+    "agentmemory": {
+      "source": {
+        "source": "github",
+        "repo": "rohitg00/agentmemory"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "agentmemory@agentmemory": true
   }
 }

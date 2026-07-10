@@ -18,9 +18,6 @@
       ],
       "env": {}
     },
-    "Figma-Desktop": {
-      "url": "http://127.0.0.1:3845/mcp"
-    },
     "web-search-prime": {
       "url": "https://open.bigmodel.cn/api/mcp/web_search_prime/mcp",
       "headers": {
@@ -162,6 +159,17 @@
         "Authorization": "Bearer ${BIGMODEL_API_KEY}"
       },
       "disabled": true
+    },
+    "Figma-Desktop": {
+      "url": "http://127.0.0.1:3845/mcp"
+    },
+    "agentmemory": {
+      "command": "npx",
+      "args": ["-y", "@agentmemory/mcp"],
+      "env": {
+        "AGENTMEMORY_URL": "${AGENTMEMORY_URL}",
+        "AGENTMEMORY_SECRET": "${AGENTMEMORY_SECRET}"
+      }
     }
   }
 }
