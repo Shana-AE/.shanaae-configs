@@ -120,6 +120,9 @@ yarn-error.log*
 
 .claude/plugins/blocklist.json
 .claude/plugins/known_marketplaces.json
+.claude/plugins/installed_plugins.json
+.claude/plugins/marketplaces/
+.claude/plugins/cache/
 .claude-code-router/config.json.*.bak
 .config/opencode/opencode-notifier-state.json
 .claude.*.backup*
