@@ -110,7 +110,7 @@ holds runtime state (e.g. `~/.claude/history`, `statsig`).
 | trae             | `.trae/`                           | `~/.trae`                          | `%APPDATA%\Trae\User` (selective)    | mixed  |
 | trae-mcp         | `ai/mcp/trae.json`                 | `~/.trae/mcp.json`                 | `%APPDATA%\Trae\User\mcp.json`       | file   |
 | cursor           | `.cursor/`                         | `~/.cursor`                        | `%USERPROFILE%\.cursor`              | dir    |
-| codex            | `.codex/`                          | `~/.codex`                         | `%USERPROFILE%\.codex`               | dir    |
+| codex            | `.codex/`                          | `~/.codex`                         | `%USERPROFILE%\.codex`               | dir ✅ implemented |
 
 `mode` controls link granularity: `dir` = link the whole directory;
 `file` = link a single file; `mixed` = a list of (source, target) pairs.
@@ -168,7 +168,7 @@ backups are timestamped and gitignored. Never deletes a non-backed-up target.
 | new    | `install/manifest.json`                             | declarative link manifest (§6)                                                      |
 | new    | `ai/skills/link_skills.py`                          | portable rewrite of link-skills.sh                                                  |
 | new    | `.secrets.example`                                  | committed; all vars with per-OS commented samples                                   |
-| new    | `.cursor/`, `.codex/`                                 | minimal config scaffolding for the two new tools                                    |
+| new    | `.cursor/`, `.codex/`                                 | minimal config scaffolding for the two new tools                                    | `.codex/` done (config.toml + AGENTS.md + skills symlink); `.cursor/` pending |
 | edit   | `.config/opencode/opencode.jsonc`                   | `/home/shanaae/projects`→`{env:PROJECTS_DIR}`; minimax→`{env:MINIMAX_OUTPUT_DIR}`     |
 | edit   | `.claude/mcp.json`                                  | filesystem arg → `$PROJECTS_DIR`                                                    |
 | edit   | `ai/mcp/trae.json.example`                          | paths → `{{PROJECTS_DIR}}` (the one templating case)                                |

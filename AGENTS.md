@@ -6,8 +6,8 @@ This is the central configuration hub for AI development tools (Claude Code, Ope
 
 - **Purpose**: Source of Truth for AI agent configurations, skills, and rules
 - **Platform**: Linux (WSL2) today; **cross-platform (Linux / Windows / macOS) in design** — see [design spec](docs/superpowers/specs/2026-06-25-cross-platform-configs-design.md)
-- **Active Tools**: Claude Code, OpenCode, Trae
-- **Planned Tools (WIP)**: Cursor, Codex CLI
+- **Active Tools**: Claude Code, OpenCode, Trae, Codex CLI
+- **Planned Tools (WIP)**: Cursor
 
 ## Cross-Platform Support (WIP)
 
@@ -57,6 +57,13 @@ configs/
 │   └── user_rules/    # User rule definitions
 ├── .claude-code-router/  # Claude Code Router config
 │   └── config.json       # Router configuration
+├── .codex/               # Codex CLI configuration
+│   ├── config.toml       # Codex config (base settings + MCP via mcp-sync sentinel)
+│   ├── AGENTS.md         # Codex global instructions
+│   ├── skills -> ../ai/skills/for-tools  # Shared skills (symlink)
+│   ├── sqlite/           # Runtime state (gitignored)
+│   ├── codex-lsp/        # LSP daemon runtime (gitignored)
+│   └── process_manager/  # Background process state (gitignored)
 └── .secrets           # API tokens and secrets (gitignored)
 ```
 
@@ -72,7 +79,7 @@ python3 ai/skills/local/setup-configs/scripts/setup_configs.py
 # Or use the Trae skill
 trae run setup-configs
 
-# Sync MCP server config + enabled/disabled status across opencode, ~/.claude.json, and .claude/mcp.json
+# Sync MCP server config + enabled/disabled status across opencode, ~/.claude.json, .claude/mcp.json, and ~/.codex/config.toml
 # Source of truth: ai/skills/local/mcp-sync/scripts/mcp_servers.json
 python3 ai/skills/local/mcp-sync/scripts/sync_mcp.py --dry-run   # preview drift
 python3 ai/skills/local/mcp-sync/scripts/sync_mcp.py --apply     # write all targets
@@ -132,6 +139,7 @@ MCP servers are configured in multiple locations (kept in sync by `mcp-sync`):
 | OpenCode | `.config/opencode/opencode.jsonc` (`mcp` section) | `{env:VAR}` (kept) | `enabled: false` |
 | Claude (runtime) | `~/.claude.json` (`mcpServers`) — not in repo | resolved plaintext | `disabled: true` |
 | Claude (repo) | `.claude/mcp.json` — committed | `${VAR}` (shell) | `disabled: true` |
+| Codex | `.codex/config.toml` (`[mcp_servers.*]`, sentinel block) — committed | `env_vars`/`bearer_token_env_var` (env-name refs) | `enabled = false` |
 | Trae | `ai/mcp/trae.json` (rendered from `trae.json.example` by `setup-configs`) | embedded tokens | — |
 
 > The OpenCode edit is surgical — only the `"mcp": {...}` block is rewritten; all
@@ -142,9 +150,15 @@ MCP servers are configured in multiple locations (kept in sync by `mcp-sync`):
 >
 > `exclude_from_opencode` (`context7`, `codegraph`) lists servers the
 > oh-my-openagent plugin provides at runtime in OpenCode; they are omitted from
-> `opencode.jsonc` (to avoid fighting omo) but still written to the Claude
-> configs. Note: omo **force-enables** its built-ins in OpenCode regardless of
+> `opencode.jsonc` (to avoid fighting omo) but still written to the Claude and
+> Codex configs. Note: omo **force-enables** its built-ins in OpenCode regardless of
 > the canonical `enabled` flag — disable those via omo's `disabled_mcps`.
+>
+> The Codex edit is **sentinel-based** — everything between `# BEGIN mcp-sync`
+> and `# END mcp-sync` in `config.toml` is rewritten wholesale; all base settings
+> and provider tables (written by cc-switch) outside the sentinels are preserved.
+> Codex's `config.toml` has no general `{env:VAR}` interpolation, so secrets use
+> env-name reference fields (`env_vars`, `bearer_token_env_var`, `env_http_headers`).
 
 ### Common MCP Servers
 
@@ -225,6 +239,50 @@ ccr model
 # UI mode for config management
 ccr ui
 ```
+
+### Model routing: cc-switch vs claude-code-router
+
+Two systems can route Claude Code to non-default providers. They are
+**complementary** — pick one per session, not both:
+
+| | cc-switch (primary) | claude-code-router (fallback) |
+|---|---|---|
+| **How** | Writes `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN` directly to `~/.claude/settings.json`; Claude reads it natively | Wraps Claude via `ccr code`; a Node proxy at `:3456` translates formats |
+| **Scope** | Claude Code, Claude Desktop, Codex, Gemini, OpenCode (7 tools) | Claude Code only |
+| **Switching** | GUI / tray / deep-link (no CLI) | CLI (`ccr model`) |
+| **Status** | Active (default provider) | Idle (kept for CLI-driven / transformer-heavy use) |
+
+> **Note**: cc-switch **full-overwrites** `~/.claude/settings.json` on every
+> provider switch (it does not merge). Keep that file minimal — the
+> `autoUpdatesChannel` key is lost when switching away from the "default"
+> provider. cc-switch also writes Codex's `config.toml` via `toml_edit` (a
+> non-destructive merge — base settings and the mcp-sync block are preserved).
+
+## Codex CLI
+
+Codex CLI (OpenAI) configuration lives in `.codex/` (whole-dir symlinked:
+`~/.codex` → `configs/.codex`).
+
+- **Config**: `.codex/config.toml` — base settings (`approval_policy`,
+  `sandbox_mode`, `model_reasoning_effort`) + MCP servers (rendered by mcp-sync
+  into a `# BEGIN/END mcp-sync` sentinel block). No secrets — portable.
+- **Instructions**: `.codex/AGENTS.md` — global rules (full parity with the
+  OpenCode `AGENTS.md` instruction set).
+- **Skills**: `.codex/skills` → `ai/skills/for-tools` (same shared pool as
+  Claude Code / Trae / OpenCode).
+- **Model provider**: uses the built-in `openai` provider with **ChatGPT Plus
+  OAuth login** (`codex login` → `~/.codex/auth.json`, gitignored). No provider
+  table in the committed config — OpenAI natively supports the Responses API.
+  To switch to Qiniu later: note that Qiniu lacks `/v1/responses`, so use
+  cc-switch's built-in proxy (`:15721`, which translates Responses→Chat).
+- **Runtime** (gitignored): `sqlite/` (goals/memories/logs), `codex-lsp/`,
+  `process_manager/`, `auth.json`, `cc-switch-model-catalog.json`.
+- **cc-switch coexistence**: cc-switch merges `[model_providers.*]` +
+  `model`/`model_provider` into `config.toml` via `toml_edit` (non-destructive).
+  mcp-sync owns the `[mcp_servers.*]` sentinel block. Both write through the
+  `~/.codex` → repo symlink without conflict. Set
+  `preserveCodexOfficialAuthOnSwitch: true` in cc-switch settings so switching
+  Claude providers doesn't wipe the ChatGPT login.
 
 
 ## User Rules
@@ -340,6 +398,9 @@ Key symlinks in this repository:
 # Claude Code Router (whole dir, including config.json)
 ~/.claude-code-router -> configs/.claude-code-router
 ~/.claude-code-router/config.json -> configs/.claude-code-router/config.json
+
+# Codex CLI (whole dir — runtime subdirs gitignored)
+~/.codex -> configs/.codex
 ```
 
 ## Troubleshooting

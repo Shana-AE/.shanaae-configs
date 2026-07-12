@@ -1,5 +1,13 @@
 {
   "mcpServers": {
+    "agentmemory": {
+      "command": "agentmemory-mcp",
+      "args": [],
+      "env": {
+        "AGENTMEMORY_URL": "${AGENTMEMORY_URL}",
+        "AGENTMEMORY_SECRET": "${AGENTMEMORY_SECRET}"
+      }
+    },
     "Chrome-DevTools-MCP": {
       "command": "npx",
       "args": [
@@ -17,6 +25,9 @@
         "--mcp"
       ],
       "env": {}
+    },
+    "Figma-Desktop": {
+      "url": "http://127.0.0.1:3845/mcp"
     },
     "web-search-prime": {
       "url": "https://open.bigmodel.cn/api/mcp/web_search_prime/mcp",
@@ -159,16 +170,6 @@
         "Authorization": "Bearer ${BIGMODEL_API_KEY}"
       },
       "disabled": true
-    },
-    "Figma-Desktop": {
-      "url": "http://127.0.0.1:3845/mcp"
-    },
-    "agentmemory": {
-      "command": "agentmemory-mcp",
-      "env": {
-        "AGENTMEMORY_URL": "${AGENTMEMORY_URL}",
-        "AGENTMEMORY_SECRET": "${AGENTMEMORY_SECRET}"
-      }
     }
   }
 }

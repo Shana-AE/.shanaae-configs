@@ -1,8 +1,8 @@
-# Claude Code Global Rules
+# Codex Global Rules
 
 ## English Practice
 
-Full rules live in `rules/english-learning.md` (loaded via Claude Code's instruction chain).
+Full rules live in `ai/user_rules/english-learning.md` (loaded via the project AGENTS.md chain).
 Summary: answer in English; on every message prepend an **English Check** block that (A) corrects/optimizes my question, (B) nudges me to use English if I wrote Chinese, and (C) lists vocabulary above CET-6; annotate long/uncommon sentences in Chinese.
 
 ## Git Pull for Context
@@ -41,7 +41,7 @@ The Obsidian vault lives on the **Windows** side. Always operate on it there —
 
 ## Obsidian Writes — Always Use the CLI
 
-The **Livesync** plugin syncs Obsidian's *in-memory* vault state, not raw disk. Any change made directly to vault files on disk (by Claude Code or otherwise) is **not detected**, so it gets **overwritten** by the older copy arriving from other devices.
+The **Livesync** plugin syncs Obsidian's *in-memory* vault state, not raw disk. Any change made directly to vault files on disk (by an agent or otherwise) is **not detected**, so it gets **overwritten** by the older copy arriving from other devices.
 
 - **All writes** to the vault — creating, editing, or deleting notes; changing properties/frontmatter; installing, enabling, disabling, or uninstalling plugins — **MUST** go through the `obsidian` CLI (local REST API → Obsidian → Livesync).
 - **Never** edit vault files directly via the filesystem, even though the symlink path exists. On-disk config such as `community-plugins.json` is frequently stale relative to the live app state.

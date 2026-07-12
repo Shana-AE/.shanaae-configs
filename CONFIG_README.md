@@ -11,6 +11,7 @@ control. Some ship as `.example` templates with placeholders; others use
 | `ai/mcp/trae.json`              | Rendered from `ai/mcp/trae.json.example` by `setup_configs.py` |
 | `.config/opencode/opencode.jsonc` | **Live file** — uses `{env:VAR}` substitution at read time; no `.example` |
 | `.claude/mcp.json`              | Live file — uses `$VAR` substitution where supported        |
+| `.codex/config.toml`            | Live file — MCP servers rendered by `sync_mcp.py`; uses env-name refs (`env_vars`, `bearer_token_env_var`); no secrets |
 | `.secrets`                      | Manual — holds all tokens + per-OS paths (gitignored)       |
 
 ## Required Secrets

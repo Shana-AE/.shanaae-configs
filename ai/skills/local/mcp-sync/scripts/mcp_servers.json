@@ -1,7 +1,7 @@
 {
-  "_doc": "Canonical MCP server definitions. Source of truth rendered into opencode.jsonc, ~/.claude.json, and .claude/mcp.json by sync_mcp.py. Edit this file, then run: python3 sync_mcp.py --dry-run",
-  "_secret_syntax": "Use {env:VAR_NAME} for any secret/OS-specific value. Renderer keeps it as-is for opencode, resolves to plaintext for ~/.claude.json, and converts to ${VAR_NAME} for .claude/mcp.json (committed repo file).",
-  "_enabled_semantics": "enabled=true -> active. enabled=false -> opencode emits 'enabled:false', claude emits 'disabled:true'. Servers in exclude_from_opencode are omitted from opencode.jsonc (managed by omo at runtime) but still written to claude configs.",
+  "_doc": "Canonical MCP server definitions. Source of truth rendered into opencode.jsonc, ~/.claude.json, .claude/mcp.json, and ~/.codex/config.toml by sync_mcp.py. Edit this file, then run: python3 sync_mcp.py --dry-run",
+  "_secret_syntax": "Use {env:VAR_NAME} for any secret/OS-specific value. Renderer: opencode keeps {env:VAR}; ~/.claude.json resolves to plaintext; .claude/mcp.json converts to ${VAR_NAME}; ~/.codex/config.toml maps to env_name refs (env_vars/bearer_token_env_var/env_http_headers).",
+  "_enabled_semantics": "enabled=true -> active. enabled=false -> opencode emits 'enabled:false', claude/mcp.json emit 'disabled:true', codex emits 'enabled = false'. Servers in exclude_from_opencode are omitted from opencode.jsonc (managed by omo at runtime) but still written to claude and codex configs.",
   "exclude_from_opencode": [
     "context7",
     "codegraph"
@@ -195,6 +195,17 @@
         "Authorization": "Bearer {env:GITHUB_TOKEN_MCP}"
       },
       "enabled": false
+    },
+    "agentmemory": {
+      "type": "local",
+      "command": [
+        "agentmemory-mcp"
+      ],
+      "env": {
+        "AGENTMEMORY_URL": "{env:AGENTMEMORY_URL}",
+        "AGENTMEMORY_SECRET": "{env:AGENTMEMORY_SECRET}"
+      },
+      "enabled": true
     }
   }
 }

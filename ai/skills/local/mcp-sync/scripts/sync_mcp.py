@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Sync MCP server config + enabled/disabled status across opencode and Claude Code.
+"""Sync MCP server config + enabled/disabled status across opencode, Claude Code, and Codex.
 
 Source of truth: mcp_servers.json (next to this script).
 Targets:
@@ -9,6 +9,8 @@ Targets:
                (JSON merge: preserves all other top-level keys)
   - mcp.json : ~/.claude/mcp.json (repo, symlinked)-> "mcpServers", ${VAR} shell syntax, disabled flags
                (full rewrite of mcpServers only)
+  - codex    : ~/.codex/config.toml (repo, symlinked) -> [mcp_servers.*] TOML tables, env_var refs,
+               enabled flags (sentinel-block merge: preserves base settings + provider tables)
 
 Usage:
   python3 sync_mcp.py                      # dry-run (print diff, write nothing)
@@ -35,9 +37,13 @@ SECRETS_FILE = os.path.join(CONFIGS_ROOT, ".secrets")
 OPENCODE = os.path.expanduser("~/.config/opencode/opencode.jsonc")
 CLAUDE_JSON = os.path.expanduser("~/.claude.json")
 MCP_JSON = os.path.expanduser("~/.claude/mcp.json")
+CODEX_CONFIG = os.path.expanduser("~/.codex/config.toml")
 
-TARGETS = {"opencode": OPENCODE, "claude": CLAUDE_JSON, "mcp.json": MCP_JSON}
+TARGETS = {"opencode": OPENCODE, "claude": CLAUDE_JSON, "mcp.json": MCP_JSON, "codex": CODEX_CONFIG}
 ENV_PATTERN = re.compile(r"\{env:([A-Z0-9_]+)\}")
+# Codex sentinel delimiters — everything between these lines is rewritten wholesale.
+CODEX_BEGIN = "# BEGIN mcp-sync"
+CODEX_END = "# END mcp-sync"
 
 
 # --------------------------------------------------------------------------- #
@@ -161,6 +167,71 @@ def to_mcpjson(name, spec) -> dict:
     if not spec.get("enabled", False):
         entry["disabled"] = True
     return entry
+
+
+def _toml_str(s: str) -> str:
+    """Emit a TOML basic string (double-quoted). json.dumps is a valid subset."""
+    return json.dumps(str(s), ensure_ascii=False)
+
+
+def _toml_inline_map(pairs: list[tuple[str, str]]) -> str:
+    """Emit a TOML inline table: { "key" = "value", ... }"""
+    return "{ " + ", ".join(f"{_toml_str(k)} = {_toml_str(v)}" for k, v in pairs) + " }"
+
+
+def to_codex(name, spec) -> str:
+    """Emit a [mcp_servers.<name>] TOML table for Codex config.toml.
+
+    Secret-free / portable: uses env-name references (env_vars, bearer_token_env_var,
+    env_http_headers) rather than resolved values, so the file is safe to commit.
+    """
+    lines = [f"[mcp_servers.{name}]"]
+    if spec.get("type") == "local":
+        cmd = spec.get("command", [])
+        lines.append(f"command = {_toml_str(cmd[0])}")
+        if len(cmd) > 1:
+            lines.append("args = [" + ", ".join(_toml_str(c) for c in cmd[1:]) + "]")
+        # Split env into literal values (env = {...}) vs env-var refs (env_vars = [...]).
+        env = spec.get("env") or {}
+        literals: list[tuple[str, str]] = []
+        env_vars: list[str] = []
+        for k, v in env.items():
+            m = ENV_PATTERN.search(v) if isinstance(v, str) else None
+            if m:
+                env_vars.append(m.group(1))
+            else:
+                literals.append((k, str(v)))
+        if literals:
+            lines.append("env = " + _toml_inline_map(literals))
+        if env_vars:
+            lines.append("env_vars = [" + ", ".join(_toml_str(v) for v in env_vars) + "]")
+    else:  # remote / streamable HTTP
+        lines.append(f"url = {_toml_str(spec['url'])}")
+        headers = spec.get("headers") or {}
+        bearer_var: str | None = None
+        static_headers: list[tuple[str, str]] = []
+        env_headers: list[tuple[str, str]] = []
+        for k, v in headers.items():
+            if k.lower() == "authorization" and isinstance(v, str):
+                m = re.match(r"[Bb]earer\s+\{env:([A-Z0-9_]+)\}", v)
+                if m:
+                    bearer_var = m.group(1)
+                    continue
+            if isinstance(v, str):
+                mv = ENV_PATTERN.search(v)
+                if mv:
+                    env_headers.append((k, mv.group(1)))
+                    continue
+            static_headers.append((k, str(v)))
+        if bearer_var:
+            lines.append(f"bearer_token_env_var = {_toml_str(bearer_var)}")
+        if static_headers:
+            lines.append("http_headers = " + _toml_inline_map(static_headers))
+        if env_headers:
+            lines.append("env_http_headers = " + _toml_inline_map(env_headers))
+    if not spec.get("enabled", False):
+        lines.append("enabled = false")
+    return "\n".join(lines)
 
 
 # --------------------------------------------------------------------------- #
@@ -319,6 +390,40 @@ def render_mcp_json(ordered) -> str:
     return json.dumps(data, indent=2, ensure_ascii=False) + "\n"
 
 
+def render_codex(ordered) -> str:
+    """Surgical merge of [mcp_servers.*] into ~/.codex/config.toml.
+
+    Replaces everything between the '# BEGIN mcp-sync' and '# END mcp-sync'
+    sentinel comments (inclusive). All other content (base settings, provider
+    tables written by cc-switch, user comments) is preserved verbatim.
+    If the sentinels are missing, the block is appended at the end.
+    """
+    with open(CODEX_CONFIG, encoding="utf-8") as f:
+        text = f.read()
+    blocks: list[str] = []
+    for name, spec in ordered:
+        comment = spec.get("comment")
+        if comment:
+            for cl in comment.split("\n"):
+                blocks.append("# " + cl if cl else "#")
+        blocks.append(to_codex(name, spec))
+        blocks.append("")  # blank line between servers
+    inner = "\n".join(blocks).rstrip()
+    new_section = f"{CODEX_BEGIN}\n{inner}\n{CODEX_END}"
+    bi = text.find(CODEX_BEGIN)
+    ei = text.find(CODEX_END)
+    if bi != -1 and ei != -1 and ei > bi:
+        line_start = text.rfind("\n", 0, bi) + 1
+        line_end = text.find("\n", ei)
+        if line_end == -1:
+            line_end = len(text)
+        return text[:line_start] + new_section + text[line_end:]
+    if text and not text.endswith("\n"):
+        text += "\n"
+    sep = "" if text.endswith("\n\n") else ("\n" if text.endswith("\n") else "\n\n")
+    return text + sep + new_section + "\n"
+
+
 # --------------------------------------------------------------------------- #
 # Diff / write
 # --------------------------------------------------------------------------- #
@@ -383,8 +488,9 @@ def main():
         "opencode": render_opencode(ordered, exclude),
         "claude": render_claude_json(ordered),
         "mcp.json": render_mcp_json(ordered),
+        "codex": render_codex(ordered),
     }
-    targets = ["opencode", "mcp.json"] if args.repo_only else (
+    targets = ["opencode", "mcp.json", "codex"] if args.repo_only else (
         [args.target] if args.target else list(TARGETS))
     drifted = False
     for t in targets:
