@@ -1,6 +1,6 @@
 ---
 name: qiniu-model-sync
-description: "Sync and query Qiniu (Sufy) AI model catalog. Fetches the live model list from openai.sufy.com/v1/models (primary, authoritative) merged with models.dev/api.json (supplementary — fills gaps for models available but not listed, e.g. gpt-5.6-terra). Compare against opencode.jsonc / claude-code-router configs to find new or removed models. Use when checking available Qiniu models, updating model lists, or querying by model family (claude, gpt, deepseek, glm, kimi, gemini, grok, qwen)."
+description: "Sync and query Qiniu (Sufy) AI model catalog. Fetches the authoritative model list from openai.sufy.com/v1/models, enriched with metadata (display names, context limits) from models.dev. Compare against opencode.jsonc / claude-code-router configs to find new or removed models. Probe individual model IDs for callability. Use when checking available Qiniu models, updating model lists, or querying by model family (claude, gpt, deepseek, glm, kimi, gemini, grok, qwen)."
 ---
 
 # qiniu-model-sync
@@ -8,21 +8,30 @@ description: "Sync and query Qiniu (Sufy) AI model catalog. Fetches the live mod
 Keeps Qiniu (Sufy) AI model lists in sync across configs and lets you query the
 catalog by family.
 
-## Sources
+## Sources — clear separation of concerns
 
 | Source | URL | Role |
 |--------|-----|------|
-| **Sufy (primary)** | `https://openai.sufy.com/v1/models` | Authoritative live list of Qiniu's available models |
-| **models.dev (supplementary)** | `https://models.dev/api.json` | Fills gaps — some models work via Qiniu but aren't in the `/v1/models` list (e.g. `openai/gpt-5.6-terra`) |
+| **Sufy (sole authority)** | `https://openai.sufy.com/v1/models` | **Determines model existence.** If it's not here, it's not in the catalog. |
+| **models.dev (metadata only)** | `https://models.dev/api.json` | Enriches existing Sufy models with display names, context/output limits, reasoning/attachment flags. **Never adds new model IDs** — its Qiniu data is months stale. |
 
-Both are merged. Sufy takes precedence for existence; models.dev adds metadata
-(description, context limits, family).
+> **Why not use models.dev for discovery?** Its Qiniu catalog lags by 3-6 months.
+> Testing showed 5/6 of its "gap-filling" entries were removed/unavailable
+> (`claude-3.5-sonnet` → "no available channels", `deepseek-math-v2` → "not
+> supported", etc.). Using it for existence introduces false positives.
+
+> **Callable but unlisted models:** Some models work via Qiniu's API but don't
+> appear in `/v1/models` (e.g. `openai/gpt-5.6-terra`). Use `probe` to test
+> individual model IDs, then add them manually to your config.
 
 ## Usage
 
 ```bash
-# Fetch + cache the merged model list (24h TTL on models.dev, always-fresh Sufy)
+# Fetch + cache the catalog (Sufy live + models.dev metadata)
 python3 scripts/qiniu_model_sync.py fetch
+
+# Probe a model ID for callability (use for unlisted models like gpt-5.6-terra)
+python3 scripts/qiniu_model_sync.py probe openai/gpt-5.6-terra
 
 # Show new models in Sufy not yet in opencode.jsonc
 python3 scripts/qiniu_model_sync.py diff --target opencode
@@ -33,26 +42,13 @@ python3 scripts/qiniu_model_sync.py diff --target router
 # List models by family
 python3 scripts/qiniu_model_sync.py list --family claude
 python3 scripts/qiniu_model_sync.py list --family gpt
-python3 scripts/qiniu_model_sync.py list --family grok
 
-# Show only the latest model per family
+# Show the latest model per family
 python3 scripts/qiniu_model_sync.py latest
 
 # Propose opencode.jsonc additions (dry-run; copy-paste the JSONC entries)
 python3 scripts/qiniu_model_sync.py update --target opencode --dry-run
 ```
-
-## How it works
-
-1. Fetches `openai.sufy.com/v1/models` → list of model IDs (authoritative).
-2. Fetches `models.dev/api.json` (cached 24h) → rich metadata + any models the
-   Sufy list missed.
-3. Merges: Sufy IDs are the base set; models.dev adds (a) any Qiniu models not
-   in the Sufy list and (b) metadata (name, description, context/output limits,
-   reasoning, attachment flags) for all models.
-4. Categorizes: text models, image-gen, video-gen.
-5. State file (`~/.cache/qiniu-model-sync-state.json`) tracks `seen` IDs — first
-   run is a baseline; subsequent runs report only what's new.
 
 ## Configs it can diff against
 
