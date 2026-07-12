@@ -1,3 +1,7 @@
 {
-  "plugin": ["oh-my-openagent"]
+  "plugin": [
+    "oh-my-openagent",
+    "oh-my-openagent@latest",
+    "@honcho-ai/opencode-honcho"
+  ]
 }

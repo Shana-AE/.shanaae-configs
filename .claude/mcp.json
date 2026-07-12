@@ -164,8 +164,7 @@
       "url": "http://127.0.0.1:3845/mcp"
     },
     "agentmemory": {
-      "command": "npx",
-      "args": ["-y", "@agentmemory/mcp"],
+      "command": "agentmemory-mcp",
       "env": {
         "AGENTMEMORY_URL": "${AGENTMEMORY_URL}",
         "AGENTMEMORY_SECRET": "${AGENTMEMORY_SECRET}"

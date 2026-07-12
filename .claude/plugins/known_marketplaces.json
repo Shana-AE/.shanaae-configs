@@ -4,7 +4,23 @@
       "source": "github",
       "repo": "anthropics/claude-plugins-official"
     },
-    "installLocation": "/home/shanaae/.claude/plugins/marketplaces/claude-plugins-official",
+    "installLocation": "/Users/shanaae/.claude/plugins/marketplaces/claude-plugins-official",
     "lastUpdated": "2026-03-13T06:29:13.625Z"
+  },
+  "agentmemory": {
+    "source": {
+      "source": "github",
+      "repo": "rohitg00/agentmemory"
+    },
+    "installLocation": "/Users/shanaae/.claude/plugins/marketplaces/agentmemory",
+    "lastUpdated": "2026-07-10T11:39:25.864Z"
+  },
+  "honcho": {
+    "source": {
+      "source": "github",
+      "repo": "plastic-labs/claude-honcho"
+    },
+    "installLocation": "/Users/shanaae/.claude/plugins/marketplaces/honcho",
+    "lastUpdated": "2026-07-12T04:39:21.047Z"
   }
 }
