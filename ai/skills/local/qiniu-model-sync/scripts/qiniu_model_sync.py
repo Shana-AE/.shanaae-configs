@@ -114,42 +114,45 @@ def fetch_models_dev(force: bool = False) -> dict:
 
 
 def merge_catalog(sufy_ids: list[str], dev_data: dict) -> dict[str, dict]:
-    """Merge Sufy IDs with models.dev metadata.
+    """Build the model catalog. Sufy is the SOLE authority for model existence.
 
-    Returns {model_id: {name, family, reasoning, attachment, context, output, source}}
+    models.dev is used ONLY for metadata enrichment (display name, description,
+    context/output limits, reasoning/attachment flags) of models already in the
+    Sufy list. It NEVER adds new model IDs — its Qiniu data is typically months
+    stale and would introduce false positives (removed/unavailable models).
+
+    Returns {model_id: {name, family, reasoning, attachment, context, output}}
     """
     catalog: dict[str, dict] = {}
-    # Start with Sufy IDs
+    # Sufy = sole authority for existence
     for mid in sufy_ids:
         catalog[mid] = {"id": mid, "source": "sufy"}
 
-    # Enrich / supplement from models.dev (qiniu-ai provider)
-    qiniu_dev = dev_data.get("qiniu-ai", {}).get("models", {})
-    for mid, m in qiniu_dev.items():
-        if mid not in catalog:
-            catalog[mid] = {"id": mid, "source": "models-dev"}
-        entry = catalog[mid]
-        entry.setdefault("name", m.get("name", mid))
-        if m.get("reasoning"):
-            entry["reasoning"] = True
-        if m.get("attachment"):
-            entry["attachment"] = True
-        lim = m.get("limit", {})
-        if isinstance(lim, dict):
-            if lim.get("context"):
-                entry["context"] = lim["context"]
-            if lim.get("output"):
-                entry["output"] = lim["output"]
-        # Fill name for Sufy-only entries from dev if available
-        if "name" not in entry and m.get("name"):
-            entry["name"] = m["name"]
-
-    # Also check openai provider in dev (for models like gpt-5.6-terra that Qiniu relays)
-    openai_dev = dev_data.get("openai", {}).get("models", {})
-    for mid, m in openai_dev.items():
-        qiniu_id = f"openai/{mid}"
-        if qiniu_id in catalog and "name" not in catalog[qiniu_id]:
-            catalog[qiniu_id]["name"] = m.get("name", qiniu_id)
+    # Enrich metadata from models.dev (NO new IDs added)
+    dev_sources = [
+        dev_data.get("qiniu-ai", {}).get("models", {}),
+        dev_data.get("openai", {}).get("models", {}),  # for openai/* prefixed models
+        dev_data.get("anthropic", {}).get("models", {}),
+        dev_data.get("deepseek", {}).get("models", {}),
+    ]
+    for dev_models in dev_sources:
+        for dev_mid, m in dev_models.items():
+            # Match against catalog keys — try both bare and openai/-prefixed forms
+            candidates = {dev_mid, f"openai/{dev_mid}"}
+            for mid in candidates:
+                if mid in catalog:
+                    entry = catalog[mid]
+                    entry.setdefault("name", m.get("name", mid))
+                    if m.get("reasoning"):
+                        entry["reasoning"] = True
+                    if m.get("attachment"):
+                        entry["attachment"] = True
+                    lim = m.get("limit", {})
+                    if isinstance(lim, dict):
+                        if lim.get("context"):
+                            entry.setdefault("context", lim["context"])
+                        if lim.get("output"):
+                            entry.setdefault("output", lim["output"])
 
     # Fill in family for all
     for mid, entry in catalog.items():
@@ -236,6 +239,55 @@ def save_state(state: dict) -> None:
 # --------------------------------------------------------------------------- #
 # Commands
 # --------------------------------------------------------------------------- #
+def cmd_probe(args):
+    """Test whether a model ID is callable via Qiniu's /v1/messages endpoint.
+
+    Use this for models that work via Qiniu but aren't listed in /v1/models
+    (e.g. openai/gpt-5.6-terra was confirmed callable but absent from the list).
+    """
+    mid = args.model_id
+    key = _api_key()
+    body = json.dumps({
+        "model": mid,
+        "max_tokens": 16,
+        "messages": [{"role": "user", "content": "hi"}],
+    }).encode()
+    req = urllib.request.Request(
+        "https://api.qnaigc.com/v1/messages",
+        data=body,
+        headers={
+            "x-api-key": key,
+            "anthropic-version": "2023-06-01",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            data = json.load(resp)
+        if "error" in data:
+            err = data["error"]
+            msg = err.get("message", str(err)) if isinstance(err, dict) else str(err)
+            print(f"  ✗ {mid} — ERROR: {msg[:120]}")
+        elif "content" in data:
+            print(f"  ✓ {mid} — callable (model={data.get('model', '?')})")
+        else:
+            print(f"  ? {mid} — unexpected response: {str(data)[:120]}")
+    except urllib.error.HTTPError as e:
+        body_text = e.read().decode("utf-8", errors="replace")[:200]
+        # Distinguish "model not available" from "bad parameter"
+        low = body_text.lower()
+        if "no available channels" in low or "not supported" in low or "not found" in low:
+            print(f"  ✗ {mid} — NOT AVAILABLE")
+        elif "max_output_tokens" in low or "max_tokens" in low or "below minimum" in low:
+            # Model accepted but token param rejected — model IS callable
+            print(f"  ✓ {mid} — callable (token-limit warning only)")
+        else:
+            print(f"  ? {mid} — HTTP {e.code}: {body_text}")
+    except Exception as e:
+        print(f"  ✗ {mid} — {e}")
+
+
 def cmd_fetch(args):
     sufy_ids = fetch_sufy(force=getattr(args, "force", False))
     dev_data = fetch_models_dev(force=getattr(args, "force", False))
@@ -254,9 +306,10 @@ def cmd_fetch(args):
     save_state(state)
 
     print(f"== qiniu-model-sync fetch ==")
-    print(f"   Sufy models  : {len(sufy_ids)}")
-    print(f"   models.dev   : {len(dev_data.get('qiniu-ai', {}).get('models', {}))} qiniu + {len(dev_data.get('openai', {}).get('models', {}))} openai")
-    print(f"   merged total : {len(catalog)} ({len(text)} text, {len(image)} image, {len(video)} video)")
+    print(f"   Sufy models  : {len(sufy_ids)} (authoritative)")
+    enriched = sum(1 for mid in sufy_ids if mid in dev_data.get("qiniu-ai",{}).get("models",{}) or f"openai/{mid}" in dev_data.get("openai",{}).get("models",{}))
+    print(f"   models.dev   : metadata enrichment for {enriched}/{len(sufy_ids)} models")
+    print(f"   catalog total: {len(catalog)} ({len(text)} text, {len(image)} image, {len(video)} video)")
     if first_run:
         print(f"   first run — baseline established ({len(all_ids)} models)")
     elif new_ids:
@@ -295,9 +348,8 @@ def cmd_diff(args):
             entry = catalog.get(mid, {})
             name = entry.get("name", "")
             fam = entry.get("family", "?")
-            src = entry.get("source", "?")
-            tag = f" [{src}]" if src == "models-dev" else ""
-            print(f"     + {mid:45s} {name:45s} ({fam}){tag}")
+            src = entry.get("source", "sufy")
+            print(f"     + {mid:45s} {name:45s} ({fam})")
 
     if removed_from_catalog:
         print(f"\n   REMOVED (in {target_name}, not in catalog) — {len(removed_from_catalog)}:")
@@ -428,6 +480,10 @@ def main():
     p_fetch = sub.add_parser("fetch", help="fetch + cache the merged model list")
     p_fetch.add_argument("--force", action="store_true", help="bypass cache")
     p_fetch.set_defaults(func=cmd_fetch)
+
+    p_probe = sub.add_parser("probe", help="test if a model ID is callable via Qiniu (for unlisted models like gpt-5.6-terra)")
+    p_probe.add_argument("model_id", help="model ID to test (e.g. openai/gpt-5.6-terra)")
+    p_probe.set_defaults(func=cmd_probe)
 
     p_diff = sub.add_parser("diff", help="compare catalog against a config")
     p_diff.add_argument("--target", choices=["opencode", "router"], required=True)
