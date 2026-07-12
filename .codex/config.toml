@@ -1,0 +1,134 @@
+# Codex CLI — global config (portable core)
+#
+# Model provider: none configured here. Uses the built-in "openai" provider
+# with ChatGPT Plus OAuth login (run `codex login`). OpenAI natively supports
+# the Responses API, so no proxy is needed. The OAuth token lives in
+# ~/.codex/auth.json (gitignored), NOT in this file.
+#
+# To switch providers later (e.g. Qiniu via cc-switch proxy), use the cc-switch
+# GUI — it merges [model_providers.*] + model/model_provider here via toml_edit
+# (non-destructive; this base content and the mcp-sync block are preserved).
+#
+# Config reference: https://developers.openai.com/codex/config-file/config-reference
+
+# --- Approval & sandbox -------------------------------------------------------
+approval_policy = "on-request"        # untrusted | on-request | never
+sandbox_mode = "workspace-write"      # read-only | workspace-write | danger-full-access
+
+# --- Model behavior -----------------------------------------------------------
+model_reasoning_effort = "high"       # minimal | low | medium | high | xhigh
+model_reasoning_summary = "auto"      # auto | concise | detailed | none
+
+# --- Project docs (AGENTS.md) -------------------------------------------------
+project_doc_max_bytes = 32768         # size cap for AGENTS.md chain
+
+# --- Web search ---------------------------------------------------------------
+web_search = "cached"                 # disabled | cached | indexed | live
+
+# --- MCP servers (managed by mcp-sync — do not edit manually) -----------------
+# Rendered from ai/skills/local/mcp-sync/scripts/mcp_servers.json
+# Run: python3 ai/skills/local/mcp-sync/scripts/sync_mcp.py --apply --target codex
+# BEGIN mcp-sync
+[mcp_servers.agentmemory]
+command = "agentmemory-mcp"
+env_vars = ["AGENTMEMORY_URL", "AGENTMEMORY_SECRET"]
+
+# Connects to Brave on Windows via the debug port. Brave must be running with:
+# brave.exe --remote-debugging-port=9222 --user-data-dir="C:\Users\shana\brave-debug"
+# WSL is in Mirrored mode (.wslconfig: networkingMode=Mirrored + hostAddressLoopback=true),
+# so 127.0.0.1 in WSL reaches Windows directly — no 0.0.0.0 binding needed.
+[mcp_servers.Chrome-DevTools-MCP]
+command = "npx"
+args = ["-y", "chrome-devtools-mcp@latest", "--browser-url=http://127.0.0.1:9222", "--no-usage-statistics"]
+
+[mcp_servers.codegraph]
+command = "codegraph"
+args = ["serve", "--mcp"]
+
+[mcp_servers.Figma-Desktop]
+url = "http://127.0.0.1:3845/mcp"
+
+[mcp_servers.web-search-prime]
+url = "https://open.bigmodel.cn/api/mcp/web_search_prime/mcp"
+bearer_token_env_var = "BIGMODEL_API_KEY"
+
+[mcp_servers.zai-mcp-server]
+command = "npx"
+args = ["-y", "@z_ai/mcp-server"]
+env = { "Z_AI_MODE" = "ZHIPU" }
+env_vars = ["BIGMODEL_API_KEY"]
+
+[mcp_servers.zread]
+url = "https://open.bigmodel.cn/api/mcp/zread/mcp"
+bearer_token_env_var = "BIGMODEL_API_KEY"
+
+[mcp_servers.context7]
+url = "https://mcp.context7.com/mcp"
+env_http_headers = { "CONTEXT7_API_KEY" = "CONTEXT7_API_KEY" }
+enabled = false
+
+[mcp_servers.Fetch]
+command = "uvx"
+args = ["mcp-server-fetch"]
+enabled = false
+
+[mcp_servers.Filesystem]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-filesystem", "{env:PROJECTS_DIR}"]
+enabled = false
+
+[mcp_servers.Git]
+command = "uvx"
+args = ["mcp-server-git"]
+enabled = false
+
+[mcp_servers.github]
+url = "https://api.githubcopilot.com/mcp/"
+bearer_token_env_var = "GITHUB_TOKEN_MCP"
+enabled = false
+
+[mcp_servers.Memory]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-memory"]
+env = { "MEMORY_FILE_PATH" = "memory.json" }
+enabled = false
+
+[mcp_servers.MiniMax]
+command = "uvx"
+args = ["minimax-mcp"]
+env = { "MINIMAX_API_HOST" = "https://api.minimaxi.com", "MINIMAX_API_RESOURCE_MODE" = "local" }
+env_vars = ["MINIMAX_TOKEN_PLAN_API_KEY", "MINIMAX_OUTPUT_DIR"]
+enabled = false
+
+[mcp_servers.MiniMax-TokenPlan]
+command = "uvx"
+args = ["minimax-coding-plan-mcp", "-y"]
+env = { "MINIMAX_API_HOST" = "https://api.minimaxi.com" }
+env_vars = ["MINIMAX_TOKEN_PLAN_API_KEY"]
+enabled = false
+
+[mcp_servers.Package-Version]
+command = "npx"
+args = ["-y", "mcp-package-version"]
+enabled = false
+
+[mcp_servers.Playwright]
+command = "npx"
+args = ["-y", "@executeautomation/playwright-mcp-server"]
+enabled = false
+
+[mcp_servers.Puppeteer]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-puppeteer"]
+enabled = false
+
+[mcp_servers.Sequential-Thinking]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+enabled = false
+
+[mcp_servers.web-reader]
+url = "https://open.bigmodel.cn/api/mcp/web_reader/mcp"
+bearer_token_env_var = "BIGMODEL_API_KEY"
+enabled = false
+# END mcp-sync

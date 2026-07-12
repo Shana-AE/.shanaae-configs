@@ -16,6 +16,16 @@
     // "opencode-websearch-cited"  // disabled: its WebsearchCitedOpenAIPlugin export overrides the built-in ChatGPT Plus/Pro OAuth login methods
   ],
   "mcp": {
+    "agentmemory": {
+      "type": "local",
+      "command": [
+        "agentmemory-mcp"
+      ],
+      "environment": {
+        "AGENTMEMORY_URL": "{env:AGENTMEMORY_URL}",
+        "AGENTMEMORY_SECRET": "{env:AGENTMEMORY_SECRET}"
+      }
+    },
     // Connects to Brave on Windows via the debug port. Brave must be running with:
     // brave.exe --remote-debugging-port=9222 --user-data-dir="C:\Users\shana\brave-debug"
     // WSL is in Mirrored mode (.wslconfig: networkingMode=Mirrored + hostAddressLoopback=true),
@@ -176,17 +186,6 @@
         "Authorization": "Bearer {env:BIGMODEL_API_KEY}"
       },
       "enabled": false
-    },
-    "agentmemory": {
-      "type": "local",
-      "command": [
-        "agentmemory-mcp"
-      ],
-      "environment": {
-        "AGENTMEMORY_URL": "{env:AGENTMEMORY_URL}",
-        "AGENTMEMORY_SECRET": "{env:AGENTMEMORY_SECRET}"
-      },
-      "enabled": true
     }
   },
   "instructions": [

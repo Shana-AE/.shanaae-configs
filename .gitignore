@@ -57,6 +57,7 @@
 .config/opencode/node_modules/
 .config/opencode/bun.lock
 .config/opencode/.gitignore
+.config/opencode/opencode.json
 
 .claude/.gitignore
 
@@ -65,6 +66,19 @@
 # ----------------------------------------------------------------------------
 
 .trae/mcps/
+
+# ----------------------------------------------------------------------------
+# 4b. Codex CLI runtime (config.toml, AGENTS.md, skills/ are tracked)
+# ----------------------------------------------------------------------------
+.codex/sqlite/
+.codex/codex-lsp/
+.codex/process_manager/
+.codex/logs/
+.codex/auth.json
+.codex/cc-switch-model-catalog.json
+.codex/*.sqlite
+.codex/*.sqlite-shm
+.codex/*.sqlite-wal
 
 # ----------------------------------------------------------------------------
 # 5. Claude Code Router
