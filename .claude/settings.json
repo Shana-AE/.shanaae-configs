@@ -1,9 +1,7 @@
 {
   "env": {
     "ANTHROPIC_BASE_URL": "http://127.0.0.1:3456",
-    "companyAnnouncements": [
-      "using ccr 🚀"
-    ]
+    "companyAnnouncements": "using ccr 🚀"
   },
   "permissions": {
     "allow": [
@@ -22,15 +20,22 @@
       }
     ]
   },
+  "enabledPlugins": {
+    "agentmemory@agentmemory": true,
+    "honcho@honcho": true
+  },
   "extraKnownMarketplaces": {
     "agentmemory": {
       "source": {
         "source": "github",
         "repo": "rohitg00/agentmemory"
       }
+    },
+    "honcho": {
+      "source": {
+        "source": "github",
+        "repo": "plastic-labs/claude-honcho"
+      }
     }
-  },
-  "enabledPlugins": {
-    "agentmemory@agentmemory": true
   }
 }

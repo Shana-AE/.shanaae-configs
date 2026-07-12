@@ -11,7 +11,8 @@
     "opencode-vibeguard",
     // "@tarquinen/opencode-dcp@latest",
     "opencode-pty",
-    "./plugins/agentmemory-capture.ts"
+    "./plugins/agentmemory-capture.ts",
+    "@honcho-ai/opencode-honcho"
     // "opencode-websearch-cited"  // disabled: its WebsearchCitedOpenAIPlugin export overrides the built-in ChatGPT Plus/Pro OAuth login methods
   ],
   "mcp": {
@@ -179,9 +180,7 @@
     "agentmemory": {
       "type": "local",
       "command": [
-        "npx",
-        "-y",
-        "@agentmemory/mcp"
+        "agentmemory-mcp"
       ],
       "environment": {
         "AGENTMEMORY_URL": "{env:AGENTMEMORY_URL}",
