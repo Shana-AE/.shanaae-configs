@@ -68,14 +68,27 @@
 .trae/mcps/
 
 # ----------------------------------------------------------------------------
-# 4b. Codex CLI runtime (config.toml, AGENTS.md, skills/ are tracked)
+# 4b. Codex CLI runtime (only config.toml, AGENTS.md, skills/ are tracked)
 # ----------------------------------------------------------------------------
-.codex/sqlite/
+.codex/agents/
+.codex/ambient-suggestions/
+.codex/cache/
 .codex/codex-lsp/
-.codex/process_manager/
+.codex/computer-use/
+.codex/log/
 .codex/logs/
+.codex/mcp-oauth-locks/
+.codex/plugins/
+.codex/process_manager/
+.codex/shell_snapshots/
+.codex/sqlite/
+.codex/tmp/
+.codex/vendor_imports/
 .codex/auth.json
 .codex/cc-switch-model-catalog.json
+.codex/hooks.json
+.codex/installation_id
+.codex/models_cache.json
 .codex/*.sqlite
 .codex/*.sqlite-shm
 .codex/*.sqlite-wal
