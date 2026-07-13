@@ -150,6 +150,7 @@ yarn-error.log*
 .claude/plugins/installed_plugins.json
 .claude/plugins/marketplaces/
 .claude/plugins/cache/
+.claude/settings.json
 .claude-code-router/config.json.*.bak
 .config/opencode/opencode-notifier-state.json
 .claude.*.backup*
