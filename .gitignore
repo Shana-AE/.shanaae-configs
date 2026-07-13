@@ -145,11 +145,8 @@ yarn-error.log*
 .trae-server/data/User/globalStorage/.mcp_gallery_cache/
 .claude-code-router/.claude-code-router.pid
 
-.claude/plugins/blocklist.json
-.claude/plugins/known_marketplaces.json
-.claude/plugins/installed_plugins.json
-.claude/plugins/marketplaces/
-.claude/plugins/cache/
+# All plugin data is machine-local (marketplaces, cache, config, private plugins)
+.claude/plugins/
 .claude/settings.json
 .claude-code-router/config.json.*.bak
 .config/opencode/opencode-notifier-state.json
