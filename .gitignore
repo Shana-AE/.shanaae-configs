@@ -146,7 +146,14 @@ yarn-error.log*
 .claude-code-router/.claude-code-router.pid
 
 # All plugin data is machine-local (marketplaces, cache, config, private plugins)
-.claude/plugins/
+# private/ holds plugins that must NOT be committed (proprietary, licensed, or
+# machine-local). Each machine keeps its own copy — not synced via git.
+# To set up a new machine, copy plugin dirs here and run install_all_machines.py.
+.claude/plugins/*
+!.claude/plugins/private/
+.claude/plugins/private/*
+!.claude/plugins/private/.gitkeep
+!.claude/plugins/private/README.md
 .claude/settings.json
 .claude-code-router/config.json.*.bak
 .config/opencode/opencode-notifier-state.json
