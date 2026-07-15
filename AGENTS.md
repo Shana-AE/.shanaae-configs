@@ -148,11 +148,14 @@ MCP servers are configured in multiple locations (kept in sync by `mcp-sync`):
 > `sync_mcp.py --check --repo-only` whenever `mcp_servers.json` is staged, so a
 > stale canonical that wasn't re-rendered blocks the commit.
 >
-> `exclude_from_opencode` (`context7`, `codegraph`) lists servers the
-> oh-my-openagent plugin provides at runtime in OpenCode; they are omitted from
-> `opencode.jsonc` (to avoid fighting omo) but still written to the Claude and
-> Codex configs. Note: omo **force-enables** its built-ins in OpenCode regardless of
-> the canonical `enabled` flag — disable those via omo's `disabled_mcps`.
+> `exclude_from_opencode` (`context7`, `codegraph`) lists servers omitted from
+> `opencode.jsonc` because they are delivered as **skills** (the `context7` and
+> `codegraph` skills wrap the curl API / `codegraph` CLI directly) rather than as
+> always-on global MCP servers — keeping the global config light and decoupled
+> from oh-my-openagent (omo). They are still written to the Claude and Codex
+> configs. When omo is enabled for a project it may additionally provision/serve
+> `codegraph` at runtime regardless of the canonical `enabled` flag; disable that
+> via omo's `disabled_mcps` if it conflicts.
 >
 > The Codex edit is **sentinel-based** — everything between `# BEGIN mcp-sync`
 > and `# END mcp-sync` in `config.toml` is rewritten wholesale; all base settings
