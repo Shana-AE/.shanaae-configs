@@ -85,6 +85,11 @@ python3 ai/skills/local/mcp-sync/scripts/sync_mcp.py --dry-run   # preview drift
 python3 ai/skills/local/mcp-sync/scripts/sync_mcp.py --apply     # write all targets
 python3 ai/skills/local/mcp-sync/scripts/sync_mcp.py --check     # CI/hook: exit 1 on drift
 
+# Setup Claude Code statusline (ccusage/claude-hud) — survives cc-switch provider switches
+python3 ai/skills/local/setup-configs/scripts/setup_claude_code.py setup    # install ccusage + statusLine
+python3 ai/skills/local/setup-configs/scripts/setup_claude_code.py sync    # after /claude-hud:setup
+python3 ai/skills/local/setup-configs/scripts/setup_claude_code.py status   # show current config
+
 # Manage skills with npx
 npx skills list
 npx skills install <skill-name>
@@ -256,10 +261,61 @@ Two systems can route Claude Code to non-default providers. They are
 | **Status** | Active (default provider) | Idle (kept for CLI-driven / transformer-heavy use) |
 
 > **Note**: cc-switch **full-overwrites** `~/.claude/settings.json` on every
-> provider switch (it does not merge). Keep that file minimal — the
-> `autoUpdatesChannel` key is lost when switching away from the "default"
-> provider. cc-switch also writes Codex's `config.toml` via `toml_edit` (a
-> non-destructive merge — base settings and the mcp-sync block are preserved).
+> provider switch (it does not merge). However, cc-switch has a
+> **`common_config_claude`** key in its db (`~/.cc-switch/cc-switch.db`,
+> settings table) that is **merged into every provider's settings.json** on
+> switch. Keys in this blob (permissions, hooks, enabledPlugins,
+> extraKnownMarketplaces, statusLine) survive provider switches. Keys NOT in
+> this blob get wiped on each switch. The `setup_claude_code.py sync` script
+> reads the `statusLine` key from `~/.claude/settings.json` and writes it
+> into `common_config_claude` so it persists. cc-switch also writes Codex's
+> `config.toml` via `toml_edit` (a non-destructive merge — base settings and
+> the mcp-sync block are preserved).
+
+## Claude Code Statusline & Plugins
+
+### Statusline (ccusage + claude-hud)
+
+The statusline shows real-time model, cost, context usage, tools, agents, and
+todos at the bottom of the Claude Code terminal.
+
+- **ccusage** (`pnpm install -g ccusage`) — cost/burn-rate/billing focus.
+  Installed globally, configured as the default statusline.
+- **claude-hud** (plugin, `jarrodwatts/claude-hud`) — session-visibility
+  focus (tools, agents, todos, git, context bar). More OpenCode-like.
+  Recommended primary; install interactively in Claude Code.
+
+After installing/changing the statusline (e.g. via `/claude-hud:setup`), run:
+```bash
+python3 ai/skills/local/setup-configs/scripts/setup_claude_code.py sync
+```
+This syncs the `statusLine` key from `~/.claude/settings.json` into cc-switch's
+`common_config_claude` so it survives provider switches.
+
+### Recommended Plugins
+
+Install from the official marketplace (already added as `claude-plugins-official`):
+
+| Plugin | Purpose | Install |
+|--------|---------|---------|
+| `claude-hud` | Real-time statusline (context, tools, agents, todos, git) | `/plugin marketplace add jarrodwatts/claude-hud` + `/plugin install claude-hud` |
+| `commit-commands` | `/commit`, `/commit-push-pr`, `/clean_gone` | `/plugin install commit-commands@claude-plugins-official` |
+| `security-guidance` | Passive PreToolUse hook — 9 security patterns | `/plugin install security-guidance@claude-plugins-official` |
+| `code-review` | Multi-agent `/code-review` with confidence scoring | `/plugin install code-review@claude-plugins-official` |
+| `hookify` | Build custom behavior-prevention hooks | `/plugin install hookify@claude-plugins-official` |
+| `ralph-wiggum` | Autonomous iteration loops (`/ralph-loop`) | `/plugin install ralph-wiggum@claude-plugins-official` |
+
+> Linux TMPDIR workaround (if `/plugin install` fails with `EXDEV`):
+> ```bash
+> mkdir -p ~/.cache/tmp && TMPDIR=~/.cache/tmp claude
+> ```
+
+### Built-in Commands (no plugin needed)
+
+Claude Code v2.1.x has many built-in slash commands that match OpenCode features:
+`/model`, `/effort`, `/context`, `/usage`, `/mcp`, `/resume`, `/branch`,
+`/background`, `/fork`, `/tasks`, `/rewind`, `/diff`, `/focus`, `/compact`,
+`/goal`, `/advisor`, `/export`.
 
 ## Codex CLI
 
