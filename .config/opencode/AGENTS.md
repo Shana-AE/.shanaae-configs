@@ -31,13 +31,38 @@ When the user asks to save words to Eudic (欧路词典):
 
 ## Obsidian Vault Location
 
-The Obsidian vault lives on the **Windows** side. Always operate on it there — never in a WSL-local copy.
+The Obsidian vault is **bidirectionally synced across all devices** (Windows, macOS, others) via the Livesync plugin. Each platform has its own local mount; writes propagate through CouchDB replication, not direct file sync.
 
+- **macOS path**: `~/Developer/obsidian-vault/` (hoisted out of `~/Documents/` on 2026-07-21 to escape TCC protections and iCloud Desktop & Documents sync risk; `~/Documents/` is a TCC-shielded location on macOS)
 - **Windows path**: `E:\Users\shana\Documents\Obsidian Vault\obsidian-vault`
 - **WSL access**: `/mnt/e/Users/shana/Documents/Obsidian Vault/obsidian-vault`
-- **Symlink** ( convenience ): `/home/shanaae/documents/obsidian-vault` → the Windows vault above. Use it as the default working path.
+- **Symlink** (convenience, WSL): `/home/shanaae/documents/obsidian-vault` → the Windows vault above.
+- **Quartz dev server** (`~/quartz-site`) reads vault content via the symlink `~/quartz-site/content` → macOS vault path.
 - Structure follows **I.A.R.P**: `Inbox/` (capture), `Area/` (life + work), `Resource/` (topics: web, rust, devops, english, cs, records, tools, glossary, others), `Project/` (bounded outcomes), `Recycle/` (trash).
 - Git remote: `git@github.com:Shana-AE/obsidian-vault.git` (note: `core.ignorecase=true`; for case-only folder renames use a two-step `git mv`).
+
+## Hoisted Code Folders (`~/Developer/`)
+
+Code, SDKs, and the vault were hoisted out of `~/Documents/` to escape macOS TCC (Transparency, Consent, and Control) restrictions and iCloud Desktop & Documents sync risk. The `~/Developer/` location is Apple's official convention and is not TCC-shielded.
+
+- `~/Developer/projects/` — all code projects (was `~/Documents/projects/`)
+- `~/Developer/tools/` — SDKs and learning repos; referenced by `~/.zshrc` env vars `ANDROID_SDK_ROOT` and `HARMONY_CLI_HOME`
+- `~/Developer/obsidian-vault/` — see Obsidian Vault Location above
+- `~/Developer/hap_installer/` — HarmonyOS signing config
+
+What **stayed** in `~/Documents/`: `chrome-devtools-overrides/` (Chrome hard-codes path), `com_tencent_imsdk_data/` (app-managed), `insurance/` (personal docs).
+
+### Old-Path Tracker (safety-symlink usage monitor)
+
+Safety symlinks were left in `~/Documents/{projects,tools,obsidian-vault,hap_installer}` pointing to `~/Developer/` counterparts as a 2-week transition net (installed 2026-07-21, target removal 2026-08-04). A tracker catches anything still using the OLD paths:
+
+- **`~/.local/bin/old-docs-sweep`** — daily static-grep sweep + lsof snapshot + symlink-health check. Allowlist filters deliberate refs (AGENTS.md changelog, historical cron logs, this script itself).
+- **`~/Library/LaunchAgents/com.shanaae.old-docs-tracker.plist`** — fires daily at 09:00 + RunAtLoad. Logs to `~/.local/var/log/old-docs/sweep-YYYY-MM-DD.log` (30-day retention). Pops a macOS notification (via `osascript`) with hit count.
+- **`~/.local/bin/old-docs-fsusage`** — on-demand `sudo` wrapper for real-time `fs_usage` syscall tracing of literal old paths. Use when daily sweep isn't enough and we need to know WHICH process is actively using an old path.
+
+**Limitation**: `lsof` resolves symlinks to canonical paths, so runtime symlink-path access is invisible without `fs_usage`+`sudo`. Static sweep catches hardcoded refs in configs/code (~95%); `fs_usage` catches the rest on-demand.
+
+**When the user asks "are the safety symlinks safe to remove yet?"** — run `ls ~/.local/var/log/old-docs/` and `tail -50` of each recent log. If 14+ consecutive days show "SUMMARY: 0" with no hits outside the allowlist, it's safe. Removal: `rm ~/Documents/{projects,tools,obsidian-vault,hap_installer}` then optionally unload the tracker.
 
 ## Obsidian Writes — Always Use the CLI
 

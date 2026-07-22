@@ -188,3 +188,14 @@ oh-my-openagent*.bak*
 .trae/memory
 .trae/builtin
 .trae/builtin_skills
+
+# -----------------------------------------------------------------------------
+# Machine-local runtime + secret loaders (mac-mini et al.) — never committed
+# -----------------------------------------------------------------------------
+/secrets/
+/scripts/
+.config/opencode/tui.toml
+.config/opencode/oh-my-openagent.jsonc.backup-*
+.codex/.codex-global-state.json
+.codex/.personality_migration
+*.backup-*
