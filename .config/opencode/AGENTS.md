@@ -3,7 +3,7 @@
 ## English Practice
 
 Full rules live in `rules/english-learning.md` (loaded via `instructions`).
-Summary: answer in English; on every message prepend an **English Check** block that (A) corrects/optimizes my question, (B) nudges me to use English if I wrote Chinese, and (C) lists vocabulary above CET-6; annotate long/uncommon sentences in Chinese.
+Summary: answer the real question in English **first**, then **append** an **English Check** block at the END that (A) corrects/optimizes my question, (B) nudges me to use English if I wrote Chinese, (C) lists vocabulary above CET-6 (**always shown**, never skipped), and (D) gives a one-point **grammar spotlight** (always shown); annotate long/uncommon sentences in Chinese. For deep language work (essay grading, grammar deep-dives, IELTS/TOEFL mock), dispatch the `english-tutor` subagent.
 
 ## Git Pull for Context
 

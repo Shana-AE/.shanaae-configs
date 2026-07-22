@@ -355,9 +355,10 @@ Rules are stored in `ai/user_rules/` and symlinked to tool directories.
 
 ### English Learning
 
-- Always answer in English
-- On every message, prepend an **English Check** block: correct/optimize my question, nudge me to English if I used Chinese, list vocabulary above CET-6
+- Always answer the real question in English **first**; the coaching block goes at the **end** of the response
+- On every message, **append** an **English Check** block: (A) correct/optimize my question, (B) nudge me to English if I used Chinese, (C) vocabulary above CET-6 — **always shown, never skipped**, (D) a one-point **grammar spotlight** — always shown
 - Annotate long/difficult sentences in Chinese
+- For deep language work (essay grading, grammar deep-dives, IELTS/TOEFL mock), dispatch the `english-tutor` subagent
 - Full rule: `ai/user_rules/english-learning.md` (threshold = CET-6, consistent everywhere)
 
 ### Skill Coaching (self-gating)
