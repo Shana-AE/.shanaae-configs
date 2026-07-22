@@ -1,0 +1,37 @@
+{
+  "name": "opencode-btw",
+  "version": "0.1.0",
+  "description": "Quick side questions without polluting main context — OpenCode's /btw command",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./server": {
+      "default": "./src/index.ts"
+    },
+    "./tui": {
+      "default": "./src/tui.tsx"
+    }
+  },
+  "oc-plugin": [
+    "server",
+    "tui"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "opencode",
+    "plugin",
+    "btw",
+    "side-question",
+    "context",
+    "tui"
+  ],
+  "license": "MIT",
+  "peerDependencies": {
+    "@opencode-ai/plugin": "^1.4.3"
+  }
+}
