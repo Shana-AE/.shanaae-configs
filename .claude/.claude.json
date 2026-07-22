@@ -29,5 +29,6 @@
     "rules/learning.md",
     "rules/save-to-eudic.md",
     "rules/save-to-obsidian.md"
-  ]
+  ],
+  "mcpServers": {}
 }

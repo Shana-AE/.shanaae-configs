@@ -20,6 +20,9 @@
 .claude/telemetry/
 .claude/history.jsonl
 .claude/backups/
+.claude/.last-cleanup
+.claude/daemon/
+.claude/jobs/
 
 
 
