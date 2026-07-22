@@ -2,6 +2,18 @@
   "plugin": [
     "oh-my-openagent",
     "oh-my-openagent@latest",
-    "@honcho-ai/opencode-honcho"
+    "@honcho-ai/opencode-honcho",
+    [
+      "opencode-subagent-magazine@latest",
+      {
+        "enabled": true
+      }
+    ],
+    [
+      "opencode-visual-cache@latest",
+      {
+        "enabled": true
+      }
+    ]
   ]
 }

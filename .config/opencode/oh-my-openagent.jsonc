@@ -1,164 +1,164 @@
 {
   "$schema": "https://unpkg.com/oh-my-openagent@latest/schema.json",
   "agents": {
-    "sisyphus": {
-      "model": "zhipuai-coding-plan/glm-5.2",
-      "variant": "high",
+    "atlas": {
       "fallback_models": [
         "qiniu/z-ai/glm-5.2",
         "qiniu/moonshotai/kimi-k2.7-code",
         "qiniu/openai/gpt-5.5"
-      ]
+      ],
+      "model": "zhipuai-coding-plan/glm-5.2",
+      "variant": "medium"
+    },
+    "explore": {
+      "fallback_models": [
+        "qiniu/minimax/minimax-m2.7",
+        "qiniu/moonshotai/kimi-k2.7-code",
+        "zhipuai-coding-plan/glm-5.2"
+      ],
+      "model": "qiniu/deepseek/deepseek-v4-flash"
     },
     "hephaestus": {
       "model": "qiniu/openai/gpt-5.5",
       "variant": "medium"
     },
-    "oracle": {
-      "model": "qiniu/openai/gpt-5.5",
-      "variant": "high",
+    "librarian": {
+      "fallback_models": [
+        "zhipuai-coding-plan/glm-5.2",
+        "qiniu/moonshotai/kimi-k2.7-code"
+      ],
+      "model": "qiniu/deepseek/deepseek-v4-flash"
+    },
+    "metis": {
+      "fallback_models": [
+        "qiniu/z-ai/glm-5.2",
+        "qiniu/moonshotai/kimi-k2.7-code",
+        "qiniu/openai/gpt-5.5"
+      ],
+      "model": "zhipuai-coding-plan/glm-5.2",
+      "variant": "high"
+    },
+    "momus": {
       "fallback_models": [
         "zhipuai-coding-plan/glm-5.2",
         "qiniu/z-ai/glm-5.2",
         "qiniu/moonshotai/kimi-k2.7-code"
-      ]
-    },
-    "librarian": {
-      "model": "qiniu/deepseek/deepseek-v4-flash",
-      "fallback_models": [
-        "zhipuai-coding-plan/glm-5.2",
-        "qiniu/moonshotai/kimi-k2.7-code"
-      ]
-    },
-    "explore": {
-      "model": "qiniu/deepseek/deepseek-v4-flash",
-      "fallback_models": [
-        "qiniu/minimax/minimax-m2.7",
-        "qiniu/moonshotai/kimi-k2.7-code",
-        "zhipuai-coding-plan/glm-5.2"
-      ]
+      ],
+      "model": "qiniu/openai/gpt-5.5",
+      "variant": "xhigh"
     },
     "multimodal-looker": {
-      "model": "qiniu/google/gemini-3.5-flash",
-      "variant": "medium",
       "fallback_models": [
         "qiniu/qwen/qwen3.6-plus",
         "qiniu/qwen/qwen3.7-max",
         "qiniu/moonshotai/kimi-k2.7-code"
-      ]
+      ],
+      "model": "qiniu/google/gemini-3.5-flash",
+      "variant": "medium"
     },
-    "prometheus": {
-      "model": "zhipuai-coding-plan/glm-5.2",
-      "variant": "high",
-      "fallback_models": [
-        "qiniu/z-ai/glm-5.2",
-        "qiniu/moonshotai/kimi-k2.7-code",
-        "qiniu/openai/gpt-5.5"
-      ]
-    },
-    "metis": {
-      "model": "zhipuai-coding-plan/glm-5.2",
-      "variant": "high",
-      "fallback_models": [
-        "qiniu/z-ai/glm-5.2",
-        "qiniu/moonshotai/kimi-k2.7-code",
-        "qiniu/openai/gpt-5.5"
-      ]
-    },
-    "momus": {
-      "model": "qiniu/openai/gpt-5.5",
-      "variant": "xhigh",
+    "oracle": {
       "fallback_models": [
         "zhipuai-coding-plan/glm-5.2",
         "qiniu/z-ai/glm-5.2",
         "qiniu/moonshotai/kimi-k2.7-code"
-      ]
+      ],
+      "model": "qiniu/openai/gpt-5.5",
+      "variant": "high"
     },
-    "atlas": {
-      "model": "zhipuai-coding-plan/glm-5.2",
-      "variant": "medium",
+    "prometheus": {
       "fallback_models": [
         "qiniu/z-ai/glm-5.2",
         "qiniu/moonshotai/kimi-k2.7-code",
         "qiniu/openai/gpt-5.5"
-      ]
+      ],
+      "model": "zhipuai-coding-plan/glm-5.2",
+      "variant": "high"
+    },
+    "sisyphus": {
+      "fallback_models": [
+        "qiniu/z-ai/glm-5.2",
+        "qiniu/moonshotai/kimi-k2.7-code",
+        "qiniu/openai/gpt-5.5"
+      ],
+      "model": "zhipuai-coding-plan/glm-5.2",
+      "variant": "high"
     },
     "sisyphus-junior": {
-      "model": "qiniu/deepseek/deepseek-v4-flash",
-      "variant": "medium",
       "fallback_models": [
         "zhipuai-coding-plan/glm-5.2",
         "qiniu/moonshotai/kimi-k2.7-code",
         "qiniu/minimax/minimax-m3"
-      ]
+      ],
+      "model": "qiniu/deepseek/deepseek-v4-flash",
+      "variant": "medium"
     }
   },
   "categories": {
-    "visual-engineering": {
-      "model": "qiniu/gemini-3.1-pro-preview",
+    "artistry": {
       "fallback_models": [
-        "qiniu/qwen/qwen3.7-max",
         "qiniu/google/gemini-3.5-flash"
-      ]
-    },
-    "ultrabrain": {
-      "model": "zhipuai-coding-plan/glm-5.2",
-      "variant": "xhigh",
-      "fallback_models": [
-        "qiniu/z-ai/glm-5.2",
-        "qiniu/moonshotai/kimi-k2.7-code",
-        "qiniu/deepseek/deepseek-v4-pro"
-      ]
+      ],
+      "model": "qiniu/gemini-3.1-pro-preview"
     },
     "deep": {
-      "model": "zhipuai-coding-plan/glm-5.2",
-      "variant": "medium",
       "fallback_models": [
         "qiniu/z-ai/glm-5.2",
         "qiniu/moonshotai/kimi-k2.7-code",
         "qiniu/deepseek/deepseek-v4-pro"
-      ]
-    },
-    "artistry": {
-      "model": "qiniu/gemini-3.1-pro-preview",
-      "fallback_models": [
-        "qiniu/google/gemini-3.5-flash"
-      ]
+      ],
+      "model": "zhipuai-coding-plan/glm-5.2",
+      "variant": "medium"
     },
     "quick": {
-      "model": "qiniu/deepseek/deepseek-v4-flash",
       "fallback_models": [
         "qiniu/minimax/minimax-m2.7"
-      ]
+      ],
+      "model": "qiniu/deepseek/deepseek-v4-flash"
     },
-    "unspecified-low": {
-      "model": "qiniu/deepseek/deepseek-v4-flash",
-      "variant": "medium",
+    "ultrabrain": {
       "fallback_models": [
-        "zhipuai-coding-plan/glm-5.2",
-        "qiniu/moonshotai/kimi-k2.7-code"
-      ]
+        "qiniu/z-ai/glm-5.2",
+        "qiniu/moonshotai/kimi-k2.7-code",
+        "qiniu/deepseek/deepseek-v4-pro"
+      ],
+      "model": "zhipuai-coding-plan/glm-5.2",
+      "variant": "xhigh"
     },
     "unspecified-high": {
-      "model": "zhipuai-coding-plan/glm-5.2",
-      "variant": "medium",
       "fallback_models": [
         "qiniu/z-ai/glm-5.2",
         "qiniu/moonshotai/kimi-k2.7-code",
         "qiniu/openai/gpt-5.5"
-      ]
+      ],
+      "model": "zhipuai-coding-plan/glm-5.2",
+      "variant": "medium"
+    },
+    "unspecified-low": {
+      "fallback_models": [
+        "zhipuai-coding-plan/glm-5.2",
+        "qiniu/moonshotai/kimi-k2.7-code"
+      ],
+      "model": "qiniu/deepseek/deepseek-v4-flash",
+      "variant": "medium"
+    },
+    "visual-engineering": {
+      "fallback_models": [
+        "qiniu/qwen/qwen3.7-max",
+        "qiniu/google/gemini-3.5-flash"
+      ],
+      "model": "qiniu/gemini-3.1-pro-preview"
     },
     "writing": {
-      "model": "zhipuai-coding-plan/glm-5.2",
       "fallback_models": [
         "qiniu/z-ai/glm-5.2",
         "qiniu/moonshotai/kimi-k2.7-code"
-      ]
+      ],
+      "model": "zhipuai-coding-plan/glm-5.2"
     }
   },
   "sisyphus_agent": {
-    "disabled": false,
     "default_builder_enabled": false,
+    "disabled": false,
     "planner_enabled": true,
     "replace_plan": true
   }
