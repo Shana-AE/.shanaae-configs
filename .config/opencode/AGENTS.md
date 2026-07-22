@@ -100,6 +100,20 @@ Use `memory_save` (or `/remember`) when encountering:
 - Use `memory_file_history` before editing a file to check past context
 - Use `memory_sessions` to list past sessions
 
+## Honcho (self-hosted) — Operations
+
+Honcho (Plastic Labs) provides **conversational memory** — persistent user profile, dialectic context, and session reasoning. Self-hosted on the NAS alongside AgentMemory. Division of labor: **Honcho = conversational/user-profile/dialectic; AgentMemory = structured coding facts.**
+
+- **Server**: `http://192.168.86.62:18000` (v3 API at `/v3`); env `HONCHO_URL`
+- **Auth**: `HONCHO_API_KEY` env var (in `.secrets`). `~/.honcho/config.json` holds **no embedded key** — the env var is the single source of truth (the plugin resolves `config.apiKey || process.env.HONCHO_API_KEY`).
+- **Deployment**: NAS docker-compose at `/vol1/1000/docker/honcho-hermes-mac/` (use `sudo` for docker on the NAS).
+- **Image**: pinned `honcho-hermes-mac:3.0.11-20260713` (Honcho 3.0.11, built 2026-07-13, image `a8d49442d532`). `:latest` also exists, but the compose references the pinned tag — don't rebuild onto `:latest` without re-tagging a new pin.
+- **Services**: `api` (`192.168.86.62:18000`→container `:8000`), `deriver` (background derivation), `database` (`pgvector/pgvector:pg15`), `redis` (cache).
+- **LLM backend**: configured in `.env` — `LLM_OPENAI_API_KEY`/`LLM_OPENAI_BASE_URL`, five dialectic levels (`minimal`→`max`), plus summary + dream + embedding models. The dialectic **is** available and enabled.
+- **Config standard** (`~/.honcho/config.json`, `hosts.opencode`, unified across machines): `recallMode: tools`, `sessionStrategy: per-directory`, `contextRefresh: {messageThreshold: 100, ttlSeconds: 600, skipDialectic: false}`, `messageUpload: {summarizeAssistant: true, maxUserTokens: 2000, maxAssistantTokens: 2000}`. Workspace `hermes` is shared across OpenCode (`aiPeer: opencode`) and Claude Code (`aiPeer: claude-code`).
+- **Backup**: `./data/pgdata/` holds all conversational memory — include in the NAS backup strategy.
+- **Rebuild/redeploy**: `cd /vol1/1000/docker/honcho-hermes-mac && sudo docker compose build && sudo docker tag <new-image> honcho-hermes-mac:<ver>-<date> && sudo docker compose up -d`. Changing the image tag causes a container recreate (brief restart); same image content = no data change. `~/.honcho/config.json` is machine-local (not in this repo) — edit per machine, or replicate manually.
+
 ## MCP Tools Usage
 
 - Use the **context7 skill** (curl to context7.com API with `CONTEXT7_API_KEY`) when you need to search documentation — the MCP was removed to save per-message tokens
