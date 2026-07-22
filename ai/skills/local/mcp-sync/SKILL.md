@@ -26,9 +26,16 @@ not the tool configs.**
 The opencode edit is **surgical** — only the `"mcp": {...}` block is rewritten;
 all comments, `plugin`, `provider`, `tools`, and `instructions` are preserved.
 
-The codex edit is **sentinel-based** — everything between `# BEGIN mcp-sync` and
-`# END mcp-sync` is rewritten wholesale; all base settings, provider tables
-(written by cc-switch), and user comments outside the sentinels are preserved.
+The codex edit is **sentinel-based and tolerant** — between `# BEGIN mcp-sync`
+and `# END mcp-sync`, the canonical `[mcp_servers.*]` tables are regenerated
+from the source of truth, while any *foreign* content other writers place
+inside the sentinel (notably the ChatGPT desktop app's Codex integration,
+which injects `notify`, `[mcp_servers.node_repl]`, `[mcp_servers.computer-use]`,
+`[marketplaces]`, `[plugins]`, `[features]`) is preserved verbatim. App-managed
+server names are listed in `CODEX_APP_MCP_SERVERS`; a `[mcp_servers.<name>]`
+that is neither canonical nor in that allowlist is treated as a removed server
+and dropped. Base settings, provider tables (written by cc-switch), and user
+comments outside the sentinels are preserved.
 
 `exclude_from_opencode` (default: `context7`, `codegraph`) lists servers managed
 by the oh-my-openagent plugin at runtime; they are omitted from opencode.jsonc

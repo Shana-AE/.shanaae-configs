@@ -162,9 +162,14 @@ MCP servers are configured in multiple locations (kept in sync by `mcp-sync`):
 > `codegraph` at runtime regardless of the canonical `enabled` flag; disable that
 > via omo's `disabled_mcps` if it conflicts.
 >
-> The Codex edit is **sentinel-based** — everything between `# BEGIN mcp-sync`
-> and `# END mcp-sync` in `config.toml` is rewritten wholesale; all base settings
-> and provider tables (written by cc-switch) outside the sentinels are preserved.
+> The Codex edit is **sentinel-based and tolerant** — between `# BEGIN mcp-sync`
+> and `# END mcp-sync` the canonical `[mcp_servers.*]` tables are regenerated
+> from the source of truth, while foreign content the ChatGPT app injects
+> inside the sentinel (`notify`, `node_repl`, `computer-use`, `[marketplaces]`,
+> `[plugins]`, `[features]`) is preserved verbatim. App-managed server names
+> live in `CODEX_APP_MCP_SERVERS`; any other `[mcp_servers.<name>]` not in the
+> canonical source is treated as removed and dropped. Base settings and
+> provider tables (written by cc-switch) outside the sentinels are preserved.
 > Codex's `config.toml` has no general `{env:VAR}` interpolation, so secrets use
 > env-name reference fields (`env_vars`, `bearer_token_env_var`, `env_http_headers`).
 
