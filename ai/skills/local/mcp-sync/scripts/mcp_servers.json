@@ -67,7 +67,7 @@
       "command_opencode": [
         "sh",
         "-c",
-        "export Z_AI_MODE=ZHIPU; export Z_AI_API_KEY=$(cat $HOME/.shanaae/configs/.secrets.d/bigmodel_api_key); exec npx -y @z_ai/mcp-server \"$@\""
+        "PATH=$HOME/.local/bin:$HOME/.local/share/fnm/aliases/default/bin:$HOME/.volta/bin:/opt/homebrew/bin:$PATH; export Z_AI_MODE=ZHIPU; export Z_AI_API_KEY=$(cat $HOME/.shanaae/configs/.secrets.d/bigmodel_api_key); exec npx -y @z_ai/mcp-server \"$@\""
       ],
       "env": {
         "Z_AI_MODE": "ZHIPU",
@@ -215,7 +215,7 @@
       "command_opencode": [
         "sh",
         "-c",
-        "b=$HOME/.local/share/pnpm/bin/agentmemory-mcp; [ -x \"$b\" ] || b=$HOME/Library/pnpm/bin/agentmemory-mcp; export AGENTMEMORY_URL=$(cat $HOME/.shanaae/configs/.secrets.d/agentmemory_url); export AGENTMEMORY_SECRET=$(cat $HOME/.shanaae/configs/.secrets.d/agentmemory_secret); exec \"$b\" \"$@\""
+        "PATH=$HOME/.local/bin:$HOME/.local/share/fnm/aliases/default/bin:$HOME/.volta/bin:/opt/homebrew/bin:$PATH; b=$HOME/.local/share/pnpm/bin/agentmemory-mcp; [ -x \"$b\" ] || b=$HOME/Library/pnpm/bin/agentmemory-mcp; export AGENTMEMORY_URL=$(cat $HOME/.shanaae/configs/.secrets.d/agentmemory_url); export AGENTMEMORY_SECRET=$(cat $HOME/.shanaae/configs/.secrets.d/agentmemory_secret); exec \"$b\" \"$@\""
       ],
       "env": {
         "AGENTMEMORY_URL": "{env:AGENTMEMORY_URL}",
