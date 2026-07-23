@@ -166,6 +166,7 @@ yarn-error.log*
 
 # Sensitive config files - 含有 token 或敏感数据，不提交
 .secrets
+.secrets.d/
 .config/opencode/antigravity-accounts.json
 ai/mcp/trae.json
 .local/share/opencode/auth.json
