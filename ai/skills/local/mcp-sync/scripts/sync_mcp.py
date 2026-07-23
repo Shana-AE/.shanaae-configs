@@ -132,13 +132,19 @@ def load_canonical() -> tuple[list[dict], set[str]]:
 def to_opencode(name, spec) -> tuple[str | None, dict]:
     entry = {"type": "local" if spec.get("type") == "local" else "remote"}
     if spec.get("type") == "local":
-        entry["command"] = transform_obj(spec.get("command", []), "opencode")
-        if spec.get("env"):
-            entry["environment"] = transform_obj(spec["env"], "opencode")
+        # opencode-specific overrides let a server use {file:...} secrets (resolved by
+        # opencode at spawn time) so MCPs work without the token being in the shell/session env.
+        # Other targets still use the base command/env. transform() leaves {file:...} untouched.
+        cmd_src = spec.get("command_opencode", spec.get("command", []))
+        env_src = spec.get("env_opencode", spec.get("env"))
+        entry["command"] = transform_obj(cmd_src, "opencode")
+        if env_src:
+            entry["environment"] = transform_obj(env_src, "opencode")
     else:
         entry["url"] = transform(spec["url"], "opencode")
-        if spec.get("headers"):
-            entry["headers"] = transform_obj(spec["headers"], "opencode")
+        headers_src = spec.get("headers_opencode", spec.get("headers"))
+        if headers_src:
+            entry["headers"] = transform_obj(headers_src, "opencode")
     if not spec.get("enabled", False):
         entry["enabled"] = False
     return spec.get("comment"), entry

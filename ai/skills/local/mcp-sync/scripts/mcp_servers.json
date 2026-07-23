@@ -26,6 +26,9 @@
       "headers": {
         "Authorization": "Bearer {env:BIGMODEL_API_KEY}"
       },
+      "headers_opencode": {
+        "Authorization": "Bearer {file:~/.shanaae/configs/.secrets.d/bigmodel_api_key}"
+      },
       "enabled": true
     },
     "zread": {
@@ -33,6 +36,9 @@
       "url": "https://open.bigmodel.cn/api/mcp/zread/mcp",
       "headers": {
         "Authorization": "Bearer {env:BIGMODEL_API_KEY}"
+      },
+      "headers_opencode": {
+        "Authorization": "Bearer {file:~/.shanaae/configs/.secrets.d/bigmodel_api_key}"
       },
       "enabled": true
     },
@@ -57,6 +63,11 @@
         "npx",
         "-y",
         "@z_ai/mcp-server"
+      ],
+      "command_opencode": [
+        "sh",
+        "-c",
+        "export Z_AI_MODE=ZHIPU; export Z_AI_API_KEY=$(cat $HOME/.shanaae/configs/.secrets.d/bigmodel_api_key); exec npx -y @z_ai/mcp-server \"$@\""
       ],
       "env": {
         "Z_AI_MODE": "ZHIPU",
@@ -200,6 +211,11 @@
       "type": "local",
       "command": [
         "agentmemory-mcp"
+      ],
+      "command_opencode": [
+        "sh",
+        "-c",
+        "d=$HOME/.shanaae/configs/.secrets.d; export AGENTMEMORY_URL=$(cat $d/agentmemory_url); export AGENTMEMORY_SECRET=$(cat $d/agentmemory_secret); exec $HOME/.local/share/pnpm/bin/agentmemory-mcp \"$@\""
       ],
       "env": {
         "AGENTMEMORY_URL": "{env:AGENTMEMORY_URL}",
