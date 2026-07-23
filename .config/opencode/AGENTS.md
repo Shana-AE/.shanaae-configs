@@ -146,6 +146,16 @@ Honcho (Plastic Labs) provides **conversational memory** — persistent user pro
 - Use `Filesystem` tools for file operations
 - Use `Sequential Thinking` tools for complex problem solving
 
+## Frontend Visual Verification
+
+For any frontend task that changes styles, layout, spacing, responsive behavior, modals, dialogs, CSS, or screenshot/Figma fidelity:
+
+- **MUST proactively invoke the `frontend-visual-verify` skill.** Do not wait for the user to request browser verification.
+- Render the page, inspect computed styles and geometry, capture a screenshot, compare it, and iterate before claiming completion.
+- Never claim visual fidelity from source review, tests, DOM structure, or CSS values alone.
+- Route screenshots by the active model's normalized capabilities. Native vision requires both attachment transport and image input; false, incomplete, missing, or unknown capabilities use the skill's visual bridge.
+- Prefer `agent-browser` for routine UI verification. Reserve `web-devtools` for deep performance, memory, network, or console investigations.
+
 <!-- CODEGRAPH_START -->
 ## CodeGraph
 

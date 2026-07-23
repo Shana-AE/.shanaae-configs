@@ -309,7 +309,7 @@
           "name": "Doubao-Seed-2.0-Lite (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 256000, "output": 128000}
         },
         "doubao-seed-2.0-mini": {
-          "name": "Doubao-Seed-2.0-Mini (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 256000, "output": 32000}
+          "name": "Doubao-Seed-2.0-Mini (Qiniu)", "reasoning": true, "attachment": true, "modalities": {"input": ["text", "image", "video"], "output": ["text"]}, "limit": {"context": 256000, "output": 32000}
         },
         "doubao-seed-2.0-pro": {
           "name": "Doubao-Seed-2.0-Pro (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 256000, "output": 128000}
@@ -319,7 +319,7 @@
         },
         "gemini-2.5-flash-image": {"name": "Gemini 2.5 Flash Image (Qiniu)", "attachment": true, "limit": {"context": 32768, "output": 8192}},
         "gemini-2.5-flash-lite": {
-          "name": "Gemini 2.5 Flash Lite (Qiniu)", "attachment": true, "limit": {"context": 1000000, "output": 64000}
+          "name": "Gemini 2.5 Flash Lite (Qiniu)", "attachment": true, "modalities": {"input": ["text", "image"], "output": ["text"]}, "limit": {"context": 1000000, "output": 64000}
         },
         "gemini-2.5-pro": {
           "name": "Gemini 2.5 Pro (Qiniu)", "attachment": true, "limit": {"context": 1000000, "output": 64000}
@@ -384,7 +384,7 @@
         "moonshotai/kimi-k2.7-code": {
           "name": "Moonshot-AI/Kimi-K2.7-Code (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 262144, "output": 262144}
         },
-        "moonshotai/kimi-k3": {"name": "moonshotai/kimi-k3 (Qiniu)", "limit": {"context": 200000, "output": 64000}},
+        "moonshotai/kimi-k3": {"name": "moonshotai/kimi-k3 (Qiniu)", "attachment": true, "modalities": {"input": ["text", "image"], "output": ["text"]}, "limit": {"context": 200000, "output": 64000}},
         "nvidia/nemotron-3-super-120b-a12b": {
           "name": "Nvidia/Nemotron-3-Super-120B-A12B (Qiniu)", "limit": {"context": 262144, "output": 262144}
         },
@@ -439,7 +439,7 @@
           "name": "Qwen-VL-Max-2025-01-25 (Qiniu)", "attachment": true, "limit": {"context": 128000, "output": 128000}
         },
         "qwen/qwen3.5-plus": {
-          "name": "Qwen/Qwen3.5-Plus (Qiniu)", "attachment": true, "limit": {"context": 1000000, "output": 64000}
+          "name": "Qwen/Qwen3.5-Plus (Qiniu)", "attachment": true, "modalities": {"input": ["text", "image", "video"], "output": ["text"]}, "limit": {"context": 1000000, "output": 64000}
         },
         "qwen/qwen3.6-27b": {
           "name": "Qwen/Qwen3.6-27B (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 262144, "output": 262144}
