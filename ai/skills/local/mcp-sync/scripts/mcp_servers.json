@@ -215,7 +215,7 @@
       "command_opencode": [
         "sh",
         "-c",
-        "d=$HOME/.shanaae/configs/.secrets.d; export AGENTMEMORY_URL=$(cat $d/agentmemory_url); export AGENTMEMORY_SECRET=$(cat $d/agentmemory_secret); exec $HOME/.local/share/pnpm/bin/agentmemory-mcp \"$@\""
+        "b=$HOME/.local/share/pnpm/bin/agentmemory-mcp; [ -x \"$b\" ] || b=$HOME/Library/pnpm/bin/agentmemory-mcp; export AGENTMEMORY_URL=$(cat $HOME/.shanaae/configs/.secrets.d/agentmemory_url); export AGENTMEMORY_SECRET=$(cat $HOME/.shanaae/configs/.secrets.d/agentmemory_secret); exec \"$b\" \"$@\""
       ],
       "env": {
         "AGENTMEMORY_URL": "{env:AGENTMEMORY_URL}",
