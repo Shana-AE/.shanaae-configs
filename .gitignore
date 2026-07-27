@@ -200,3 +200,7 @@ oh-my-openagent*.bak*
 .codex/.codex-global-state.json
 .codex/.personality_migration
 *.backup-*
+.bw-session
+.secrets.syncstate
+.secrets.conflicts
+.vault-sync.log
