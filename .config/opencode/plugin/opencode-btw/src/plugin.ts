@@ -1,5 +1,4 @@
 import type { Plugin } from "@opencode-ai/plugin"
-import { handled } from "./lib/command-handled"
 import { loadConfig } from "./lib/config"
 import { getOrCreateBtwSession, promptBtwSession } from "./lib/btw-session"
 import type { BtwConfig } from "./lib/types"
@@ -11,7 +10,6 @@ type OpencodeClient = Parameters<Plugin>[0] extends infer C
   : never
 
 interface PluginConfigInput {
-  command?: Record<string, { template: string; description: string }>
   agent?: Record<string, unknown>
   default_agent?: string
 }
@@ -37,11 +35,6 @@ export const BtwServerPlugin: Plugin = async ({ client }) => {
         }
       }) => Promise<{ data?: { parts?: Array<{ type: string; text?: string }> }; error?: unknown }>
     }
-    tui?: {
-      showToast: (opts: {
-        body: { message: string; variant?: string; duration?: number }
-      }) => Promise<unknown>
-    }
     app?: {
       log: (opts: {
         body: { service: string; level: string; message: string; extra?: unknown }
@@ -64,55 +57,27 @@ export const BtwServerPlugin: Plugin = async ({ client }) => {
   return {
     config: async (input: unknown) => {
       const cfg = input as PluginConfigInput & { btw?: unknown }
-      cfg.command ??= {}
-      cfg.command["btw"] = {
-        template: "/btw",
-        description: "Quick side question (BTW) — answer shown as toast, no context pollution",
-      }
       if (cfg.btw) {
         config = loadConfig(cfg.btw)
       }
     },
 
-    "command.execute.before": async (input: CommandExecuteInput) => {
+    "command.execute.before": async (
+      input: CommandExecuteInput,
+      output: { parts: Array<{ type: string; text?: string }> },
+    ) => {
       if (input.command !== "btw") return
 
       const question = input.arguments?.trim()
-      if (!question) {
-        await typedClient.tui?.showToast({
-          body: {
-            message: "BTW: type /btw <question> or press Ctrl+B",
-            variant: "info",
-            duration: 5000,
-          },
-        })
-        handled()
-      }
+      if (!question) return
 
       try {
         const btwId = await getOrCreateBtwSession(typedClient as any, input.sessionID, config)
-        const answer = await promptBtwSession(typedClient as any, btwId, question!, config)
-
-        const truncated = answer.length > 800 ? answer.slice(0, 800) + "\n…(truncated)" : answer
-        await typedClient.tui?.showToast({
-          body: {
-            message: `💡 ${truncated}`,
-            variant: "info",
-            duration: config.toastDuration,
-          },
-        })
+        const answer = await promptBtwSession(typedClient as any, btwId, question, config)
+        output.parts.splice(0, output.parts.length, { type: "text", text: `💡 BTW: ${answer}` })
       } catch (err) {
         await log("error", "BTW command failed", { error: err instanceof Error ? err.message : String(err) })
-        await typedClient.tui?.showToast({
-          body: {
-            message: `BTW error: ${err instanceof Error ? err.message : String(err)}`,
-            variant: "error",
-            duration: 5000,
-          },
-        })
       }
-
-      handled()
     },
   }
 }

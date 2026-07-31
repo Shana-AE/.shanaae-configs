@@ -126,6 +126,7 @@ build/
 eggs/
 lib/
 lib64/
+!.config/opencode/plugin/opencode-btw/src/lib/
 parts/
 sdist/
 var/

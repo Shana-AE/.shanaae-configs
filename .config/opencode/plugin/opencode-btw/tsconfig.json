@@ -10,10 +10,9 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "types": ["bun"],
     "paths": {
-      "@opencode-ai/plugin": ["../../../../../../.ai-git-pulls/opencode/packages/plugin/src/index.ts"],
-      "@opencode-ai/plugin/tui": ["../../../../../../.ai-git-pulls/opencode/packages/plugin/src/tui.ts"]
+      "@opencode-ai/plugin": ["../../node_modules/@opencode-ai/plugin/dist/index.d.ts"],
+      "@opencode-ai/plugin/tui": ["../../node_modules/@opencode-ai/plugin/dist/tui.d.ts"]
     }
   },
   "include": ["src"]
