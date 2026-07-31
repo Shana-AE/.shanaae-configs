@@ -1,0 +1,22 @@
+{
+  "name": "project-rules",
+  "version": "0.1.0",
+  "description": "Auto-load project-specific instruction rules (vue, harmonyos, ...) based on detected project code",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./server": {
+      "default": "./src/index.ts"
+    }
+  },
+  "oc-plugin": [
+    "server"
+  ],
+  "license": "MIT",
+  "peerDependencies": {
+    "@opencode-ai/plugin": "^1.0.0"
+  }
+}

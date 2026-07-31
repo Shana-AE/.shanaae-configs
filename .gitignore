@@ -60,7 +60,9 @@
 .config/opencode/node_modules/
 .config/opencode/bun.lock
 .config/opencode/.gitignore
-.config/opencode/opencode.json
+# opencode.json holds only the shared plugin list (no secrets) — tracked
+# machine-local archive of previous opencode configs
+.config/opencode/backups/
 
 .claude/.gitignore
 
