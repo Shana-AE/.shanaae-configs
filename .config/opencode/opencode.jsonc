@@ -11,6 +11,19 @@
     "opencode-vibeguard",
     // "@tarquinen/opencode-dcp@latest",
     "opencode-pty",
+    ["./plugin/project-rules", {
+      "projects": {
+        "vue": {
+          "deps": ["vue"],
+          "files": ["**/*.vue"],
+          "rules": ["~/.shanaae/configs/ai/user_rules/vue-learning.md"]
+        },
+        "harmonyos": {
+          "files": ["oh-package.json5", "build-profile.json5", "hvigorfile.ts"],
+          "rules": ["~/.shanaae/configs/ai/user_rules/harmonyos-learning.md"]
+        }
+      }
+    }],
     "./plugins/agentmemory-capture.ts",
     "./plugin/opencode-btw",
     "@honcho-ai/opencode-honcho"
@@ -192,21 +205,29 @@
     }
   },
   "instructions": [
-    "rules/english-learning.md",
-    "rules/vue-learning.md",
-    "rules/harmonyos-learning.md",
-    "rules/git-pull-context.md",
-    "rules/learning.md",
-    "rules/save-to-eudic.md",
-    "rules/save-to-obsidian.md",
-    "plugin/shell-strategy/shell_strategy.md"
+    "~/.shanaae/configs/ai/user_rules/english-learning.md",
+    "~/.shanaae/configs/ai/user_rules/learning.md",
+    "~/.shanaae/configs/ai/user_rules/git-pull-context.md",
+    "~/.shanaae/configs/ai/user_rules/save-to-eudic.md",
+    "~/.shanaae/configs/ai/user_rules/save-to-obsidian.md",
+    "~/.config/opencode/plugin/shell-strategy/shell_strategy.md"
   ],
   // Chrome-DevTools-MCP tools are GLOBALLY OFF (zero token cost in main/plan context).
   // They are re-enabled only inside the `web-devtools` subagent (see agents/web-devtools.md),
   // so the MCP's ~47 tool schemas are paid for only when that subagent runs.
   "tools": {
-    "Chrome-DevTools-MCP*": false,
-    "github": true
+    "Chrome-DevTools-MCP*": false
+  },
+  // Allow safe, read-only bash without prompting; everything else falls back to `ask`.
+  "permission": {
+    "bash": {
+      "git *": "allow",
+      "ls *": "allow",
+      "cat *": "allow",
+      "rg *": "allow",
+      "pwd": "allow",
+      "env *": "allow"
+    }
   },
   "provider": {
     "qiniu": {
