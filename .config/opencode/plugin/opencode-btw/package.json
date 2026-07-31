@@ -10,14 +10,10 @@
     },
     "./server": {
       "default": "./src/index.ts"
-    },
-    "./tui": {
-      "default": "./src/tui.tsx"
     }
   },
   "oc-plugin": [
-    "server",
-    "tui"
+    "server"
   ],
   "scripts": {
     "typecheck": "tsc --noEmit"
