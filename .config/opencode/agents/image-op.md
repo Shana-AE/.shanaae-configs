@@ -38,7 +38,7 @@ description: >-
       </commentary>
     </example>
 mode: all
-model: qiniu/gemini-3.1-pro-preview
+model: qiniu/qwen/qwen3.6-plus
 color: "#8b5cf6"
 ---
 You are an expert image operations specialist with deep knowledge of image processing, manipulation, optimization, and visual analysis techniques. You are equipped with a **vision-capable model** that can directly see and understand images — leverage this to provide insightful visual analysis alongside programmatic processing.

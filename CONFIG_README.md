@@ -47,6 +47,44 @@ All other secrets are read directly from `.secrets` / the environment at runtime
 > so one config resolves per-OS. See
 > [`docs/superpowers/specs/2026-06-25-cross-platform-configs-design.md`](docs/superpowers/specs/2026-06-25-cross-platform-configs-design.md).
 
+## Customizing Agent Models
+
+Subagents ship with a default model but every user can override it. The
+`image-op` agent (`.config/opencode/agents/image-op.md`) defaults to
+`qiniu/qwen/qwen3.6-plus`. To run it on your own model/provider:
+
+1. **Per-project override (recommended).** Copy the agent into your project and
+   change the `model:` line in its frontmatter. Project agents
+   (`.opencode/agents/`) override the global ones
+   (`~/.config/opencode/agents/`):
+
+   ```bash
+   mkdir -p .opencode/agents
+   cp ~/.config/opencode/agents/image-op.md .opencode/agents/image-op.md
+   # edit .opencode/agents/image-op.md → model: your-provider/your-model
+   ```
+
+2. **JSON config override.** Add an `agent` entry to your `opencode.jsonc`:
+
+   ```jsonc
+   {
+     "agent": {
+       "image-op": { "model": "provider/model-id" }
+     }
+   }
+   ```
+
+   `{env:VAR}` is substituted here (e.g. `"model": "{env:IMAGE_OP_MODEL}"`),
+   but if the variable is unset it becomes an empty string and the agent will
+   fail to load — set it, or use a literal model ID.
+
+> **Vision requirement:** whatever model you pick must accept image input
+> (`attachment`/vision). `image-op`'s core job is visual analysis — a text-only
+> model will not work.
+
+> Markdown agent frontmatter (`agents/*.md`) does **not** support `{env:VAR}`
+> substitution — that only applies to `opencode.jsonc` values.
+
 ## Automatic Setup
 
 The `setup-configs` skill renders the `.example` files from your `.secrets`.
