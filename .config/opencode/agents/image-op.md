@@ -37,7 +37,7 @@ description: >-
       Visual content understanding and analysis leverage the agent's vision-capable model.
       </commentary>
     </example>
-mode: all
+mode: subagent
 model: qiniu/qwen/qwen3.6-plus
 color: "#8b5cf6"
 ---
