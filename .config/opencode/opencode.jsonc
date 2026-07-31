@@ -12,6 +12,7 @@
     // "@tarquinen/opencode-dcp@latest",
     "opencode-pty",
     "./plugins/agentmemory-capture.ts",
+    "./plugin/opencode-btw",
     "@honcho-ai/opencode-honcho"
     // "opencode-websearch-cited"  // disabled: its WebsearchCitedOpenAIPlugin export overrides the built-in ChatGPT Plus/Pro OAuth login methods
   ],
@@ -226,10 +227,13 @@
         "anthropic/claude-fable-5": {
           "name": "Anthropic/Claude Fable 5 (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 1000000, "output": 128000}
         },
+        "anthropic/claude-opus-5": {"name": "anthropic/claude-opus-5 (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 1000000, "output": 128000}},
         "anthropic/claude-sonnet-5": {"name": "anthropic/claude-sonnet-5 (Qiniu)", "limit": {"context": 200000, "output": 64000}},
         "arcee-ai/trinity-mini": {
           "name": "Arcee-AI/Trinity-Mini (Qiniu)", "limit": {"context": 128000, "output": 128000}
         },
+        "bytedance/doubao-seed-2-1-pro": {"name": "bytedance/doubao-seed-2-1-pro (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 256000, "output": 128000}},
+        "bytedance/doubao-seed-2-1-turbo": {"name": "bytedance/doubao-seed-2-1-turbo (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 256000, "output": 128000}},
         "claude-4.0-opus": {"name": "Claude 4.0 Opus (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 200000, "output": 32000}},
         "claude-4.0-sonnet": {"name": "Claude 4.0 Sonnet (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 200000, "output": 64000}},
         "claude-4.1-opus": {
@@ -283,6 +287,8 @@
         "deepseek/deepseek-v4-flash": {
           "name": "DeepSeek-V4-Flash (Qiniu)", "limit": {"context": 1000000, "output": 384000}
         },
+        "deepseek/deepseek-v4-flash-202605": {"name": "deepseek/deepseek-v4-flash-202605 (Qiniu)", "limit": {"context": 1000000, "output": 384000}},
+        "deepseek/deepseek-v4-flash-20260731": {"name": "deepseek/deepseek-v4-flash-20260731 (Qiniu)", "limit": {"context": 1000000, "output": 384000}},
         "deepseek/deepseek-v4-pro": {
           "name": "DeepSeek-V4-Pro (Qiniu)", "reasoning": true, "limit": {"context": 1000000, "output": 384000}
         },
@@ -347,6 +353,8 @@
         "google/gemini-3.5-flash": {
           "name": "Gemini 3.5 Flash (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 1000000, "output": 64000}
         },
+        "google/gemini-3.5-flash-lite": {"name": "google/gemini-3.5-flash-lite (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 1000000, "output": 64000}},
+        "google/gemini-3.6-flash": {"name": "google/gemini-3.6-flash (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 1000000, "output": 64000}},
         "gpt-oss-120b": {
           "name": "GPT-OSS-120B (Qiniu)", "reasoning": true, "limit": {"context": 128000, "output": 4096}
         },
