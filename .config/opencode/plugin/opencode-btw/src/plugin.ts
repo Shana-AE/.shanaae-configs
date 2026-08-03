@@ -20,7 +20,24 @@ interface CommandExecuteInput {
   sessionID: string
 }
 
+const BTW_DEPRECATION_NOTICE =
+  "[opencode-btw] DEPRECATED: this plugin uses the v1 plugin API " +
+  "(command.execute.before + client.tui.showToast), which the opencode v2 plugin " +
+  "system (@opencode-ai/plugin/v2/effect) will replace. Re-migrate when opencode v2 ships. " +
+  "See README.md in this plugin directory."
+
+/**
+ * /btw — quick side question answered in an isolated child session, surfaced via a
+ * TUI toast. The main conversation is not disturbed.
+ *
+ * @deprecated Uses the v1 plugin API (`command.execute.before` + `client.tui.showToast`).
+ * The opencode v2 plugin system (`@opencode-ai/plugin/v2/effect`, imperative
+ * `ctx.command.hook("execute.before", …)` + redesigned TUI API) supersedes this surface.
+ * TODO(v2): re-migrate this plugin when opencode v2 is released.
+ */
 export const BtwServerPlugin: Plugin = async ({ client }) => {
+  console.warn(BTW_DEPRECATION_NOTICE)
+
   const typedClient = client as unknown as OpencodeClient & {
     session: {
       create: (opts: { body?: { parentID?: string; title?: string } }) => Promise<{ data?: { id: string } }>
@@ -34,6 +51,11 @@ export const BtwServerPlugin: Plugin = async ({ client }) => {
           tools?: Record<string, boolean>
         }
       }) => Promise<{ data?: { parts?: Array<{ type: string; text?: string }> }; error?: unknown }>
+    }
+    tui?: {
+      showToast: (opts: {
+        body: { title?: string; message: string; variant?: string; duration?: number }
+      }) => Promise<unknown>
     }
     app?: {
       log: (opts: {
@@ -62,10 +84,7 @@ export const BtwServerPlugin: Plugin = async ({ client }) => {
       }
     },
 
-    "command.execute.before": async (
-      input: CommandExecuteInput,
-      output: { parts: Array<{ type: string; text?: string }> },
-    ) => {
+    "command.execute.before": async (input: CommandExecuteInput) => {
       if (input.command !== "btw") return
 
       const question = input.arguments?.trim()
@@ -74,7 +93,17 @@ export const BtwServerPlugin: Plugin = async ({ client }) => {
       try {
         const btwId = await getOrCreateBtwSession(typedClient as any, input.sessionID, config)
         const answer = await promptBtwSession(typedClient as any, btwId, question, config)
-        output.parts.splice(0, output.parts.length, { type: "text", text: `💡 BTW: ${answer}` })
+
+        const truncated = answer.length > 400
+        const preview = truncated ? answer.slice(0, 400) + "\n…" : answer
+        await typedClient.tui?.showToast({
+          body: {
+            title: "💡 BTW",
+            message: truncated ? `${preview}\n(full answer in the btw:side-questions session)` : preview,
+            variant: "info",
+            duration: config.toastDuration,
+          },
+        })
       } catch (err) {
         await log("error", "BTW command failed", { error: err instanceof Error ? err.message : String(err) })
       }
