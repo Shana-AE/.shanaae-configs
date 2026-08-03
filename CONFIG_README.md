@@ -82,6 +82,13 @@ Subagents ship with a default model but every user can override it. The
 > (`attachment`/vision). `image-op`'s core job is visual analysis — a text-only
 > model will not work.
 
+> **`image-op-pro` (optional):** a hidden subagent variant that uses
+> `qiniu/google/gemini-3.6-flash` for dense OCR / chart / pixel-level
+> verification, self-dispatched by `image-op`. It requires the `qiniu` provider
+> and a vision-capable Gemini model. If you don't need it, delete
+> `.config/opencode/agents/image-op-pro.md` — `image-op` then handles everything
+> with its own model.
+
 > Markdown agent frontmatter (`agents/*.md`) does **not** support `{env:VAR}`
 > substitution — that only applies to `opencode.jsonc` values.
 
