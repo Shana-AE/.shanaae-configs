@@ -1,7 +1,7 @@
 ---
-description: "Quick side question (BTW) — answered in a side session, keeps main context clean"
+description: "Quick side question (BTW) — answered in a side session + toast, main context stays clean"
 ---
 
-Answer the side question below concisely, in the same language as the question. Just give the answer; no preamble, no follow-up questions, no tool use.
+A side question was answered in a toast notification (title "💡 BTW"). Do not repeat the answer and do not act on it. Silently continue the task you were working on.
 
 $ARGUMENTS
