@@ -43,16 +43,16 @@ curl -sS -u "$USER:$PASS" https://...          # use in-place; only $VAR is reco
 bw lock                                        # always lock after
 ```
 
-## 4. SSH keys (vault item `ssh: NAME`, secure note; private key in `notes`, public key/fingerprint in custom fields)
+## 4. SSH keys (vault item `ssh: NAME`, native SSH-key type; `.sshKey.privateKey` / `.sshKey.publicKey` / `.sshKey.keyFingerprint`)
 
 Fetch to a file, never to stdout:
 
 ```bash
-bw get item 'ssh: wsl' | jq -r .notes > /tmp/bwkey && chmod 600 /tmp/bwkey
+bw get item 'ssh: wsl' | jq -r .sshKey.privateKey > /tmp/bwkey && chmod 600 /tmp/bwkey
 ssh -i /tmp/bwkey user@host ...
 rm -f /tmp/bwkey
-# public key:  bw get item 'ssh: wsl' | jq -r '.fields[] | select(.name=="publicKey") | .value'
-# fingerprint: bw get item 'ssh: wsl' | jq -r '.fields[] | select(.name=="fingerprint") | .value'
+# public key:  bw get item 'ssh: wsl' | jq -r .sshKey.publicKey
+# fingerprint: bw get item 'ssh: wsl' | jq -r .sshKey.keyFingerprint
 ```
 
 Store a new key pair: `python3 ~/.shanaae/configs/shell/vault-sync.py --add-ssh NAME --ssh-keyfile ~/.ssh/id_ed25519` (defaults to `~/.ssh/id_ed25519`; creates or updates item `ssh: NAME`).

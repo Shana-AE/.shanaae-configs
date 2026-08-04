@@ -8,7 +8,7 @@ Subcommands (agent-facing):
   (no args)      full 3-way sync (cron)
   --list         print Dev Secrets key names only (safe)
   --pull KEY     materialize one Dev Secret into .secrets.d/<key> (chmod 600)
-  --add-ssh NAME store an SSH key pair as vault item 'ssh: NAME' (secure note)
+  --add-ssh NAME store an SSH key pair as vault item 'ssh: NAME' (type 5, sshKey)
 """
 import argparse, json, os, re, subprocess, sys
 from pathlib import Path
@@ -146,42 +146,57 @@ def ssh_fingerprint(pub):
     return ""
 
 
+def find_folder_id(bwpath, session, folder_name):
+    r = bw(bwpath, ["list", "folders"], session)
+    try:
+        for f in json.loads(r.stdout or "[]"):
+            if f.get("name") == folder_name:
+                return f.get("id")
+    except Exception:
+        pass
+    return None
+
+
 def cmd_add_ssh(bwpath, session, name, keyfile):
     keyfile = Path(keyfile).expanduser()
     pubfile = Path(str(keyfile) + ".pub")
     if not keyfile.exists() or not pubfile.exists():
         print(f"key files not found: {keyfile} / {pubfile}")
         return 1
+    priv = keyfile.read_text().strip()
     pub = pubfile.read_text().strip()
-    fields = [
-        {"name": "publicKey", "value": pub},
-        {"name": "fingerprint", "value": ssh_fingerprint(pubfile)},
-        {"name": "keyType", "value": ssh_key_type_from_pub(pub) or ssh_key_type(name + " " + keyfile.name)},
-    ]
+    fp = ssh_fingerprint(pubfile)
     item = {
-        "type": 2,
-        "secureNote": {"type": 0},
+        "type": 5,
         "name": f"ssh: {name}",
-        "notes": keyfile.read_text().strip(),
-        "fields": fields,
+        "folderId": find_folder_id(bwpath, session, "SSH Keys"),
+        "sshKey": {
+            "privateKey": priv,
+            "publicKey": pub,
+            "keyFingerprint": fp,
+            "keyType": ssh_key_type_from_pub(pub) or ssh_key_type(name + " " + keyfile.name),
+        },
     }
     enc = bw_encode(bwpath, item)
     if not enc:
         print("encode failed")
         return 1
-    existing = None
+    legacy = existing = None
     lr = bw(bwpath, ["list", "items", "--search", f"ssh: {name}"], session)
     try:
         for it in json.loads(lr.stdout or "[]"):
-            if it.get("name") == f"ssh: {name}" and it.get("type") == 2:
+            if it.get("name") != f"ssh: {name}":
+                continue
+            if it.get("type") == 5:
                 existing = it
-                break
+            elif it.get("type") == 2:
+                legacy = it
     except Exception:
         pass
     if existing:
         it = json.loads(bw(bwpath, ["get", "item", existing["id"]], session).stdout)
-        it["notes"] = item["notes"]
-        it["fields"] = fields
+        it["sshKey"] = item["sshKey"]
+        it["folderId"] = item["folderId"]
         enc = bw_encode(bwpath, it)
         r = bw(bwpath, ["edit", "item", existing["id"], enc], session)
         verb = "updated"
@@ -189,7 +204,11 @@ def cmd_add_ssh(bwpath, session, name, keyfile):
         r = bw(bwpath, ["create", "item", enc], session)
         verb = "created"
     if r and r.returncode == 0:
-        print(f"ssh key '{name}' {verb} (fingerprint: {fields[1]['value']})")
+        if legacy:
+            bw(bwpath, ["delete", "item", legacy["id"]], session)
+            print(f"ssh key '{name}' {verb} (legacy secure note removed; fingerprint: {fp})")
+        else:
+            print(f"ssh key '{name}' {verb} (fingerprint: {fp})")
         return 0
     print("failed to store ssh key")
     return 1
