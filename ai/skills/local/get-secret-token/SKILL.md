@@ -57,3 +57,4 @@ This skill loads secrets from `${AI_CONFIGS_ROOT:-$HOME/.shanaae/configs}/.secre
 
 - Use `set -a; source ...` or `"$(cat ...)"` inside double quotes to avoid issues with special characters (spaces or symbols in tokens).
 - If multiple keys exist for the same service (e.g., OpenAI), ask the user for clarification or default to the most general one (e.g., `_OPENAPI` or `_MCP`).
+- For secrets that live in the Vaultwarden vault (Dev Secrets on demand, login passwords, TOTP, SSH keys), use the `bw-secret` skill instead.
