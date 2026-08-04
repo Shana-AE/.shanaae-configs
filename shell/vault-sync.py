@@ -17,13 +17,21 @@ FOLDER = "Dev Secrets"
 KV = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)=(.*)$")
 
 def find_bw():
+    candidates = []
     for p in os.environ.get("PATH", "").split(os.pathsep):
         f = Path(p) / "bw"
         if f.exists() and os.access(f, os.X_OK):
-            return str(f)
-    for c in [Path.home() / ".local/share/pnpm/bin/bw", Path.home() / "Library/pnpm/bin/bw", Path("/opt/homebrew/bin/bw")]:
+            candidates.append(f)
+    for c in [Path("/opt/homebrew/bin/bw"), Path.home() / ".local/share/pnpm/bin/bw", Path.home() / "Library/pnpm/bin/bw"]:
         if c.exists():
-            return str(c)
+            candidates.append(c)
+    for c in candidates:
+        try:
+            r = subprocess.run([str(c), "--version"], capture_output=True, text=True, timeout=10)
+            if r.returncode == 0 and r.stdout.strip():
+                return str(c)
+        except Exception:
+            continue
     return None
 
 def bw(bwpath, args, session=None):
