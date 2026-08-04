@@ -234,7 +234,10 @@
       "set -a": "allow",
       "set +a": "allow",
       "source ~/.shanaae/configs/.secrets*": "allow",
-      "pwd": "allow"
+      "pwd": "allow",
+      "bw status*": "allow",
+      "bw sync*": "allow",
+      "bw lock*": "allow"
     }
   },
   "provider": {
