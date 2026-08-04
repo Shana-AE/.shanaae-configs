@@ -312,7 +312,7 @@ def main():
     
     if args.backfill:
         # 回填：从新到旧
-        vault = os.path.expanduser("~/Documents/obsidian-vault/Inbox/ai-skills/english-learning")
+        vault = os.path.expanduser("~/Developer/obsidian-vault/Inbox/ai-skills/english-learning")
         articles = []
         for root, dirs, files in os.walk(vault):
             for f in files:
