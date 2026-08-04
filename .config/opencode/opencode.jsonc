@@ -210,7 +210,8 @@
     "~/.shanaae/configs/ai/user_rules/git-pull-context.md",
     "~/.shanaae/configs/ai/user_rules/save-to-eudic.md",
     "~/.shanaae/configs/ai/user_rules/save-to-obsidian.md",
-    "~/.config/opencode/plugin/shell-strategy/shell_strategy.md"
+    "~/.config/opencode/plugin/shell-strategy/shell_strategy.md",
+    "~/.shanaae/configs/ai/user_rules/secret-hygiene.md"
   ],
   // Chrome-DevTools-MCP tools are GLOBALLY OFF (zero token cost in main/plan context).
   // They are re-enabled only inside the `web-devtools` subagent (see agents/web-devtools.md),
@@ -219,14 +220,21 @@
     "Chrome-DevTools-MCP*": false
   },
   // Allow safe, read-only bash without prompting; everything else falls back to `ask`.
+  // Secrets hygiene: removed `env *` (dumps exported secrets into the transcript);
+  // `cat` of the secrets files now asks; `read` stays on default `ask`; `source` of the
+  // secrets file stays allowed because it loads vars silently without printing values.
   "permission": {
     "bash": {
       "git *": "allow",
       "ls *": "allow",
       "cat *": "allow",
+      "cat ~/.shanaae/configs/.secrets*": "ask",
+      "cat /home/shanaae/.shanaae/configs/.secrets*": "ask",
       "rg *": "allow",
-      "pwd": "allow",
-      "env *": "allow"
+      "set -a": "allow",
+      "set +a": "allow",
+      "source ~/.shanaae/configs/.secrets*": "allow",
+      "pwd": "allow"
     }
   },
   "provider": {
@@ -306,15 +314,59 @@
           "name": "DeepSeek-V3.2-Exp-Thinking (Qiniu)", "reasoning": true, "limit": {"context": 128000, "output": 128000}
         },
         "deepseek/deepseek-v4-flash": {
-          "name": "DeepSeek-V4-Flash (Qiniu)", "limit": {"context": 1000000, "output": 384000}
+          "name": "DeepSeek-V4-Flash (Qiniu)",
+          "reasoning": true,
+          "variants": {
+            "low": {"disabled": true},
+            "medium": {"disabled": true},
+            "high": {"reasoningEffort": "high"},
+            "max": {"reasoningEffort": "max"}
+          },
+          "limit": {"context": 1000000, "output": 384000}
         },
-        "deepseek/deepseek-v4-flash-202605": {"name": "deepseek/deepseek-v4-flash-202605 (Qiniu)", "limit": {"context": 1000000, "output": 384000}},
-        "deepseek/deepseek-v4-flash-20260731": {"name": "deepseek/deepseek-v4-flash-20260731 (Qiniu)", "limit": {"context": 1000000, "output": 384000}},
+        "deepseek/deepseek-v4-flash-202605": {
+          "name": "deepseek/deepseek-v4-flash-202605 (Qiniu)",
+          "reasoning": true,
+          "variants": {
+            "low": {"disabled": true},
+            "medium": {"disabled": true},
+            "high": {"reasoningEffort": "high"},
+            "max": {"reasoningEffort": "max"}
+          },
+          "limit": {"context": 1000000, "output": 384000}
+        },
+        "deepseek/deepseek-v4-flash-20260731": {
+          "name": "deepseek/deepseek-v4-flash-20260731 (Qiniu)",
+          "reasoning": true,
+          "variants": {
+            "low": {"disabled": true},
+            "medium": {"disabled": true},
+            "high": {"reasoningEffort": "high"},
+            "max": {"reasoningEffort": "max"}
+          },
+          "limit": {"context": 1000000, "output": 384000}
+        },
         "deepseek/deepseek-v4-pro": {
-          "name": "DeepSeek-V4-Pro (Qiniu)", "reasoning": true, "limit": {"context": 1000000, "output": 384000}
+          "name": "DeepSeek-V4-Pro (Qiniu)",
+          "reasoning": true,
+          "variants": {
+            "low": {"disabled": true},
+            "medium": {"disabled": true},
+            "high": {"reasoningEffort": "high"},
+            "max": {"reasoningEffort": "max"}
+          },
+          "limit": {"context": 1000000, "output": 384000}
         },
         "deepseek/deepseek-v4-pro-202606": {
-          "name": "DeepSeek-V4-Pro-202606 (Qiniu)", "reasoning": true, "limit": {"context": 1000000, "output": 384000}
+          "name": "DeepSeek-V4-Pro-202606 (Qiniu)",
+          "reasoning": true,
+          "variants": {
+            "low": {"disabled": true},
+            "medium": {"disabled": true},
+            "high": {"reasoningEffort": "high"},
+            "max": {"reasoningEffort": "max"}
+          },
+          "limit": {"context": 1000000, "output": 384000}
         },
         "doubao-1.5-thinking-pro": {
           "name": "Doubao-1.5-Thinking-Pro (Qiniu)", "reasoning": true, "limit": {"context": 128000, "output": 128000}

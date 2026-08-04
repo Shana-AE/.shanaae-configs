@@ -5,21 +5,24 @@ description: Import keys from `.secrets` to environment variables and convert to
 
 # Get Secret Token
 
-This skill helps you manage and use secret tokens stored in `/home/shanaae/.shanaae/configs/.secrets`. It instructs the agent to load these secrets into the environment and map them to the variable names required by other tools or agents.
+This skill loads secrets from `~/.shanaae/configs/.secrets` and `~/.shanaae/configs/.secrets.d/` into the environment **without ever printing their values**. Never paste or echo a secret value — the value would be recorded in the session transcript.
 
 ## Workflow
 
-1. **Read Secrets**:
-    The agent should first read the secrets file to identify available keys:
-    `/home/shanaae/.shanaae/configs/.secrets`
+1. **List available keys (never read values)**:
+    - `awk -F= '/^[A-Za-z_][A-Za-z0-9_]*=/{print $1}' ~/.shanaae/configs/.secrets` — key names only from the key=value file
+    - or `ls ~/.shanaae/configs/.secrets.d/` — one lowercase file per key
 
-2. **Import to Environment**:
-    For any key needed in the current session, the agent must run the `export` command in the terminal.
+2. **Load into the environment silently** (never `export VAR='value'` — the literal value is recorded as the command's tool argument):
 
-    *Example:*
-
+    Load everything at once:
     ```bash
-    export MY_TOKEN='value_from_file'
+    set -a; source ~/.shanaae/configs/.secrets; set +a
+    ```
+
+    Or load a single key from its `.secrets.d` file (the value never appears in the command text):
+    ```bash
+    export EUDIC_TOKEN="$(cat ~/.shanaae/configs/.secrets.d/eudic_token)"
     ```
 
 3. **Token Conversion / Mapping**:
@@ -39,11 +42,18 @@ This skill helps you manage and use secret tokens stored in `/home/shanaae/.shan
     | **Context7** | `CONTEXT7_API_KEY` | `CONTEXT7_API_KEY` |
 
 4. **Usage Instructions**:
-    - When a user asks to use a tool (e.g., "Use Eudic to save this word"), check if `EUDIC_TOKEN` is set.
-    - If not, read `.secrets`, find `EUDIC_TOKEN`, and run `export EUDIC_TOKEN='...'`.
-    - If a tool fails due to authentication, verify if the correct environment variable is exported.
+    - When a user asks to use a tool (e.g., "Use Eudic to save this word"), check if the variable is set: `test -n "$EUDIC_TOKEN" && echo set || echo missing`.
+    - If not set, load it as in step 2, then reference `$EUDIC_TOKEN` in commands.
+    - If a tool fails due to authentication, verify the variable is exported with `test -n "$VAR"` — never print its value.
+
+## Hard Rules (never violate)
+
+- **Never print a secret value**: no `echo $VAR`, no `env`, no `cat ~/.shanaae/configs/.secrets` or `cat ~/.shanaae/configs/.secrets.d/*`, no `curl -v` (verbose prints the `Authorization` header — use `-sS`).
+- **Never put a literal secret in a prompt, config file, agent file, or command-line argument** (argv is visible to every user via `/proc/<pid>/cmdline`). Use `$VAR` references — shell expansion happens at runtime, after the command text is recorded.
+- **Never paste a user-provided secret into chat text**. Ask the user to write it into the secrets file in their own terminal, then reference the variable.
+- **Subagents inherit the environment** — source once, and downstream agents can use the variables without re-reading anything.
 
 ## Notes
 
-- Always use `export VAR='VALUE'` with single quotes to avoid issues with special characters (like spaces or symbols in the token).
+- Use `set -a; source ...` or `"$(cat ...)"` inside double quotes to avoid issues with special characters (spaces or symbols in tokens).
 - If multiple keys exist for the same service (e.g., OpenAI), ask the user for clarification or default to the most general one (e.g., `_OPENAPI` or `_MCP`).

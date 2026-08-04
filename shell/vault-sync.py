@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Bidirectional sync: Vaultwarden 'Dev Secrets' <-> .secrets + .secrets.d.
 3-way merge (vault, .secrets, baseline). Conflicts flagged; deletions NOT propagated.
-Run via hourly cron. Uses persisted BW_SESSION. Relies on clash DNS (vault.shanaae.com -> .63)."""
+Run via hourly cron. Uses persisted BW_SESSION (auto-refreshed via
+.secrets.d/bw-master-password when stale). Relies on clash DNS (vault.shanaae.com -> .63)."""
 import json, os, re, subprocess, sys
 from pathlib import Path
 
@@ -11,6 +12,7 @@ SECD = CONFIGS / ".secrets.d"
 SYNCSTATE = CONFIGS / ".secrets.syncstate"
 CONFLICTS = CONFIGS / ".secrets.conflicts"
 SESSION_FILE = CONFIGS / ".bw-session"
+MASTER_PW = CONFIGS / ".secrets.d" / "bw-master-password"
 FOLDER = "Dev Secrets"
 KV = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)=(.*)$")
 
@@ -19,7 +21,7 @@ def find_bw():
         f = Path(p) / "bw"
         if f.exists() and os.access(f, os.X_OK):
             return str(f)
-    for c in [Path.home() / ".local/share/pnpm/bin/bw", Path.home() / "Library/pnpm/bin/bw"]:
+    for c in [Path.home() / ".local/share/pnpm/bin/bw", Path.home() / "Library/pnpm/bin/bw", Path("/opt/homebrew/bin/bw")]:
         if c.exists():
             return str(c)
     return None
@@ -61,10 +63,7 @@ def main():
     if not bwpath:
         print("bw not found")
         return 1
-    if not SESSION_FILE.exists():
-        print("no .bw-session; skip")
-        return 0
-    session = SESSION_FILE.read_text().strip()
+    session = SESSION_FILE.read_text().strip() if SESSION_FILE.exists() else ""
 
     st = bw(bwpath, ["status"], session)
     try:
@@ -72,8 +71,17 @@ def main():
     except Exception:
         status = ""
     if status != "unlocked":
-        print(f"vault '{status}'; skip")
-        return 0
+        if not MASTER_PW.exists():
+            print(f"vault '{status}'; no session and no {MASTER_PW}; skip")
+            return 0
+        u = bw(bwpath, ["unlock", "--raw", "--passwordfile", str(MASTER_PW)])
+        if not u or u.returncode != 0 or not u.stdout.strip():
+            print(f"vault '{status}'; unlock failed; skip")
+            return 0
+        session = u.stdout.strip()
+        SESSION_FILE.write_text(session)
+        os.chmod(SESSION_FILE, 0o600)
+        print("  session refreshed (auto-unlock)")
 
     bw(bwpath, ["sync"], session)
     fr = bw(bwpath, ["get", "folder", FOLDER], session)
