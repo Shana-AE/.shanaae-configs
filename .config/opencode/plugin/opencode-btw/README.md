@@ -1,64 +1,59 @@
 # opencode-btw — /btw plugin
 
-Quick side question (by-the-way) for OpenCode. Type `/btw <question>` → the question runs in
-an isolated child session (`btw:side-questions`), the answer surfaces as a TUI toast, and your
-**main conversation is not disturbed** (its prompt uses a "do not respond, continue your task"
-template).
+Quick side question (by-the-way) for OpenCode. Type `/btw <question>` → the question runs
+in an isolated child session (`btw:side-questions`), and the answer shows in a **persistent
+TUI sidebar panel** (plus a toast cue). The main conversation is not disturbed — its prompt
+uses a silent "do not respond, continue your task" template.
 
-- Full Q&A history: open the `btw:side-questions` child session from the session list.
-- The answer preview is shown in a toast (max ~400 chars); long answers are truncated there
-  and point to the side session.
+## How it works (two cooperating plugins)
+
+| Part | File | Role |
+|------|------|------|
+| Server plugin | `src/plugin.ts` | `command.execute.before` hook → creates `btw:side-questions` child session → prompts it → shows a toast (`client.tui.showToast`, title `💡 BTW`) |
+| TUI plugin | `src/tui.tsx` | `api.slots.register({ slots: { sidebar_content } })` renders a persistent sidebar panel; `api.event.on("tui.toast.show")` (title `💡 BTW`) triggers reading the child session's full answer via `api.client.session.children` + `session.messages` → updates the panel |
+| Command | `commands/btw.md` | registers `/btw`; silent template so the main agent doesn't re-answer |
+
+The answer panel updates reactively after the toast fires (which happens only after the
+side session fully answers), so it shows the **complete** answer, persistent and readable.
+This avoids the opencode 1.18 plugin-dialog key-routing bug (DialogPrompt opened from a
+plugin command renders but never receives Enter/Esc) — no dialogs are used.
 
 ## ⚠️ DEPRECATED — pending opencode v2
 
-**This plugin uses the v1 OpenCode plugin API** (`command.execute.before` hook +
-`client.tui.showToast`), which the opencode **v2 plugin system**
-(`@opencode-ai/plugin/v2/effect`) is designed to replace:
+Uses the v1 plugin API: server `command.execute.before` + `client.tui.showToast`, and the
+v1 TUI API (`api.slots` / `api.event`). The opencode **v2 plugin system**
+(`@opencode-ai/plugin/v2/effect`) redesigns this surface.
 
-- v1: `PluginModule.server` returning a hooks object → v2: `define({ effect })` with
-  imperative `ctx.command.hook("execute.before", …)`.
-- The v1 TUI plugin API (`api.command`) is already marked `@deprecated` ("Remove in v2").
-- Reference: `packages/plugin/src/v2/effect/PLAN.md` in the opencode repo.
+- Server: v1 hook → v2 `ctx.command.hook("execute.before", …)`.
+- TUI: v1 `api.slots`/`api.event` → v2 TUI surface (to be defined).
+- Reference: `packages/plugin/src/v2/effect/PLAN.md`.
 
-**Action required:** when opencode v2 is released, re-migrate this plugin (likely to
-`@opencode-ai/plugin/v2/effect` + a v2 TUI surface) or replace it with a native mechanism.
-The side-session logic (`src/lib/btw-session.ts`, `config.ts`, `types.ts`) is portable;
+**Action required:** re-migrate when opencode v2 ships. The side-session logic is portable;
 only the registration/UI surface needs the v2 port.
 
 > 此插件基于 v1 插件 API，opencode v2 发布后需迁移（见上）。当前仍可正常使用。
 
-## Files
-
-| File | Purpose |
-|------|---------|
-| `src/index.ts` | plugin entry (`id: "opencode-btw"`, `server`) |
-| `src/plugin.ts` | `command.execute.before` hook → side session + toast |
-| `src/lib/btw-session.ts` | `getOrCreateBtwSession`, `promptBtwSession` |
-| `src/lib/config.ts` | `btw` config options (model, toastDuration, keybind, keepSession) |
-| `src/lib/types.ts` | `BtwConfig`, defaults |
-| `commands/btw.md` (repo) | registers the `/btw` command (silent fallback template) |
-
 ## Registration
 
-- `opencode.jsonc` → `"plugin": [ …, "./plugin/opencode-btw" ]`
+- `opencode.jsonc` → `"plugin": [ …, "./plugin/opencode-btw" ]` (server part)
+- `tui.json` → `"plugin": [ …, "./plugin/opencode-btw" ]` (TUI part)
 - `commands/btw.md` → the `/btw` command.
 
-Optional config (top-level `"btw"` in `opencode.jsonc`):
+Optional config (top-level `"btw"` in `opencode.jsonc`): `model`, `toastDuration`, `keepSession`.
 
-```jsonc
-{
-  "btw": {
-    "model": { "providerID": "provider", "modelID": "model" },
-    "toastDuration": 10000,
-    "keepSession": true
-  }
-}
+## Deps (TUI part)
+
+`solid-js@1.9.12`, `@opentui/solid@0.4.3`, `@opentui/core@0.4.3` must be in the plugin's
+`node_modules` (per machine):
+
+```bash
+bun install   # in this directory, on each machine
 ```
 
 ## Verify
 
 ```bash
 bunx --bun tsc --noEmit   # typecheck (in this dir)
-# headless: main session must NOT contain the answer; a btw:side-questions child must exist
-opencode run --command btw "what is 3+4"
+# interactive: start opencode, in a session type /btw <question> → a toast pops and the
+# answer appears in the sidebar panel; full Q&A in the btw:side-questions child session.
 ```

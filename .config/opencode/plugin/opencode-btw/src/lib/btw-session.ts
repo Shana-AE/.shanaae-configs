@@ -16,6 +16,7 @@ type OpencodeClient = {
         parts: Array<{ type: string; text: string; ignored?: boolean }>
         noReply?: boolean
         agent?: string
+        system?: string
         model?: { providerID: string; modelID: string }
         tools?: Record<string, boolean>
       }
@@ -84,7 +85,10 @@ export async function promptBtwSession(
     body: {
       parts: [{ type: "text", text: question }],
       ...(config.model ? { model: config.model } : {}),
-      tools: { todowrite: false, todoread: false },
+      system:
+        "You answer a quick side question (/btw). Reply with a short, direct text answer only. " +
+        "You have no tools: do not read files, run commands, or make any changes.",
+      tools: { "*": false },
     },
   })
 
