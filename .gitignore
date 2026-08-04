@@ -58,6 +58,7 @@
 
 # 配置文件中的临时文件
 .config/opencode/node_modules/
+.config/opencode/plugin/opencode-btw/node_modules/
 .config/opencode/bun.lock
 .config/opencode/.gitignore
 # opencode.json holds only the shared plugin list (no secrets) — tracked

@@ -26,7 +26,6 @@
       }
     }],
     "./plugins/agentmemory-capture.ts",
-    "./plugin/opencode-btw",
     "@honcho-ai/opencode-honcho"
     // "opencode-websearch-cited"  // disabled: its WebsearchCitedOpenAIPlugin export overrides the built-in ChatGPT Plus/Pro OAuth login methods
   ],
