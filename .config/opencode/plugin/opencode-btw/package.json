@@ -1,7 +1,7 @@
 {
   "name": "opencode-btw",
-  "version": "0.1.0",
-  "description": "Quick side questions without polluting main context — OpenCode's /btw command",
+  "version": "0.3.0",
+  "description": "Quick side questions without polluting main context — OpenCode's /btw command (server exec + TUI sidebar panel)",
   "type": "module",
   "main": "./src/index.ts",
   "exports": {
@@ -10,10 +10,14 @@
     },
     "./server": {
       "default": "./src/index.ts"
+    },
+    "./tui": {
+      "default": "./src/tui.tsx"
     }
   },
   "oc-plugin": [
-    "server"
+    "server",
+    "tui"
   ],
   "scripts": {
     "typecheck": "tsc --noEmit"
@@ -27,6 +31,11 @@
     "tui"
   ],
   "license": "MIT",
+  "dependencies": {
+    "@opentui/core": "0.4.3",
+    "@opentui/solid": "0.4.3",
+    "solid-js": "1.9.12"
+  },
   "peerDependencies": {
     "@opencode-ai/plugin": "^1.4.3"
   }
