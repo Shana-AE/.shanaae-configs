@@ -124,6 +124,7 @@ export const tui: TuiPlugin = async (api) => {
   api.keymap.registerLayer({
     commands: [
       {
+        namespace: "palette",
         name: "btw",
         title: "BTW — ask a side question",
         desc: "Answer in an isolated session, shown in a panel; main context untouched",
