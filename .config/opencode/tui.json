@@ -1,6 +1,5 @@
 {
   "plugin": [
-    "./plugin/opencode-btw",
     [
       "opencode-subagent-magazine@latest",
       {
