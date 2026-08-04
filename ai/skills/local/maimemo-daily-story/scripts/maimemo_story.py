@@ -22,6 +22,21 @@ def maimemo_today():
     return now
 
 
+def completed_study_day():
+    """The most recently COMPLETED MaiMemo study day.
+
+    The story reviews words from the day that just finished, so when saving in
+    the morning (>=04:00 Beijing) the target is yesterday; before 04:00 it's the
+    day about to close (== maimemo_today()). Prefer passing --date from
+    maimemo_words_from_pg.py; this is the fallback when no date is given.
+    """
+    now = datetime.now(BEIJING_TZ)
+    day = maimemo_today()
+    if now.hour >= 4:
+        day -= timedelta(days=1)
+    return day
+
+
 def render_template(template, dt):
     return (
         template.replace("{YYYY}", dt.strftime("%Y"))
@@ -35,20 +50,25 @@ def save_to_obsidian(content, date_str=None):
     if date_str:
         dt = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=BEIJING_TZ)
     else:
-        dt = maimemo_today()
+        dt = completed_study_day()
     path = f"{render_template(OBSIDIAN_BASE_PATH, dt)}/{render_template(FILE_TEMPLATE, dt)}"
-    result = subprocess.run(
-        [
-            "obsidian",
-            "create",
-            f"path={path}",
-            f"content={content}",
-            "silent",
-            "overwrite",
-        ],
-        capture_output=True,
-        text=True,
-    )
+    try:
+        result = subprocess.run(
+            [
+                "obsidian",
+                "create",
+                f"path={path}",
+                f"content={content}",
+                "silent",
+                "overwrite",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+    except subprocess.TimeoutExpired:
+        print(f"Obsidian CLI Error: create timed out after 120s for {path}", file=sys.stderr)
+        sys.exit(1)
     if result.returncode != 0:
         print(f"Obsidian CLI Error: {result.stderr}", file=sys.stderr)
         sys.exit(1)
@@ -57,11 +77,16 @@ def save_to_obsidian(content, date_str=None):
 
 
 def delete_from_obsidian(path):
-    result = subprocess.run(
-        ["obsidian", "trash", f"path={path}"],
-        capture_output=True,
-        text=True,
-    )
+    try:
+        result = subprocess.run(
+            ["obsidian", "trash", f"path={path}"],
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+    except subprocess.TimeoutExpired:
+        print(f"Obsidian CLI Error: trash timed out after 60s for {path}", file=sys.stderr)
+        sys.exit(1)
     if result.returncode != 0:
         print(f"Obsidian CLI Error: {result.stderr}", file=sys.stderr)
         sys.exit(1)

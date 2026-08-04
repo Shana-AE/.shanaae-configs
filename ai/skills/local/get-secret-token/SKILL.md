@@ -5,24 +5,24 @@ description: Import keys from `.secrets` to environment variables and convert to
 
 # Get Secret Token
 
-This skill loads secrets from `~/.shanaae/configs/.secrets` and `~/.shanaae/configs/.secrets.d/` into the environment **without ever printing their values**. Never paste or echo a secret value — the value would be recorded in the session transcript.
+This skill loads secrets from `${AI_CONFIGS_ROOT:-$HOME/.shanaae/configs}/.secrets` and `${AI_CONFIGS_ROOT:-$HOME/.shanaae/configs}/.secrets.d/` into the environment **without ever printing their values**. Never paste or echo a secret value — the value would be recorded in the session transcript.
 
 ## Workflow
 
 1. **List available keys (never read values)**:
-    - `awk -F= '/^[A-Za-z_][A-Za-z0-9_]*=/{print $1}' ~/.shanaae/configs/.secrets` — key names only from the key=value file
-    - or `ls ~/.shanaae/configs/.secrets.d/` — one lowercase file per key
+    - `awk -F= '/^[A-Za-z_][A-Za-z0-9_]*=/{print $1}' ${AI_CONFIGS_ROOT:-$HOME/.shanaae/configs}/.secrets` — key names only from the key=value file
+    - or `ls ${AI_CONFIGS_ROOT:-$HOME/.shanaae/configs}/.secrets.d/` — one lowercase file per key
 
 2. **Load into the environment silently** (never `export VAR='value'` — the literal value is recorded as the command's tool argument):
 
     Load everything at once:
     ```bash
-    set -a; source ~/.shanaae/configs/.secrets; set +a
+    set -a; source ${AI_CONFIGS_ROOT:-$HOME/.shanaae/configs}/.secrets; set +a
     ```
 
     Or load a single key from its `.secrets.d` file (the value never appears in the command text):
     ```bash
-    export EUDIC_TOKEN="$(cat ~/.shanaae/configs/.secrets.d/eudic_token)"
+    export EUDIC_TOKEN="$(cat ${AI_CONFIGS_ROOT:-$HOME/.shanaae/configs}/.secrets.d/eudic_token)"
     ```
 
 3. **Token Conversion / Mapping**:
@@ -38,7 +38,7 @@ This skill loads secrets from `~/.shanaae/configs/.secrets` and `~/.shanaae/conf
     | **ModelScope** | `MODELSCOPE_API_KEY_OPENCODE` | `MODELSCOPE_API_TOKEN` |
     | **TickTick** | `TICKTICK_CLIENT_ID`<br>`TICKTICK_CLIENT_SECRET` | `TICKTICK_CLIENT_ID`<br>`TICKTICK_CLIENT_SECRET` |
     | **SiliconFlow** | `SILICONFLOW_API_KEY` | `SILICONFLOW_API_KEY` |
-    | **Travily** | `TRAVILY_RECOVER_CODE` | `TRAVILY_API_KEY` (if applicable) |
+    | **Tavily** | `TAVILY_RECOVER_CODE`<br>`TAVILY_API_KEY` | `TAVILY_API_KEY` |
     | **Context7** | `CONTEXT7_API_KEY` | `CONTEXT7_API_KEY` |
 
 4. **Usage Instructions**:
@@ -48,7 +48,7 @@ This skill loads secrets from `~/.shanaae/configs/.secrets` and `~/.shanaae/conf
 
 ## Hard Rules (never violate)
 
-- **Never print a secret value**: no `echo $VAR`, no `env`, no `cat ~/.shanaae/configs/.secrets` or `cat ~/.shanaae/configs/.secrets.d/*`, no `curl -v` (verbose prints the `Authorization` header — use `-sS`).
+- **Never print a secret value**: no `echo $VAR`, no `env`, no `cat ${AI_CONFIGS_ROOT:-$HOME/.shanaae/configs}/.secrets` or `cat ${AI_CONFIGS_ROOT:-$HOME/.shanaae/configs}/.secrets.d/*`, no `curl -v` (verbose prints the `Authorization` header — use `-sS`).
 - **Never put a literal secret in a prompt, config file, agent file, or command-line argument** (argv is visible to every user via `/proc/<pid>/cmdline`). Use `$VAR` references — shell expansion happens at runtime, after the command text is recorded.
 - **Never paste a user-provided secret into chat text**. Ask the user to write it into the secrets file in their own terminal, then reference the variable.
 - **Subagents inherit the environment** — source once, and downstream agents can use the variables without re-reading anything.
