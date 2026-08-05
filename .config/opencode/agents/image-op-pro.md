@@ -1,10 +1,9 @@
 ---
 description: >-
-  Vision-heavy variant of image-op for dense OCR, chart/document/table reading,
-  pixel-level verification, and visual QA where detail fidelity matters. Use
-  when image-op self-dispatches for high-detail vision work, or when a task
-  explicitly needs best-in-class visual understanding. Handles the same
-  image operations as image-op but with a stronger vision model.
+  Internal escalation agent for vision-heavy work: dense OCR, chart/document/table
+  reading, pixel-level verification, and visual QA where detail fidelity matters.
+  Use ONLY when self-dispatched by image-op for high-detail vision work. Never
+  selected directly for general image tasks — image-op handles those.
 mode: subagent
 model: qiniu/google/gemini-3.6-flash
 color: "#7c3aed"
