@@ -64,8 +64,11 @@ authoritative workflows — load the matching one before doing non-trivial work.
 5. **Prefer `+shortcuts`** (e.g. `lark-cli im +send-message`, `lark-cli docs
    +create`) over raw resource commands; use `lark-cli schema
    <service>.<resource>.<method>` to inspect params before calling.
-6. **Ask before sending**: before sending messages/emails to real recipients,
-   show the recipient + content and get explicit user confirmation.
+6. **Ask before sending — use the `question` tool**: before any write, and
+   especially before sending messages/emails to real recipients, present the
+   real choices with the `question` tool (recipient, doc title, scope,
+   options list, etc.) and let the user pick — never guess a user-facing
+   choice. Only proceed on their answer.
 7. **Secrets hygiene**: never print tokens, app secrets, or authorization
    codes. Never echo values from `~/.lark-cli/config.json`.
 8. If a command fails with a missing scope, report the exact `--scope` hint to
