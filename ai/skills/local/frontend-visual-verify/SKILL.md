@@ -19,9 +19,14 @@ Set `<skill-dir>` below to the base directory reported when this skill is loaded
    ```bash
    python3 "<skill-dir>/scripts/vision_describe.py" route --model "<provider/model-id>"
    ```
-2. Open the rendered app with `agent-browser`. Capture a snapshot, computed styles, and bounding boxes for the changed elements.
-3. Match the required viewport, theme, data state, fonts, and reduced-motion setting. Capture a screenshot.
-4. Follow the resolved route:
+2. **Verify the browser attachment first** (before trusting any snapshot):
+   `agent-browser connect <port>` (and even `--cdp <port>` on the default session) can silently spawn its own isolated chromium instead of attaching to the user's real browser (the one they launched for debugging on a CDP port). That isolated browser has no session cookies, so it renders a logged-out page and produces false "not logged in" conclusions.
+   - Ground truth: `curl -s --max-time 3 http://127.0.0.1:<port>/json/list | grep -oE '"url": "[^"]*"'` — the CDP tab list shows the user's actual tabs (e.g. a localhost dev tab + a staging/production tab). If your `agent-browser tab` list does **not** match this, you are driving the wrong browser.
+   - To attach to the real browser, use a fresh named session: `agent-browser --session <name> --cdp <port> tab`, then confirm the user's tabs appear.
+   - Cookies are **origin-scoped and per-profile**: a session on the staging/production domain (or another profile) is invisible to the localhost dev origin. Never report "user is not logged in" from a 登录 link until you have confirmed you are driving the correct browser *and* origin.
+3. Open the rendered app with `agent-browser`. Capture a snapshot, computed styles, and bounding boxes for the changed elements.
+4. Match the required viewport, theme, data state, fonts, and reduced-motion setting. Capture a screenshot.
+5. Follow the resolved route:
    - `native`: read/attach the screenshot directly with the active model.
    - `bridge`: run the balanced visual describer:
      ```bash
@@ -30,7 +35,7 @@ Set `<skill-dir>` below to the base directory reported when this skill is loaded
        --prompt "Identify concrete visual discrepancies and their likely CSS causes."
      ```
      Omit `--reference` when no expected screenshot exists; request a single-image UI audit instead.
-5. Apply the smallest correction, render again, and repeat until the evidence matches. Check desktop and mobile when responsive behavior can change.
+6. Apply the smallest correction, render again, and repeat until the evidence matches. Check desktop and mobile when responsive behavior can change.
 
 For Figma work, get the Figma node screenshot and compare it with the browser screenshot under identical dimensions. A text-only model must use the bridge for image interpretation.
 
@@ -52,3 +57,4 @@ The bridge sends screenshots to Qiniu. Before calling it, crop or redact credent
 - Using Kimi K3 as a routine describer wastes roughly 20x the Qwen bridge cost.
 - Treating a screenshot as inspectable by a text-only model creates false confidence.
 - Stopping after the first screenshot verifies the bug, not the correction.
+- Trusting `agent-browser connect <port>` without checking the CDP tab list — it may spawn its own cookie-less chromium, causing false "logged out" conclusions (see Workflow step 2).
