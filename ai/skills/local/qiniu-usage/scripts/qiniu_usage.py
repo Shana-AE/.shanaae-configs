@@ -85,14 +85,27 @@ def build_url(granularity: str, start: datetime, end: datetime) -> str:
 # ── Formatting ────────────────────────────────────────────────────────────────
 
 
-def format_value(v: float) -> str:
-    """Format kToken value with appropriate precision."""
-    if v >= 1000:
-        return f"{v / 1000:.2f} MToken"
-    elif v >= 1:
-        return f"{v:.3f} kToken"
+def count_to_mtoken(count: float, unit: str) -> float:
+    """Convert a usage count to MToken based on its unit."""
+    unit = unit or "k/tokens"
+    if unit == "default":
+        return count / 1_000_000.0
+    elif unit in ("k/tokens", "kToken"):
+        return count / 1000.0
     else:
-        return f"{v * 1000:.0f} Token"
+        return 0.0
+
+
+def format_mtoken(v: float) -> str:
+    """Format MToken value with appropriate precision."""
+    if v >= 1:
+        return f"{v:.2f} MToken"
+    elif v >= 0.01:
+        return f"{v:.2f} MToken"
+    elif v > 0:
+        return f"{v:.4f} MToken"
+    else:
+        return "0"
 
 
 def fetch_billing(api_key: str, bill_type: str) -> dict:
@@ -163,31 +176,44 @@ def print_billing(data: dict, bill_type: str) -> None:
     col_fee = 14
 
     print(
-        f"  {'Model':<{col_model}} │ {'Tokens':>{col_tokens}} │ {'Fee (CNY)':>{col_fee}}"
+        f"  {'Model':<{col_model}} │ {'Tokens (MToken)':>{col_tokens}} │ {'Fee (CNY)':>{col_fee}}"
     )
     print(f"  {'─' * col_model}─┼─{'─' * col_tokens}─┼─{'─' * col_fee}")
 
     grand_fee = 0.0
-    grand_tokens = 0.0
+    grand_mtokens = 0.0
 
     for model_id, mdata in sorted_models:
         fee = mdata["fee"]
-        # Sum tokens from items
-        total_ktokens = sum(
-            item.get("usage", {}).get("count", 0.0) for item in mdata["items"]
-        )
+        total_mtokens = 0.0
+        image_count = 0
+        for item in mdata["items"]:
+            usage = item.get("usage", {})
+            count = usage.get("count", 0.0)
+            unit = usage.get("unit", "k/tokens")
+            if unit in ("张", "image"):
+                image_count += int(count)
+            else:
+                total_mtokens += count_to_mtoken(count, unit)
         grand_fee += fee
-        grand_tokens += total_ktokens
+        grand_mtokens += total_mtokens
+
+        if total_mtokens > 0:
+            token_str = format_mtoken(total_mtokens)
+        elif image_count > 0:
+            token_str = f"({image_count} image{'s' if image_count != 1 else ''})"
+        else:
+            token_str = "0"
 
         fee_str = f"¥{fee:.4f}" if fee < 0.01 else f"¥{fee:.2f}"
         print(
-            f"  {model_id:<{col_model}} │ {format_value(total_ktokens):>{col_tokens}} │ {fee_str:>{col_fee}}"
+            f"  {model_id:<{col_model}} │ {token_str:>{col_tokens}} │ {fee_str:>{col_fee}}"
         )
 
     print(f"  {'─' * col_model}─┼─{'─' * col_tokens}─┼─{'─' * col_fee}")
     grand_fee_str = f"¥{grand_fee:.4f}" if grand_fee < 0.01 else f"¥{grand_fee:.2f}"
     print(
-        f"  {'TOTAL':<{col_model}} │ {format_value(grand_tokens):>{col_tokens}} │ {grand_fee_str:>{col_fee}}"
+        f"  {'TOTAL':<{col_model}} │ {format_mtoken(grand_mtokens):>{col_tokens}} │ {grand_fee_str:>{col_fee}}"
     )
     print()
 
@@ -234,23 +260,25 @@ def print_table(
     models_summary = []
     for model in data:
         model_id = model.get("name", model.get("id", "unknown"))
-        input_total = 0.0
-        output_total = 0.0
+        input_mtokens = 0.0
+        output_mtokens = 0.0
 
         for item in model.get("items", []):
             name = item.get("name", "")
             total = item.get("total", 0.0)
+            unit = item.get("unit", "kToken")
+            mtokens = count_to_mtoken(total, unit)
             if "输入" in name or "input" in name.lower():
-                input_total += total
+                input_mtokens += mtokens
             elif "输出" in name or "output" in name.lower():
-                output_total += total
+                output_mtokens += mtokens
 
         models_summary.append(
             {
                 "model": model_id,
-                "input": input_total,
-                "output": output_total,
-                "total": input_total + output_total,
+                "input": input_mtokens,
+                "output": output_mtokens,
+                "total": input_mtokens + output_mtokens,
             }
         )
 
@@ -262,7 +290,7 @@ def print_table(
     col_tokens = 16
 
     print(
-        f"  {'Model':<{col_model}} │ {'Input':>{col_tokens}} │ {'Output':>{col_tokens}} │ {'Total':>{col_tokens}}"
+        f"  {'Model':<{col_model}} │ {'Input (MToken)':>{col_tokens}} │ {'Output (MToken)':>{col_tokens}} │ {'Total (MToken)':>{col_tokens}}"
     )
     print(
         f"  {'─' * col_model}─┼─{'─' * col_tokens}─┼─{'─' * col_tokens}─┼─{'─' * col_tokens}"
@@ -273,8 +301,8 @@ def print_table(
 
     for m in models_summary:
         print(
-            f"  {m['model']:<{col_model}} │ {format_value(m['input']):>{col_tokens}} │ "
-            f"{format_value(m['output']):>{col_tokens}} │ {format_value(m['total']):>{col_tokens}}"
+            f"  {m['model']:<{col_model}} │ {format_mtoken(m['input']):>{col_tokens}} │ "
+            f"{format_mtoken(m['output']):>{col_tokens}} │ {format_mtoken(m['total']):>{col_tokens}}"
         )
         grand_input += m["input"]
         grand_output += m["output"]
@@ -285,8 +313,8 @@ def print_table(
         f"  {'─' * col_model}─┼─{'─' * col_tokens}─┼─{'─' * col_tokens}─┼─{'─' * col_tokens}"
     )
     print(
-        f"  {'TOTAL':<{col_model}} │ {format_value(grand_input):>{col_tokens}} │ "
-        f"{format_value(grand_output):>{col_tokens}} │ {format_value(grand_total):>{col_tokens}}"
+        f"  {'TOTAL':<{col_model}} │ {format_mtoken(grand_input):>{col_tokens}} │ "
+        f"{format_mtoken(grand_output):>{col_tokens}} │ {format_mtoken(grand_total):>{col_tokens}}"
     )
     print()
 
@@ -303,6 +331,7 @@ def print_daily_breakdown(data: list) -> None:
     for model in data:
         for item in model.get("items", []):
             name = item.get("name", "")
+            unit = item.get("unit", "kToken")
             is_input = "输入" in name or "input" in name.lower()
 
             for cat in item.get("categories", []):
@@ -311,12 +340,13 @@ def print_daily_breakdown(data: list) -> None:
                     val = entry.get("value", 0.0)
                     if val == 0:
                         continue
+                    mtokens = count_to_mtoken(val, unit)
                     if date not in date_totals:
                         date_totals[date] = {"input": 0.0, "output": 0.0}
                     if is_input:
-                        date_totals[date]["input"] += val
+                        date_totals[date]["input"] += mtokens
                     else:
-                        date_totals[date]["output"] += val
+                        date_totals[date]["output"] += mtokens
 
     if not date_totals:
         return
@@ -328,7 +358,7 @@ def print_daily_breakdown(data: list) -> None:
     col_tokens = 16
 
     print(
-        f"  {'Date':<{col_date}} │ {'Input':>{col_tokens}} │ {'Output':>{col_tokens}} │ {'Total':>{col_tokens}}"
+        f"  {'Date':<{col_date}} │ {'Input (MToken)':>{col_tokens}} │ {'Output (MToken)':>{col_tokens}} │ {'Total (MToken)':>{col_tokens}}"
     )
     print(
         f"  {'─' * col_date}─┼─{'─' * col_tokens}─┼─{'─' * col_tokens}─┼─{'─' * col_tokens}"
@@ -338,8 +368,8 @@ def print_daily_breakdown(data: list) -> None:
         d = date_totals[date]
         total = d["input"] + d["output"]
         print(
-            f"  {date:<{col_date}} │ {format_value(d['input']):>{col_tokens}} │ "
-            f"{format_value(d['output']):>{col_tokens}} │ {format_value(total):>{col_tokens}}"
+            f"  {date:<{col_date}} │ {format_mtoken(d['input']):>{col_tokens}} │ "
+            f"{format_mtoken(d['output']):>{col_tokens}} │ {format_mtoken(total):>{col_tokens}}"
         )
     print()
 
