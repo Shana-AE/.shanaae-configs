@@ -27,6 +27,9 @@ const DEFAULT_PROJECTS: Record<string, ProjectRuleSpec> = {
 
 const SKIP_DIRS = new Set(["node_modules", ".git", "dist", "build", ".hvigor", ".idea", ".vscode"])
 
+// Safety bound so glob checks can't stall boot on huge trees (e.g. $HOME).
+const MAX_WALKED = 3000
+
 function hasDeps(dir: string, deps: string[]): boolean {
   const pkgPath = join(dir, "package.json")
   if (!existsSync(pkgPath)) return false
@@ -45,7 +48,7 @@ function hasDeps(dir: string, deps: string[]): boolean {
 }
 
 function collectFiles(dir: string, depth: number, out: string[]): void {
-  if (depth > 5) return
+  if (depth > 5 || out.length >= MAX_WALKED) return
   let entries: string[]
   try {
     entries = readdirSync(dir)
@@ -54,6 +57,7 @@ function collectFiles(dir: string, depth: number, out: string[]): void {
   }
   for (const entry of entries) {
     if (SKIP_DIRS.has(entry)) continue
+    if (entry.startsWith(".")) continue
     const full = join(dir, entry)
     let stat
     try {
