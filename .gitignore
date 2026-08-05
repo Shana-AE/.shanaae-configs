@@ -88,6 +88,7 @@
 .codex/plugins/
 .codex/process_manager/
 .codex/shell_snapshots/
+.codex/sessions/
 .codex/sqlite/
 .codex/tmp/
 .codex/vendor_imports/
