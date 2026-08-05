@@ -1,0 +1,16 @@
+# Gitleaks config for the ShanaAE configs repo.
+# Extends the default ruleset with an allowlist for sample tokens that appear
+# in Lark (Feishu) official API documentation, bundled inside the lark-* skills
+# (ai/skills/vendor/lark-*/references/*.md). These are documentation placeholders,
+# not real credentials.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Lark API documentation sample tokens (placeholders, not real secrets)"
+paths = ['''(?i)ai/skills/vendor/lark-[^/]+/references/.*\.md$''']
+regexes = [
+  '''TLLKdcpDro9ijQxA33ycNMabcef''',
+  '''YhljsPiGfUgnVAg9urvRFd-BvSqRLxxxx''',
+]
