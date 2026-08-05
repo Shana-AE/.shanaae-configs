@@ -3,5 +3,6 @@
   "builtinSkillStatus": {
     "TRAE-dynamic-ui": false
   },
-  "managedSkills": {}
+  "managedSkills": {},
+  "deletedSkills": []
 }
