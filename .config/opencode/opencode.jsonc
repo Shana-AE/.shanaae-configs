@@ -238,6 +238,13 @@
       "bw status*": "allow",
       "bw sync*": "allow",
       "bw lock*": "allow"
+    },
+    // image-op-pro is internal-only: reachable solely via image-op's self-dispatch
+    // (image-op.md declares its own task allow). Denied for primary agents so the
+    // model can't pick the "pro" variant directly for general image tasks.
+    "task": {
+      "*": "allow",
+      "image-op-pro": "deny"
     }
   },
   "provider": {
