@@ -71,6 +71,8 @@
 # ----------------------------------------------------------------------------
 
 .trae/mcps/
+# Trae IDE tool-host runtime snapshots (native runcommand process dumps)
+.trae/toolhost/
 
 # ----------------------------------------------------------------------------
 # 4b. Codex CLI runtime (only config.toml, AGENTS.md, skills/ are tracked)
