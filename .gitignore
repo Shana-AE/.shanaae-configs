@@ -165,6 +165,10 @@ yarn-error.log*
 .claude/settings.json
 .claude-code-router/config.json.*.bak
 .config/opencode/opencode-notifier-state.json
+# tokentracker.js is generated per-machine by `tokentracker init` (notifyPath is
+# machine-specific) — never synced. disabled/ holds local sit-asides (WSL variant).
+.config/opencode/plugin/tokentracker.js
+.config/opencode/plugin/disabled/
 .claude.*.backup*
 
 
