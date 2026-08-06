@@ -36,24 +36,30 @@ function resolveTarget(argv) {
   return join(homedir(), ".tokentracker", "tracker", "app", "src", "lib", "rollout.js");
 }
 
-const FN = `// OpenCode stores per-message (per-call) token counts in message.data.tokens,
-// NOT cumulative running totals like Gemini's session transcripts do. Each
-// message's \`input\` is the non-cached input for that single API call and
-// \`cache.read\` is that call's cached-prompt prefix (it grows inside a session
-// then resets on context clears). diffGeminiTotals() subtracts the previous
-// message's totals, which corrupts these numbers (undercounting input and
-// cache, and occasionally emitting full bursts on resets). For OpenCode the
-// correct accounting is: emit the message's own totals exactly once. The
-// messageIndex cursor already dedupes re-parses via sameGeminiTotals().
-// Shana-AE patch: fixes multi-billion-token overcount vs provider billing.
-function diffOpencodeTotals(current, previous) {
-  if (!current || typeof current !== "object") return null;
-  if (!previous || typeof previous !== "object") return current;
-  if (sameGeminiTotals(current, previous)) return null;
-  return current;
+// CRLF-aware: the Windows-installed copies use \r\n line endings. Build the
+// inserted block with the same EOL as the target file so the patch applies
+// cleanly to both the CLI app dir and the desktop app's EmbeddedServer copy.
+function buildFn(eol) {
+  return (
+    "// OpenCode stores per-message (per-call) token counts in message.data.tokens," + eol +
+    "// NOT cumulative running totals like Gemini's session transcripts do. Each" + eol +
+    "// message's `input` is the non-cached input for that single API call and" + eol +
+    "// `cache.read` is that call's cached-prompt prefix (it grows inside a session" + eol +
+    "// then resets on context clears). diffGeminiTotals() subtracts the previous" + eol +
+    "// message's totals, which corrupts these numbers (undercounting input and" + eol +
+    "// cache, and occasionally emitting full bursts on resets). For OpenCode the" + eol +
+    "// correct accounting is: emit the message's own totals exactly once. The" + eol +
+    "// messageIndex cursor already dedupes re-parses via sameGeminiTotals()." + eol +
+    "// Shana-AE patch: fixes multi-billion-token overcount vs provider billing." + eol +
+    "function diffOpencodeTotals(current, previous) {" + eol +
+    "  if (!current || typeof current !== \"object\") return null;" + eol +
+    "  if (!previous || typeof previous !== \"object\") return current;" + eol +
+    "  if (sameGeminiTotals(current, previous)) return null;" + eol +
+    "  return current;" + eol +
+    "}" + eol +
+    eol
+  );
 }
-
-`;
 
 function main() {
   const target = resolveTarget(process.argv.slice(2));
@@ -61,29 +67,31 @@ function main() {
     console.error(`[rollout] not found: ${target}`);
     process.exit(1);
   }
-  let src = readFileSync(target, "utf8");
+  const raw = readFileSync(target, "utf8");
+  const eol = raw.includes("\r\n") ? "\r\n" : "\n";
 
-  if (src.includes("function diffOpencodeTotals")) {
+  if (raw.includes("function diffOpencodeTotals")) {
     console.log(`[rollout] already patched: ${target}`);
     return;
   }
 
   // 1. Insert diffOpencodeTotals right after diffGeminiTotals.
-  const anchor = "return isAllZeroUsage(delta) ? null : delta;\n}\n";
-  const idx = src.indexOf(anchor);
+  const anchor = `return isAllZeroUsage(delta) ? null : delta;${eol}}${eol}`;
+  const idx = raw.indexOf(anchor);
   if (idx === -1) {
     console.error("[rollout] could not locate diffGeminiTotals() end; aborting");
     process.exit(1);
   }
-  src = src.slice(0, idx + anchor.length) + FN + src.slice(idx + anchor.length);
+  let src = raw.slice(0, idx + anchor.length) + buildFn(eol) + raw.slice(idx + anchor.length);
 
   // 2. Swap the two opencode call sites (this exact arg-shape only occurs in
   //    the opencode file + db parsers; gemini uses totals/projectTotals).
-  const before = String(src.split("diffGeminiTotals(currentTotals, lastTotals)").length - 1);
-  src = src.split("diffGeminiTotals(currentTotals, lastTotals)").join("diffOpencodeTotals(currentTotals, lastTotals)");
+  const needle = "diffGeminiTotals(currentTotals, lastTotals)";
+  const before = String(src.split(needle).length - 1);
+  src = src.split(needle).join("diffOpencodeTotals(currentTotals, lastTotals)");
 
   writeFileSync(target, src, "utf8");
-  console.log(`[rollout] patched ${target} (swapped ${before} call site(s) + inserted diffOpencodeTotals)`);
+  console.log(`[rollout] patched ${target} (swapped ${before} call site(s) + inserted diffOpencodeTotals, eol=${JSON.stringify(eol)})`);
 }
 
 main();

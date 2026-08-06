@@ -17,15 +17,24 @@ The WSL opencode plugin lives at `.config/opencode/plugin/tokentracker.js` (same
 ## After every `tokentracker init` / upgrade
 
 The app dir (incl. `curated-overrides.json` and `rollout.js`) is recreated from the
-npm package, wiping both changes. Re-apply:
+npm package, wiping both changes. Re-apply to **both** copies:
 
 ```bash
-APP=/mnt/c/Users/<user>/.tokentracker/tracker/app     # Windows side (covers WSL too)
-node patch-pricing.mjs "$APP"
-node patch-rollout.mjs "$APP"
+APP=/mnt/c/Users/<user>/.tokentracker/tracker/app     # CLI app dir (Windows side, covers WSL via /mnt/c)
+EMBED="/mnt/c/Users/<user>/AppData/Local/Programs/TokenTracker/EmbeddedServer/tokentracker"  # desktop app's embedded copy
+for d in "$APP" "$EMBED"; do
+  node patch-pricing.mjs "$d"
+  node patch-rollout.mjs "$d"
+done
 ```
 
-Then restart the dashboard (pricing loads once at startup).
+Notes:
+- The **desktop app** (TokenTrackerWin) runs its own **embedded copy** at
+  `AppData\Local\Programs\TokenTracker\EmbeddedServer\tokentracker\` and can
+  re-deploy it over the CLI app dir on start, so patch **both**.
+- `patch-rollout.mjs` is **CRLF-aware** — the Windows copies use `\r\n`.
+- After patching, restart the desktop app so its embedded server reloads the code
+  (pricing also loads once at startup).
 
 ## Why the opencode token fix exists
 
@@ -36,6 +45,15 @@ overcounted massively (e.g. 4.4× Qiniu for 7 days). `patch-rollout.mjs` makes t
 opencode paths emit each message's own totals exactly once. After the fix,
 TokenTracker ≈ 75% of Qiniu's counted usage (the gap is messages opencode doesn't
 record tokens for — not a parsing bug).
+
+Upstream issue: https://github.com/xiufengsun/TokenTracker/issues/426
+
+## Cloud data
+
+The desktop app's tokens tab shows **cloud** (InsForge) data when signed in. To
+re-ingest the corrected local queue to the cloud:
+1. `node .../tracker/app/bin/tracker.js device-login` → approve the code in a browser.
+2. `node .../tracker/app/bin/tracker.js sync --drain` → uploads the corrected queue.
 
 ## Cost display in RMB
 
