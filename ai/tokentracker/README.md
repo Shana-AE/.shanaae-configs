@@ -12,7 +12,10 @@ Local-first token tracker (`tokentracker-cli`) with WSL tracking + custom-provid
 | `patch-rollout.mjs`   | Applies the opencode per-message token-accounting fix to `src/lib/rollout.js` |
 | `rebuild-opencode-queue.mjs` | Repair tool: regenerates correct opencode buckets in `queue.jsonl` |
 
-The WSL opencode plugin lives at `.config/opencode/plugin/tokentracker.js` (same repo).
+The opencode plugin is generated per-machine by `tokentracker init` into
+`~/.config/opencode/plugin/tokentracker.js` (machine-local, gitignored — not
+synced). WSL uses a hand-flipped variant that calls a wrapper script on the
+Windows host; see the disabled copies under `.config/opencode/plugin/disabled/`.
 
 ## After every `tokentracker init` / upgrade
 
