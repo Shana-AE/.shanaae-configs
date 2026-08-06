@@ -86,19 +86,19 @@
         "Authorization": "Bearer {file:~/.shanaae/configs/.secrets.d/bigmodel_api_key}"
       }
     },
-    // Cua Driver (trycua/cua.ai) — Windows computer-use via WSL interop.
-    // opencode spawns the Windows binary directly through interop; it runs
-    // in-process in the interactive session (desktop attached), so no
-    // Windows-side daemon is required. Install: irm cua.ai/driver/install.ps1 | iex
-    // Update path if the driver is installed elsewhere (default:
-    // %LOCALAPPDATA%\Programs\Cua\cua-driver\bin).
+    // Cua Driver (trycua/cua.ai) — Windows computer-use.
+    // DISABLED as MCP (2026-08-05): it flooded startup with Ajv schema warnings
+    // (`unknown format "uint32"/"uint64"` — Rust Schemars annotations) and paid
+    // ~44 tool schemas per session. Now served as a SKILL instead:
+    // ~/.config/opencode/skills/cua-driver/ (official pack + scripts/cua.sh
+    // wrapper; daemon auto-starts via Scheduled Task cua-driver-serve).
     "cua-driver": {
       "type": "local",
       "command": [
         "/mnt/c/Users/shana/AppData/Local/Programs/Cua/cua-driver/bin/cua-driver.exe",
         "mcp"
       ],
-      "enabled": true
+      "enabled": false
     },
     // FALLBACK (uncomment if cua-driver interop proves flaky): Windows-MCP
     // (CursorTouch) over streamable-http on the Windows host, reached via the
@@ -239,8 +239,9 @@
   // Chrome-DevTools-MCP tools are GLOBALLY OFF (zero token cost in main/plan context).
   // They are re-enabled only inside the `web-devtools` subagent (see agents/web-devtools.md),
   // so the MCP's ~47 tool schemas are paid for only when that subagent runs.
-  // Same for cua-driver (~44 Windows computer-use tools) — only the `windows-use` subagent
-  // pays for them (see agents/windows-use.md).
+  // cua-driver is no longer an MCP at all (disabled above since 2026-08-05) — it is a
+  // skill (~/.config/opencode/skills/cua-driver/) used by the `windows-use` subagent.
+  // The pattern below is kept as a safety net if the MCP is ever re-enabled.
   "tools": {
     "Chrome-DevTools-MCP*": false,
     "cua-driver*": false
@@ -346,10 +347,10 @@
           "name": "Claude 4.6 Sonnet (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 1000000, "output": 64000}
         },
         "deepseek-r1": {
-          "name": "DeepSeek-R1 (Qiniu)", "reasoning": true, "limit": {"context": 128000, "output": 128000}
+          "name": "DeepSeek-R1 (Qiniu)", "reasoning": true, "interleaved": {"field": "reasoning_content"}, "limit": {"context": 128000, "output": 128000}
         },
         "deepseek-r1-0528": {
-          "name": "DeepSeek-R1-0528 (Qiniu)", "reasoning": true, "limit": {"context": 128000, "output": 128000}
+          "name": "DeepSeek-R1-0528 (Qiniu)", "reasoning": true, "interleaved": {"field": "reasoning_content"}, "limit": {"context": 128000, "output": 128000}
         },
         "deepseek-v3": {
           "name": "DeepSeek-V3 (Qiniu)", "limit": {"context": 128000, "output": 128000}
@@ -358,26 +359,27 @@
           "name": "DeepSeek-V3-0324 (Qiniu)", "limit": {"context": 128000, "output": 128000}
         },
         "deepseek-v3.1": {
-          "name": "DeepSeek-V3.1 (Qiniu)", "reasoning": true, "limit": {"context": 128000, "output": 128000}
+          "name": "DeepSeek-V3.1 (Qiniu)", "reasoning": true, "interleaved": {"field": "reasoning_content"}, "limit": {"context": 128000, "output": 128000}
         },
         "deepseek/deepseek-v3.1-terminus": {
           "name": "DeepSeek-V3.1-Terminus (Qiniu)", "limit": {"context": 128000, "output": 128000}
         },
         "deepseek/deepseek-v3.1-terminus-thinking": {
-          "name": "DeepSeek-V3.1-Terminus-Thinking (Qiniu)", "reasoning": true, "limit": {"context": 128000, "output": 128000}
+          "name": "DeepSeek-V3.1-Terminus-Thinking (Qiniu)", "reasoning": true, "interleaved": {"field": "reasoning_content"}, "limit": {"context": 128000, "output": 128000}
         },
         "deepseek/deepseek-v3.2-251201": {
-          "name": "DeepSeek-V3.2-251201 (Qiniu)", "reasoning": true, "limit": {"context": 128000, "output": 128000}
+          "name": "DeepSeek-V3.2-251201 (Qiniu)", "reasoning": true, "interleaved": {"field": "reasoning_content"}, "limit": {"context": 128000, "output": 128000}
         },
         "deepseek/deepseek-v3.2-exp": {
           "name": "DeepSeek-V3.2-Exp (Qiniu)", "limit": {"context": 128000, "output": 128000}
         },
         "deepseek/deepseek-v3.2-exp-thinking": {
-          "name": "DeepSeek-V3.2-Exp-Thinking (Qiniu)", "reasoning": true, "limit": {"context": 128000, "output": 128000}
+          "name": "DeepSeek-V3.2-Exp-Thinking (Qiniu)", "reasoning": true, "interleaved": {"field": "reasoning_content"}, "limit": {"context": 128000, "output": 128000}
         },
         "deepseek/deepseek-v4-flash": {
           "name": "DeepSeek-V4-Flash (Qiniu)",
           "reasoning": true,
+          "interleaved": { "field": "reasoning_content" },
           "variants": {
             "low": {"disabled": true},
             "medium": {"disabled": true},
@@ -389,6 +391,7 @@
         "deepseek/deepseek-v4-flash-202605": {
           "name": "deepseek/deepseek-v4-flash-202605 (Qiniu)",
           "reasoning": true,
+          "interleaved": { "field": "reasoning_content" },
           "variants": {
             "low": {"disabled": true},
             "medium": {"disabled": true},
@@ -400,6 +403,7 @@
         "deepseek/deepseek-v4-flash-20260731": {
           "name": "deepseek/deepseek-v4-flash-20260731 (Qiniu)",
           "reasoning": true,
+          "interleaved": { "field": "reasoning_content" },
           "variants": {
             "low": {"disabled": true},
             "medium": {"disabled": true},
@@ -411,6 +415,7 @@
         "deepseek/deepseek-v4-pro": {
           "name": "DeepSeek-V4-Pro (Qiniu)",
           "reasoning": true,
+          "interleaved": { "field": "reasoning_content" },
           "variants": {
             "low": {"disabled": true},
             "medium": {"disabled": true},
@@ -422,6 +427,7 @@
         "deepseek/deepseek-v4-pro-202606": {
           "name": "DeepSeek-V4-Pro-202606 (Qiniu)",
           "reasoning": true,
+          "interleaved": { "field": "reasoning_content" },
           "variants": {
             "low": {"disabled": true},
             "medium": {"disabled": true},
