@@ -4,6 +4,11 @@
 Primary source: https://openai.sufy.com/v1/models (authoritative live list)
 Supplementary:  https://models.dev/api.json (fills gaps + adds metadata)
 
+Modalities: models.dev modalities (image/video/audio input) are merged into the
+catalog so generated opencode.jsonc entries declare native vision. New multimodal
+models that models.dev hasn't indexed are covered by MULTIMODAL overrides in
+merge_catalog().
+
 Usage:
   python3 qiniu_model_sync.py fetch                          # fetch + cache merged list
   python3 qiniu_model_sync.py diff --target opencode          # new models vs opencode.jsonc
@@ -129,16 +134,30 @@ def merge_catalog(sufy_ids: list[str], dev_data: dict) -> dict[str, dict]:
         catalog[mid] = {"id": mid, "source": "sufy"}
 
     # Enrich metadata from models.dev (NO new IDs added)
-    dev_sources = [
-        dev_data.get("qiniu-ai", {}).get("models", {}),
-        dev_data.get("openai", {}).get("models", {}),  # for openai/* prefixed models
-        dev_data.get("anthropic", {}).get("models", {}),
-        dev_data.get("deepseek", {}).get("models", {}),
+    # Source providers: native qiniu-ai plus the upstream providers whose models
+    # Qiniu mirrors (google/*, x-ai/*, moonshotai/*, minimax/*, bytedance/*,
+    # openai/*, anthropic/*). Without these, prefixed models (e.g.
+    # google/gemini-3.6-flash) get no modalities and lose native vision.
+    dev_provider_ids = [
+        "qiniu-ai",
+        "openai",      # openai/* prefixed models
+        "anthropic",   # anthropic/* prefixed models
+        "deepseek",
+        "google",      # google/gemini-* prefixed models
+        "xai",         # x-ai/grok-* prefixed models
+        "moonshotai",  # moonshotai/kimi-* prefixed models
+        "bytedance",   # bytedance/doubao-* prefixed models
+        "minimax",     # minimax/* prefixed models
     ]
-    for dev_models in dev_sources:
+    dev_sources = [
+        (pid, dev_data.get(pid, {}).get("models", {}))
+        for pid in dev_provider_ids
+        if isinstance(dev_data.get(pid), dict)
+    ]
+    for pid, dev_models in dev_sources:
         for dev_mid, m in dev_models.items():
-            # Match against catalog keys — try both bare and openai/-prefixed forms
-            candidates = {dev_mid, f"openai/{dev_mid}"}
+            # Match against catalog keys — try bare, provider-prefixed, and openai/-prefixed forms
+            candidates = {dev_mid, f"{pid}/{dev_mid}", f"openai/{dev_mid}"}
             for mid in candidates:
                 if mid in catalog:
                     entry = catalog[mid]
@@ -147,12 +166,39 @@ def merge_catalog(sufy_ids: list[str], dev_data: dict) -> dict[str, dict]:
                         entry["reasoning"] = True
                     if m.get("attachment"):
                         entry["attachment"] = True
+                    mod = m.get("modalities")
+                    if isinstance(mod, dict) and mod.get("input"):
+                        entry["modalities"] = mod
                     lim = m.get("limit", {})
                     if isinstance(lim, dict):
                         if lim.get("context"):
                             entry.setdefault("context", lim["context"])
                         if lim.get("output"):
                             entry.setdefault("output", lim["output"])
+
+    # Manual overrides for known-multimodal models that models.dev has not
+    # indexed yet (verified via vendor docs / OpenRouter). Keyed by catalog ID.
+    overrides = {
+        "anthropic/claude-4.7-opus": {"input": ["text", "image"], "output": ["text"]},
+        "anthropic/claude-4.8-opus": {"input": ["text", "image"], "output": ["text"]},
+        "claude-4.6-opus": {"input": ["text", "image"], "output": ["text"]},
+        "claude-4.6-sonnet": {"input": ["text", "image"], "output": ["text"]},
+        "bytedance/doubao-seed-2-1-pro": {"input": ["text", "image"], "output": ["text"]},
+        "bytedance/doubao-seed-2-1-turbo": {"input": ["text", "image"], "output": ["text"]},
+        "minimax/minimax-m3": {"input": ["text", "image", "video"], "output": ["text"]},
+        "moonshotai/kimi-k2.6": {"input": ["text", "image", "video"], "output": ["text"]},
+        "moonshotai/kimi-k2.7-code": {"input": ["text", "image", "video"], "output": ["text"]},
+        "openai/gpt-5": {"input": ["text", "image"], "output": ["text"]},
+        "qwen/qwen3.6-27b": {"input": ["text", "image", "video", "audio"], "output": ["text"]},
+        "qwen/qwen3.6-plus": {"input": ["text", "image", "video"], "output": ["text"]},
+        "x-ai/grok-4.2-fast-non-reasoning": {"input": ["text", "image"], "output": ["text"]},
+        "x-ai/grok-4.2-fast-reasoning": {"input": ["text", "image"], "output": ["text"]},
+        "x-ai/grok-4.2-reasoning": {"input": ["text", "image"], "output": ["text"]},
+        "x-ai/grok-4.3": {"input": ["text", "image"], "output": ["text"]},
+    }
+    for mid, mod in overrides.items():
+        if mid in catalog:
+            catalog[mid]["modalities"] = mod
 
     # Fill in family for all
     for mid, entry in catalog.items():
@@ -374,6 +420,9 @@ def cmd_list(args):
                 tags.append("reasoning")
             if entry.get("attachment"):
                 tags.append("attachment")
+            mod = entry.get("modalities")
+            if isinstance(mod, dict) and "image" in (mod.get("input") or []):
+                tags.append("vision")
             tagstr = f" [{', '.join(tags)}]" if tags else ""
             print(f"  {mid:45s} | {name:45s} | ctx={ctx}{tagstr}")
     else:
@@ -461,6 +510,10 @@ def cmd_update(args):
                 parts.append('"reasoning": true')
             if attachment:
                 parts.append('"attachment": true')
+            mod = entry.get("modalities")
+            if isinstance(mod, dict) and mod.get("input"):
+                mod_json = json.dumps(mod).replace(", ", ", ")
+                parts.append(f'"modalities": {mod_json}')
             parts.append(f'"limit": {{"context": {context}, "output": {output}}}')
             body = ", ".join(parts)
             print(f'        "{mid}": {{ {body} }},')
