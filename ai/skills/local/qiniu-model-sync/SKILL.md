@@ -13,7 +13,18 @@ catalog by family.
 | Source | URL | Role |
 |--------|-----|------|
 | **Sufy (sole authority)** | `https://openai.sufy.com/v1/models` | **Determines model existence.** If it's not here, it's not in the catalog. |
-| **models.dev (metadata only)** | `https://models.dev/api.json` | Enriches existing Sufy models with display names, context/output limits, reasoning/attachment flags. **Never adds new model IDs** — its Qiniu data is months stale. |
+| **models.dev (metadata only)** | `https://models.dev/api.json` | Enriches existing Sufy models with display names, context/output limits, reasoning/attachment flags, **and modalities** (image/video/audio input). **Never adds new model IDs** — its Qiniu data is months stale. |
+
+> **Modalities = native vision.** OpenCode only sends image bytes to a model when
+> the config declares `"modalities": {"input": [... "image" ...]}` (i.e. resolved
+> capability `input.image=true`). `"attachment": true` alone is NOT enough — the
+> model receives the file path but never the pixels. The merged catalog carries
+> modalities so `update --target opencode` emits them. New multimodal models that
+> models.dev hasn't indexed are covered by a hardcoded override map in
+> `merge_catalog()` (e.g. claude-4.6/4.7/4.8, gpt-5, grok-4.2/4.3, kimi-k2.6/
+> k2.7-code, minimax-m3, qwen3.6-plus/27b, doubao-seed-2-1). Verification: after a
+> config change run `opencode models qiniu --verbose` and confirm
+> `"input": {"image": true}` for the affected model.
 
 > **Why not use models.dev for discovery?** Its Qiniu catalog lags by 3-6 months.
 > Testing showed 5/6 of its "gap-filling" entries were removed/unavailable
