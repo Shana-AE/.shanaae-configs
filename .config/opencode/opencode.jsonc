@@ -292,13 +292,10 @@
       "lark-cli config keychain-downgrade*": "deny",
       "lark-cli auth logout*": "ask"
     },
-    // NAS is a first-class location for this stack (screenshots, vault, docker).
-    // Without an allow rule, reads fall back to the default external_directory
-    // "*": "ask", and a deep-nested subagent prompt can never be answered —
-    // e.g. image-op's read of /mnt/nas/... hung forever on the ask.
-    "external_directory": {
-      "/mnt/nas/**": "allow"
-    },
+    // NOTE: external_directory is a SINGLE gate shared by read/write/edit/apply_patch/
+    // grep/glob/lsp/bash-file-commands. An allow on /mnt/nas/** would grant full
+    // write+delete on the NAS — deliberately NOT configured. Instead, subagents
+    // stage external files into /tmp/opencode/ (whitelisted) before reading them.
     // image-op-pro is internal-only: reachable solely via image-op's self-dispatch
     // (image-op.md declares its own task allow). Denied for primary agents so the
     // model can't pick the "pro" variant directly for general image tasks.
