@@ -9,8 +9,10 @@ Local-first token tracker (`tokentracker-cli`) with WSL tracking + custom-provid
 |------|---------|
 | `pricing.json`        | USD/M model prices for custom Qiniu models (edited rarely; see notes) |
 | `patch-pricing.mjs`   | Idempotently merges `pricing.json` into the app's `curated-overrides.json` |
-| `patch-rollout.mjs`   | Applies the opencode per-message token-accounting fix to `src/lib/rollout.js` |
-| `rebuild-opencode-queue.mjs` | Repair tool: regenerates correct opencode buckets in `queue.jsonl` |
+| `patch-rollout.mjs`   | **RETIRED** — see "Why the opencode token fix was RETIRED" below |
+| `revert-rollout-patch.mjs` | Removes the retired `diffOpencodeTotals` patch from a `rollout.js` |
+| `rebuild-opencode-forkdedup.mjs` | Repair tool: rebuilds opencode buckets de-duplicating fork-copied messages |
+| `rebuild-opencode-queue.mjs` | Legacy repair tool (requires the retired patch; kept for reference) |
 
 The opencode plugin is generated per-machine by `tokentracker init` into
 `~/.config/opencode/plugin/tokentracker.js` (machine-local, gitignored — not
@@ -27,7 +29,6 @@ APP=/mnt/c/Users/<user>/.tokentracker/tracker/app     # CLI app dir (Windows sid
 EMBED="/mnt/c/Users/<user>/AppData/Local/Programs/TokenTracker/EmbeddedServer/tokentracker"  # desktop app's embedded copy
 for d in "$APP" "$EMBED"; do
   node patch-pricing.mjs "$d"
-  node patch-rollout.mjs "$d"
 done
 ```
 
@@ -35,19 +36,60 @@ Notes:
 - The **desktop app** (TokenTrackerWin) runs its own **embedded copy** at
   `AppData\Local\Programs\TokenTracker\EmbeddedServer\tokentracker\` and can
   re-deploy it over the CLI app dir on start, so patch **both**.
-- `patch-rollout.mjs` is **CRLF-aware** — the Windows copies use `\r\n`.
+- `patch-rollout.mjs` is **retired** — do NOT re-apply it. If a machine's
+  `rollout.js` still contains `diffOpencodeTotals`, run
+  `node revert-rollout-patch.mjs "$d"` to restore pristine upstream.
 - After patching, restart the desktop app so its embedded server reloads the code
   (pricing also loads once at startup).
 
-## Why the opencode token fix exists
+## Fork-session duplication (the real inflation cause)
 
-opencode stores **per-message** token usage in `message.data.tokens`
-(`{input, output, reasoning, cache:{read, write}}`). The bundled parser treated
-these as cumulative (subtracting the previous message, like Gemini), which
-overcounted massively (e.g. 4.4× Qiniu for 7 days). `patch-rollout.mjs` makes the
-opencode paths emit each message's own totals exactly once. After the fix,
-TokenTracker ≈ 75% of Qiniu's counted usage (the gap is messages opencode doesn't
-record tokens for — not a parsing bug).
+opencode's `Session.fork` copies every parent message up to the fork point into a
+new session — preserving `time_created` and the per-message token payloads but
+assigning **new message IDs**. TokenTracker keys on `sessionID|messageID`, so the
+entire copied prefix is counted twice (parent + fork). Symptom: a machine's daily
+usage spikes to >1B while its baseline is tens of millions, and the cloud total =
+sum of parent + fork copies.
+
+**Fix** (`rebuild-opencode-forkdedup.mjs`): rebuild the opencode buckets de-duplicating
+by `(time_created, content-hash)`, keeping the first occurrence (the parent, which
+holds the authoritative post-update tokens) and keeping the fork's genuine
+continuation messages. Then compact + reset the upload offset + drain:
+
+```bash
+# On each machine, for each opencode.db (native + WSL):
+node rebuild-opencode-forkdedup.mjs "$APP" "$QUEUE" "$DB" ["$DB2"...]
+# compact (keep last row per source|model|hour):
+python3 - <<'PY'
+import json
+p = "$QUEUE"
+best = {}
+for line in open(p):
+    r = json.loads(line)
+    best[(r["source"], r["model"], r.get("hour_start"))] = r
+open(p, "w").write("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in best.values()))
+PY
+# reset upload offset so the cloud re-ingests (idempotent upsert by key):
+echo '{"offset":0,"updatedAt":"'$(date -u +%Y-%m-%dT%H:%M:%S.000Z)'","note":"fork-dedup-repair"}' > "$(dirname "$QUEUE")/queue.state.json"
+# drain to cloud (Windows box: run node from the Windows side so it reads the
+# Windows queue; or trigger the desktop app's Sync Now):
+node "$APP/bin/tracker.js" sync --drain
+```
+
+## Why the opencode token fix was RETIRED
+
+> **Status (2026-08-07): `patch-rollout.mjs` is RETIRED.** The maintainer's
+> analysis of [issue #426](https://github.com/xiufengsun/TokenTracker/issues/426)
+> is correct: the parser is **not** broken. `lastTotals` is looked up by
+> `sessionID|messageID` (the same message's previous snapshot), so a first-seen
+> message already emits its full per-message usage; the reported 4.4× was a
+> **raw `queue.jsonl` line summation** (append-only replacement snapshots — invalid),
+> not a parser bug. `diffOpencodeTotals` also **breaks in-place message updates**
+> (5→8 tokens emits 13). The patch has been reverted on all installs; the parser
+> runs pristine upstream `diffGeminiTotals`.
+
+The real inflation turned out to be **opencode fork sessions** (see
+`rebuild-opencode-forkdedup.mjs` below), not the parser.
 
 Upstream issue: https://github.com/xiufengsun/TokenTracker/issues/426
 
