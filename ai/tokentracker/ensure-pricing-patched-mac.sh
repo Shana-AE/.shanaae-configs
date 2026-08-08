@@ -39,7 +39,7 @@ if [ "$embedded_patched" -eq 0 ]; then
   log "embedded copy was unpatched (upgrade detected) -> restarting TokenTracker"
   osascript -e 'tell application "TokenTracker" to quit' >/dev/null 2>&1 || true
   sleep 2
-  open -a /Applications/TokenTracker.app >/dev/null 2>&1 || true
+  open -g -a /Applications/TokenTracker.app >/dev/null 2>&1 || true
   log "TokenTracker relaunched"
 else
   log "embedded copy already patched; no restart"
