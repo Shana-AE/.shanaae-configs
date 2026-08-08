@@ -9,10 +9,30 @@ Local-first token tracker (`tokentracker-cli`) with WSL tracking + custom-provid
 |------|---------|
 | `pricing.json`        | USD/M model prices for custom Qiniu models (edited rarely; see notes) |
 | `patch-pricing.mjs`   | Idempotently merges `pricing.json` into the app's `curated-overrides.json` |
+| `ensure-pricing-patched.sh` | **Auto-re-apply** (Windows/WSL): patches both copies + restarts the desktop app when an upgrade wipes pricing |
+| `ensure-pricing-patched-mac.sh` | **Auto-re-apply** (macOS): same, with `open -g` relaunch (no focus steal) |
 | `patch-rollout.mjs`   | **RETIRED** — see "Why the opencode token fix was RETIRED" below |
 | `revert-rollout-patch.mjs` | Removes the retired `diffOpencodeTotals` patch from a `rollout.js` |
 | `rebuild-opencode-forkdedup.mjs` | Repair tool: rebuilds opencode buckets de-duplicating fork-copied messages |
 | `rebuild-opencode-queue.mjs` | Legacy repair tool (requires the retired patch; kept for reference) |
+
+## Auto-re-apply (pricing patch survives upgrades)
+
+Desktop app upgrades replace the whole install dir, wiping `curated-overrides.json`
+in the **embedded copy**; every `serve` start re-copies embedded → CLI app dir.
+`pricing/index.js` `require()`s the file at module load, so it must be patched
+before the server starts (or the app restarted after).
+
+- **Windows**: Task Scheduler job `TokenTrackerPricingAutoPatch` (logon + every
+  10 min) runs a hidden VBS launcher
+  (`C:\Users\<user>\.tokentracker\run-pricing-autofix.vbs`, `wscript.exe` — no
+  console window) → `wsl.exe` → `ensure-pricing-patched.sh`.
+- **macOS**: launchd agent `com.shanaae.tokentracker-pricing-autofix`
+  (`~/Library/LaunchAgents/`, `StartInterval` 600 + `RunAtLoad`) → the mac script.
+- Both scripts detect the embedded-copy wipe via `grep shanaae`; if unpatched,
+  re-run `patch-pricing.mjs` on embedded + CLI, then restart the desktop app so
+  the server reloads pricing. Idempotent + cheap; no restart in steady state.
+- The VBS is machine-local (Windows-only); the bash scripts live here (synced).
 
 The opencode plugin is generated per-machine by `tokentracker init` into
 `~/.config/opencode/plugin/tokentracker.js` (machine-local, gitignored — not
