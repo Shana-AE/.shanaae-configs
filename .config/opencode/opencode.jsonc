@@ -2,8 +2,19 @@
   "$schema": "https://opencode.ai/config.json",
   "autoupdate": true,
   "subagent_depth": 3,
+  // Disable built-in providers (models.dev) not in use. NOTE: `qiniu-ai` is the
+  // built-in Qiniu — the custom `qiniu` provider (model catalog + omo routes) is
+  // a separate config-defined provider and intentionally left enabled.
+  "disabled_providers": [
+    "qiniu-ai",
+    "huggingface",
+    "siliconflow"
+  ],
   "plugin": [
     "superpowers@git+https://github.com/obra/superpowers.git",
+    // Plugin list consolidated here (previously split with opencode.json).
+    "opencode-subagent-magazine@latest",
+    "opencode-visual-cache@latest",
     // "oh-my-openagent",  // disabled: consumes too many tokens globally; config kept in oh-my-openagent.jsonc for when needed
     "@nick-vi/opencode-type-inject",
     "@franlol/opencode-md-table-formatter@latest",
@@ -86,29 +97,6 @@
         "Authorization": "Bearer {file:~/.shanaae/configs/.secrets.d/bigmodel_api_key}"
       }
     },
-    // Cua Driver (trycua/cua.ai) — Windows computer-use.
-    // DISABLED as MCP (2026-08-05): it flooded startup with Ajv schema warnings
-    // (`unknown format "uint32"/"uint64"` — Rust Schemars annotations) and paid
-    // ~44 tool schemas per session. Now served as a SKILL instead:
-    // ~/.config/opencode/skills/cua-driver/ (official pack + scripts/cua.sh
-    // wrapper; daemon auto-starts via Scheduled Task cua-driver-serve).
-    "cua-driver": {
-      "type": "local",
-      "command": [
-        "/mnt/c/Users/shana/AppData/Local/Programs/Cua/cua-driver/bin/cua-driver.exe",
-        "mcp"
-      ],
-      "enabled": false
-    },
-    // FALLBACK (uncomment if cua-driver interop proves flaky): Windows-MCP
-    // (CursorTouch) over streamable-http on the Windows host, reached via the
-    // Mirrored-mode loopback. Start on Windows first:
-    //   uvx windows-mcp --transport streamable-http --host 127.0.0.1 --port 8765
-    // "windows-mcp": {
-    //   "type": "remote",
-    //   "url": "http://127.0.0.1:8765/mcp",
-    //   "enabled": true
-    // },
     "Fetch": {
       "type": "local",
       "command": [
@@ -239,12 +227,8 @@
   // Chrome-DevTools-MCP tools are GLOBALLY OFF (zero token cost in main/plan context).
   // They are re-enabled only inside the `web-devtools` subagent (see agents/web-devtools.md),
   // so the MCP's ~47 tool schemas are paid for only when that subagent runs.
-  // cua-driver is no longer an MCP at all (disabled above since 2026-08-05) — it is a
-  // skill (~/.config/opencode/skills/cua-driver/) used by the `windows-use` subagent.
-  // The pattern below is kept as a safety net if the MCP is ever re-enabled.
   "tools": {
-    "Chrome-DevTools-MCP*": false,
-    "cua-driver*": false
+    "Chrome-DevTools-MCP*": false
   },
   // Allow safe, read-only bash without prompting; everything else falls back to `ask`.
   // Secrets hygiene: removed `env *` (dumps exported secrets into the transcript);
