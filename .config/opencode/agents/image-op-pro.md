@@ -1,9 +1,11 @@
 ---
 description: >-
-  Internal escalation agent for vision-heavy work: dense OCR, chart/document/table
+  Hoisted escalation agent for vision-heavy work: dense OCR, chart/document/table
   reading, pixel-level verification, and visual QA where detail fidelity matters.
-  Use ONLY when self-dispatched by image-op for high-detail vision work. Never
-  selected directly for general image tasks — image-op handles those.
+  Not a first-line image agent — the main agent should try `image-op` first, and
+  call this one when image-op recommends it (or when the vision task is clearly
+  heavy and image-op is unavailable). Dispatched directly by the main agent (never
+  by image-op, to avoid nested-subagent depth limits in opencode v1).
 mode: subagent
 model: qiniu/google/gemini-3.6-flash
 color: "#7c3aed"

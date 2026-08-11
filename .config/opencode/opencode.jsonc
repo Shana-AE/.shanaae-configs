@@ -280,12 +280,12 @@
     // grep/glob/lsp/bash-file-commands. An allow on /mnt/nas/** would grant full
     // write+delete on the NAS — deliberately NOT configured. Instead, subagents
     // stage external files into /tmp/opencode/ (whitelisted) before reading them.
-    // image-op-pro is internal-only: reachable solely via image-op's self-dispatch
-    // (image-op.md declares its own task allow). Denied for primary agents so the
-    // model can't pick the "pro" variant directly for general image tasks.
+    // image-op-pro is hoisted: primary agents may dispatch it, but ONLY after
+    // image-op recommends it (image-op never self-dispatches it — nested subagent
+    // depth in opencode v1). No deny here; the "image-op first" ordering is a
+    // prompt contract in image-op.md / image-op-pro.md.
     "task": {
-      "*": "allow",
-      "image-op-pro": "deny"
+      "*": "allow"
     }
   },
   "provider": {

@@ -82,16 +82,16 @@ Subagents ship with a default model but every user can override it. The
 > (`attachment`/vision). `image-op`'s core job is visual analysis — a text-only
 > model will not work.
 
-> **`image-op-pro` (internal escalation):** a hidden subagent that uses
+> **`image-op-pro` (hoisted escalation):** a hidden subagent that uses
 > `qiniu/google/gemini-3.6-flash` for dense OCR / chart / pixel-level
-> verification, self-dispatched by `image-op`. It requires the `qiniu` provider
-> and a vision-capable Gemini model. **It is enforced as internal-only:** the
-> global `permission.task` in `opencode.jsonc` denies `image-op-pro` to primary
-> agents (removing it from their Task tool list), while `image-op`'s own
-> frontmatter grants it dispatching rights — so the main agent always picks
-> `image-op` for image work, and pro is only reached when `image-op` escalates
-> for vision-heavy tasks. If you don't need it, delete
-> `.config/opencode/agents/image-op-pro.md` and the `image-op-pro` deny entry —
+> verification. It requires the `qiniu` provider and a vision-capable Gemini
+> model. **It is hoisted to the main level** (dispatchable by primary agents),
+> but it is NOT a first-line image agent: the main agent should try `image-op`
+> first, and call `image-op-pro` only when `image-op` explicitly recommends it.
+> `image-op` never self-dispatches `image-op-pro` — the handoff is a
+> recommendation back to the main agent, because nested subagents
+> (main → image-op → image-op-pro) hit the subagent-depth limit in opencode v1.
+> If you don't need it, delete `.config/opencode/agents/image-op-pro.md` —
 > `image-op` then handles everything with its own model.
 
 > Markdown agent frontmatter (`agents/*.md`) does **not** support `{env:VAR}`
