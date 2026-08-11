@@ -9,7 +9,6 @@ description: >-
 mode: subagent
 model: qiniu/google/gemini-3.6-flash
 color: "#7c3aed"
-hidden: true
 tools:
   "zai-mcp-server*": false
 ---
