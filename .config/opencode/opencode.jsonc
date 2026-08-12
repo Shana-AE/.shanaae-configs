@@ -1,7 +1,14 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "autoupdate": true,
+  "default_agent": "plan",
   "subagent_depth": 3,
+  // Agent display colors (hex, cross-surface: TUI + web). Explicit colors bypass
+  // the TUI modulo-index palette fallback (packages/tui/src/context/local.tsx).
+  "agent": {
+    "build": { "color": "#f5a742" },
+    "plan": { "color": "#56b6c2" }
+  },
   // Disable built-in providers (models.dev) not in use. NOTE: `qiniu-ai` is the
   // built-in Qiniu — the custom `qiniu` provider (model catalog + omo routes) is
   // a separate config-defined provider and intentionally left enabled.
