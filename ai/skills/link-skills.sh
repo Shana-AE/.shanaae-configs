@@ -8,6 +8,9 @@
 # Ownership:  also re-points each tool's `skills` symlink (opencode /
 #             claude / codex / trae) to its own pool.
 #
+# Bash 3.2+ compatible (macOS /bin/bash, Linux bash 4/5). No associative
+# arrays, no gnu-only flags.
+#
 # Usage:
 #   bash link-skills.sh            link everything (idempotent)
 #   bash link-skills.sh --dry-run  show what would change, touch nothing
@@ -24,42 +27,47 @@ FOR_TOOLS_DIR="$BASE_DIR/for-tools"
 POLICY_FILE="$BASE_DIR/skills-policy.json"
 
 AGENTS=(opencode claude codex trae)
+POLICY_TMP="$(mktemp -d "${TMPDIR:-/tmp}/link-skills.XXXXXX")"
+trap 'rm -rf "$POLICY_TMP"' EXIT
 
 DRY_RUN=0
 if [ "${1:-}" = "--dry-run" ]; then
     DRY_RUN=1
 fi
 
-# Per-agent tool symlink: absolute path of the `skills` link inside the repo,
-# and the target it should point to (relative to that link's parent dir).
-declare -A SYMLINK_PATH SYMLINK_REL
-SYMLINK_PATH[opencode]="$BASE_DIR/../../.config/opencode/skills"
-SYMLINK_PATH[claude]="$BASE_DIR/../../.claude/skills"
-SYMLINK_PATH[codex]="$BASE_DIR/../../.codex/skills"
-SYMLINK_PATH[trae]="$BASE_DIR/../../.trae/skills"
-SYMLINK_REL[opencode]="../../ai/skills/for-tools/opencode"
-SYMLINK_REL[claude]="../ai/skills/for-tools/claude"
-SYMLINK_REL[codex]="../ai/skills/for-tools/codex"
-SYMLINK_REL[trae]="../ai/skills/for-tools/trae"
+# Absolute path of a tool's `skills` symlink inside the repo...
+tool_link_path() {
+    case "$1" in
+        opencode) echo "$BASE_DIR/../../.config/opencode/skills" ;;
+        claude)   echo "$BASE_DIR/../../.claude/skills" ;;
+        codex)    echo "$BASE_DIR/../../.codex/skills" ;;
+        trae)     echo "$BASE_DIR/../../.trae/skills" ;;
+    esac
+}
 
-# Pattern rules, per agent, as newline-separated lists.
-declare -A INCLUDE EXCLUDE
+# ...and the repo-relative target it should point to.
+tool_link_rel() {
+    case "$1" in
+        opencode) echo "../../ai/skills/for-tools/opencode" ;;
+        claude)   echo "../ai/skills/for-tools/claude" ;;
+        codex)    echo "../ai/skills/for-tools/codex" ;;
+        trae)     echo "../ai/skills/for-tools/trae" ;;
+    esac
+}
 
+# Parse the policy into per-agent pattern lists:
+#   $POLICY_TMP/<agent>.include   $POLICY_TMP/<agent>.exclude
+# python3 emits one "agent<TAB>kind<TAB>pattern" line per effective rule
+# (defaults expanded to every agent), warnings on stderr.
 load_policy() {
     if [ ! -f "$POLICY_FILE" ]; then
         echo "WARN: $POLICY_FILE not found — no per-agent filtering (full sets everywhere)."
         return 0
     fi
-    local line agent kind pat
-    # python3 emits one "agent<TAB>kind<TAB>pattern" line per effective rule
-    # (defaults.expanded to every agent), warnings on stderr.
+    local agent kind pat
     while IFS=$'\t' read -r agent kind pat; do
         [ -z "$agent" ] && continue
-        if [ "$kind" = "include" ]; then
-            INCLUDE[$agent]+="$pat"$'\n'
-        else
-            EXCLUDE[$agent]+="$pat"$'\n'
-        fi
+        printf '%s\n' "$pat" >> "$POLICY_TMP/$agent.$kind"
     done < <(python3 - "$POLICY_FILE" <<'PYEOF'
 import json, sys
 
@@ -100,17 +108,16 @@ pattern_matches() {
     esac
 }
 
-# True if a skill name matches any pattern in a newline-separated list.
-matches_any() {
-    local name="$1" list="${2:-}"
-    [ -n "$list" ] || return 1
-    local pat
+# True if a skill name matches any pattern line in a file.
+matches_file() {
+    local name="$1" file="$2" pat
+    [ -f "$file" ] || return 1
     while IFS= read -r pat; do
         [ -n "$pat" ] || continue
         if pattern_matches "$name" "$pat"; then
             return 0
         fi
-    done <<< "$list"
+    done < "$file"
     return 1
 }
 
@@ -118,11 +125,11 @@ matches_any() {
 # Exclusions always win; include only filters when non-empty.
 skill_allowed() {
     local name="$1" agent="$2"
-    if matches_any "$name" "${EXCLUDE[$agent]:-}"; then
+    if matches_file "$name" "$POLICY_TMP/$agent.exclude"; then
         return 1
     fi
-    if [ -n "${INCLUDE[$agent]:-}" ]; then
-        matches_any "$name" "${INCLUDE[$agent]}" || return 1
+    if [ -s "$POLICY_TMP/$agent.include" ]; then
+        matches_file "$name" "$POLICY_TMP/$agent.include" || return 1
     fi
     return 0
 }
@@ -148,10 +155,10 @@ link_agent_pool() {
                 continue
             fi
             linked=$((linked + 1))
-            link="$agent_dir/$name"
             if [ "$DRY_RUN" = 1 ]; then
                 continue
             fi
+            link="$agent_dir/$name"
             if [ -e "$link" ] && [ ! -L "$link" ]; then
                 echo "  WARN: $link exists and is not a symlink — leaving untouched"
                 continue
@@ -171,8 +178,8 @@ link_agent_pool() {
 rewire_tool_symlinks() {
     local agent link rel
     for agent in "${AGENTS[@]}"; do
-        link="${SYMLINK_PATH[$agent]}"
-        rel="${SYMLINK_REL[$agent]}"
+        link="$(tool_link_path "$agent")"
+        rel="$(tool_link_rel "$agent")"
         if [ "$DRY_RUN" = 1 ]; then
             echo "  [dry-run] $link -> $rel"
             continue
