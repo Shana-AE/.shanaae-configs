@@ -1,0 +1,9 @@
+{
+  "defaults": {
+    "exclude": ["*.bak*"]
+  },
+  "opencode": { "exclude": [] },
+  "claude": { "exclude": [] },
+  "codex": { "exclude": [] },
+  "trae": { "exclude": [] }
+}

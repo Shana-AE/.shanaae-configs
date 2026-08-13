@@ -29,7 +29,7 @@ configs/
 ├── .trae/                # Trae config (skills, user_rules)
 ├── ai/
 │   ├── mcp/              # Master MCP configs (trae.json + .example)
-│   ├── skills/           # vendor/ + local/ + private/ (gitignored) + for-tools/ (generated, gitignored)
+│   ├── skills/           # vendor/ + local/ + private/ (gitignored) + skills-policy.json + for-tools/<agent>/ (generated, gitignored)
 │   └── user_rules/       # English, Vue, HarmonyOS, learning, save-to-* rules
 ├── .claude-code-router/  # Claude Code Router (multi-provider routing)
 ├── .agents/              # `npx skills` CLI storage
@@ -53,7 +53,7 @@ See [`AGENTS.md`](AGENTS.md) for the full agent guidelines and
 
 ### Trae Configuration
 
-- **Skills**: `.trae/skills` -> `ai/skills/for-tools`
+- **Skills**: `.trae/skills` -> `ai/skills/for-tools/trae` (per-agent pool)
 - **User Rules**: `.trae/user_rules` -> `ai/user_rules`
 
 ### Agent Skills CLI (`.agents`)
@@ -78,6 +78,8 @@ cp .secrets.example .secrets   # when the cross-platform installer lands;
 # 3. Render MCP configs from .secrets
 python3 ai/skills/local/setup-configs/scripts/setup_configs.py
 
-# 4. Link skills into for-tools/ (mandatory — for-tools is gitignored & generated)
-bash ai/skills/link-skills.sh
+# 4. Build per-agent skill pools in for-tools/ (mandatory — for-tools is gitignored & generated)
+#    Per-agent filtering: edit ai/skills/skills-policy.json first
+bash ai/skills/link-skills.sh --dry-run   # preview
+bash ai/skills/link-skills.sh             # apply
 ```
