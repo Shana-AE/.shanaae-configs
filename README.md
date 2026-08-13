@@ -12,7 +12,9 @@ model catalogs.
 | OpenCode    | Active      | `.config/opencode/`              |
 | Trae        | Active      | `.trae/` + `ai/mcp/trae.json`      |
 | Cursor      | Planned (WIP) | `.cursor/` (not yet created)    |
-| Codex CLI   | Planned (WIP) | `.codex/` (not yet created)     |
+| Codex CLI   | Active      | `.codex/`                        |
+| dsh         | Active (dev preview) | `dsh/` (DeepSeek Harness) |
+| Pi          | Active      | `pi/`                            |
 
 > **Cross-platform support (Linux / Windows / macOS) is in design.**
 > See [`docs/superpowers/specs/2026-06-25-cross-platform-configs-design.md`](docs/superpowers/specs/2026-06-25-cross-platform-configs-design.md).
@@ -32,6 +34,8 @@ configs/
 │   ├── skills/           # vendor/ + local/ + private/ (gitignored) + skills-policy.json + for-tools/<agent>/ (generated, gitignored)
 │   └── user_rules/       # English, Vue, HarmonyOS, learning, save-to-* rules
 ├── .claude-code-router/  # Claude Code Router (multi-provider routing)
+├── dsh/                  # DeepSeek Harness config (settings.yaml)
+├── pi/                   # Pi coding agent config (settings, models, AGENTS.md, skills)
 ├── .agents/              # `npx skills` CLI storage
 └── .secrets              # API tokens (gitignored — see CONFIG_README.md)
 ```
@@ -55,6 +59,13 @@ See [`AGENTS.md`](AGENTS.md) for the full agent guidelines and
 
 - **Skills**: `.trae/skills` -> `ai/skills/for-tools/trae` (per-agent pool)
 - **User Rules**: `.trae/user_rules` -> `ai/user_rules`
+
+### dsh (DeepSeek Harness) & Pi
+
+- **dsh**: `~/.dsh/settings.yaml` -> `dsh/settings.yaml` (LLM routes via
+  `apiKeyEnv` env refs; credentials stay in `~/.dsh/.credentials.yaml`)
+- **Pi**: `~/.pi/agent/{settings.json,models.json,AGENTS.md}` -> `pi/`; skills
+  pool via `pi/skills` -> `ai/skills/for-tools/pi`
 
 ### Agent Skills CLI (`.agents`)
 

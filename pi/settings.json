@@ -1,0 +1,14 @@
+{
+  "defaultProvider": "deepseek",
+  "defaultModel": "deepseek-chat",
+  "defaultThinkingLevel": "medium",
+  "theme": "dark",
+  "enableInstallTelemetry": false,
+  "compaction": {
+    "enabled": true,
+    "reserveTokens": 16384,
+    "keepRecentTokens": 20000
+  },
+  "enabledModels": ["deepseek-*", "qiniu/*"],
+  "skills": ["~/.shanaae/configs/pi/skills"]
+}

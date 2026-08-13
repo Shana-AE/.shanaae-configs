@@ -1,0 +1,34 @@
+# DeepSeek Harness (dsh) — global settings ($DSH_HOME/settings.yaml).
+# Docs: https://github.com/deepseek-ai/deepseek-harness
+#
+# Secrets are never stored in this repo: llm-pi-ai routes reference env vars
+# via apiKeyEnv (values live in ~/.shanaae/configs/.secrets). The built-in
+# DeepSeek card stores its key in $DSH_HOME/.credentials.yaml (machine-local,
+# write-only — never committed).
+#
+# Managed file: dsh watches it and hot-publishes external edits. You can also
+# configure providers through the Web UI: npx @deepseek-ai/dsh web -> Settings -> Models.
+
+llm-pi-ai:
+  providers:
+    # Qiniu AI gateway (OpenAI-compatible). Model IDs verified against
+    # GET https://api.qnaigc.com/v1/models (same key as api.modelink.ai).
+    qiniu:
+      apiKeyEnv: QINIU_AI_API_KEY
+      api: openai-completions
+      baseURL: https://api.qnaigc.com/v1
+      models:
+        - id: deepseek/deepseek-v4-flash
+        - id: deepseek/deepseek-v3.2-251201
+        - id: moonshotai/kimi-k2.7-code
+        - id: z-ai/glm-5.2
+        - id: minimax/minimax-m3
+        - id: qwen/qwen3.7-max
+    # DeepSeek official API.
+    deepseek:
+      apiKeyEnv: DEEPSEEK_API_KEY
+      api: openai-completions
+      baseURL: https://api.deepseek.com
+      models:
+        - id: deepseek-chat
+        - id: deepseek-reasoner
