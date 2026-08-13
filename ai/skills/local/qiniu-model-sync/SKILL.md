@@ -1,19 +1,25 @@
 ---
 name: qiniu-model-sync
-description: "Sync and query Qiniu (Sufy) AI model catalog. Fetches the authoritative model list from openai.sufy.com/v1/models, enriched with metadata (display names, context limits) from models.dev. Compare against opencode.jsonc / claude-code-router configs to find new or removed models. Probe individual model IDs for callability. Use when checking available Qiniu models, updating model lists, or querying by model family (claude, gpt, deepseek, glm, kimi, gemini, grok, qwen)."
+description: "Sync and query Qiniu (Modelink) AI model catalog. Fetches the authoritative model list from api.modelink.ai/v1/models (successor to openai.sufy.com, same key, identical data), enriched with metadata (display names, context limits) from models.dev. Compare against opencode.jsonc / claude-code-router configs to find new or removed models. Probe individual model IDs for callability. Use when checking available Qiniu models, updating model lists, or querying by model family (claude, gpt, deepseek, glm, kimi, gemini, grok, qwen)."
 ---
 
 # qiniu-model-sync
 
-Keeps Qiniu (Sufy) AI model lists in sync across configs and lets you query the
-catalog by family.
+Keeps Qiniu (Modelink) AI model lists in sync across configs and lets you query
+the catalog by family.
 
 ## Sources — clear separation of concerns
 
 | Source | URL | Role |
 |--------|-----|------|
-| **Sufy (sole authority)** | `https://openai.sufy.com/v1/models` | **Determines model existence.** If it's not here, it's not in the catalog. |
-| **models.dev (metadata only)** | `https://models.dev/api.json` | Enriches existing Sufy models with display names, context/output limits, reasoning/attachment flags, **and modalities** (image/video/audio input). **Never adds new model IDs** — its Qiniu data is months stale. |
+| **Modelink (sole authority)** | `https://api.modelink.ai/v1/models` | **Determines model existence.** If it's not here, it's not in the catalog. Successor to `openai.sufy.com` (migrated 2026-08; both served identical 134-model lists at migration time). The script falls back to the still-live `https://openai.sufy.com/v1/models` alias on network errors. |
+| **models.dev (metadata only)** | `https://models.dev/api.json` | Enriches existing catalog models with display names, context/output limits, reasoning/attachment flags, **and modalities** (image/video/audio input). **Never adds new model IDs** — its Qiniu data is months stale. |
+
+> **CN endpoint is a subset — never the catalog source.** `https://api.qnaigc.com`
+> and `https://openai.qiniu.com` (identical lists) serve the China-mainland
+> gateway and list only ~73 models vs 134 on Modelink. They are fine as runtime
+> base URLs but MUST NOT be used as the model-list authority — you'd miss ~60
+> models.
 
 > **Modalities = native vision.** OpenCode only sends image bytes to a model when
 > the config declares `"modalities": {"input": [... "image" ...]}` (i.e. resolved
@@ -38,7 +44,7 @@ catalog by family.
 ## Usage
 
 ```bash
-# Fetch + cache the catalog (Sufy live + models.dev metadata)
+# Fetch + cache the catalog (Modelink live + models.dev metadata)
 python3 scripts/qiniu_model_sync.py fetch
 
 # Probe a model ID for callability (use for unlisted models like gpt-5.6-terra)

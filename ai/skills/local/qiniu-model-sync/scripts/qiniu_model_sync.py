@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-"""Qiniu (Sufy) model catalog — fetch, query, diff, and sync.
+"""Qiniu (Modelink) model catalog — fetch, query, diff, and sync.
 
-Primary source: https://openai.sufy.com/v1/models (authoritative live list)
+Primary source: https://api.modelink.ai/v1/models (authoritative live list;
+                successor to openai.sufy.com, same key, identical data)
+Fallback:       https://openai.sufy.com/v1/models (legacy alias, still live)
 Supplementary:  https://models.dev/api.json (fills gaps + adds metadata)
 
 Modalities: models.dev modalities (image/video/audio input) are merged into the
@@ -30,11 +32,15 @@ from pathlib import Path
 # --------------------------------------------------------------------------- #
 # Constants
 # --------------------------------------------------------------------------- #
+# Modelink is the current Qiniu catalog home (migrated from Sufy in 2026-08;
+# both served identical 134-model lists at migration time). Sufy is kept as an
+# automatic fallback while the legacy alias is still live.
+MODELINK_ENDPOINT = "https://api.modelink.ai/v1/models"
 SUFY_ENDPOINT = "https://openai.sufy.com/v1/models"
 MODELS_DEV_ENDPOINT = "https://models.dev/api.json"
 
 CACHE_DIR = Path(os.environ.get("XDG_CACHE_HOME", os.path.expanduser("~/.cache"))) / "qiniu-model-sync"
-SUFY_CACHE = CACHE_DIR / "sufy.json"
+CATALOG_CACHE = CACHE_DIR / "catalog.json"
 MODELS_DEV_CACHE = CACHE_DIR / "models-dev.json"
 STATE_FILE = CACHE_DIR / "state.json"
 
@@ -85,20 +91,33 @@ def _api_key() -> str:
 
 
 def fetch_sufy(force: bool = False) -> list[str]:
-    """Fetch the authoritative model list from openai.sufy.com."""
-    if not force and SUFY_CACHE.exists():
+    """Fetch the authoritative model list from the Modelink endpoint.
+
+    Tries https://api.modelink.ai/v1/models first; falls back to the legacy
+    openai.sufy.com alias on network/HTTP errors (same key, identical data).
+    """
+    if not force and CATALOG_CACHE.exists():
         import time
-        age = time.time() - SUFY_CACHE.stat().st_mtime
+        age = time.time() - CATALOG_CACHE.stat().st_mtime
         if age < 300:  # 5-min cache
-            return json.loads(SUFY_CACHE.read_text())
+            return json.loads(CATALOG_CACHE.read_text())
 
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     key = _api_key()
-    req = urllib.request.Request(SUFY_ENDPOINT, headers={"Authorization": f"Bearer {key}"})
-    with urllib.request.urlopen(req, timeout=20) as resp:
-        data = json.load(resp)
-    ids = sorted(m["id"] for m in data.get("data", []) if m.get("id"))
-    SUFY_CACHE.write_text(json.dumps(ids, ensure_ascii=False, indent=2))
+    ids: list[str] | None = None
+    last_err: Exception | None = None
+    for endpoint in (MODELINK_ENDPOINT, SUFY_ENDPOINT):
+        req = urllib.request.Request(endpoint, headers={"Authorization": f"Bearer {key}"})
+        try:
+            with urllib.request.urlopen(req, timeout=20) as resp:
+                data = json.load(resp)
+            ids = sorted(m["id"] for m in data.get("data", []) if m.get("id"))
+            break
+        except Exception as e:
+            last_err = e
+    if ids is None:
+        raise last_err or RuntimeError("failed to fetch model catalog")
+    CATALOG_CACHE.write_text(json.dumps(ids, ensure_ascii=False, indent=2))
     return ids
 
 
@@ -119,17 +138,19 @@ def fetch_models_dev(force: bool = False) -> dict:
 
 
 def merge_catalog(sufy_ids: list[str], dev_data: dict) -> dict[str, dict]:
-    """Build the model catalog. Sufy is the SOLE authority for model existence.
+    """Build the model catalog. Modelink (api.modelink.ai, ex-Sufy) is the SOLE
+    authority for model existence.
 
     models.dev is used ONLY for metadata enrichment (display name, description,
-    context/output limits, reasoning/attachment flags) of models already in the
-    Sufy list. It NEVER adds new model IDs — its Qiniu data is typically months
-    stale and would introduce false positives (removed/unavailable models).
+    context/output limits, reasoning/attachment flags, modalities) of models
+    already in the catalog. It NEVER adds new model IDs — its Qiniu data is
+    typically months stale and would introduce false positives (removed/
+    unavailable models).
 
     Returns {model_id: {name, family, reasoning, attachment, context, output}}
     """
     catalog: dict[str, dict] = {}
-    # Sufy = sole authority for existence
+    # Modelink (ex-Sufy) = sole authority for existence
     for mid in sufy_ids:
         catalog[mid] = {"id": mid, "source": "sufy"}
 
@@ -244,12 +265,65 @@ def _skip_jsonc_comment(text: str, i: int) -> int | None:
     return None
 
 
+def _balanced_json_block(text: str, start: int) -> str | None:
+    """Return the balanced-brace JSON block starting at the '{' at text[start]."""
+    depth = 0
+    in_str = False
+    esc = False
+    i = start
+    while i < len(text):
+        c = text[i]
+        if in_str:
+            if esc:
+                esc = False
+            elif c == "\\":
+                esc = True
+            elif c == '"':
+                in_str = False
+        else:
+            if c == '"':
+                in_str = True
+                i += 1
+                continue
+            if c == "/":
+                end = _skip_jsonc_comment(text, i)
+                if end is not None:
+                    i = end
+                    continue
+            if c == "{":
+                depth += 1
+            elif c == "}":
+                depth -= 1
+                if depth == 0:
+                    return text[start:i + 1]
+        i += 1
+    return None
+
+
 def parse_opencode_models(config_path: Path) -> set[str]:
-    """Extract model IDs from provider.qiniu.models in opencode.jsonc."""
+    """Extract model IDs from provider.qiniu.models in opencode.jsonc.
+
+    Scoped to the qiniu provider's models block via balanced braces so keys
+    elsewhere at the same indentation (e.g. plugin configs like project-rules
+    "projects": {"vue": ...}) are never mistaken for models.
+    """
     text = config_path.read_text()
-    # Find all 8-space-indented keys that look like model entries
+    qiniu_m = re.search(r'"qiniu"\s*:\s*\{', text)
+    if not qiniu_m:
+        return set()
+    qiniu_block = _balanced_json_block(text, qiniu_m.end() - 1)
+    if not qiniu_block:
+        return set()
+    models_m = re.search(r'"models"\s*:\s*\{', qiniu_block)
+    if not models_m:
+        return set()
+    models_block = _balanced_json_block(qiniu_block, models_m.end() - 1)
+    if not models_block:
+        return set()
     models: set[str] = set()
-    for line in text.split("\n"):
+    for line in models_block.split("\n"):
+        # Model entries sit at exactly 8 spaces inside the models block;
+        # nested keys (reasoning/limit/variants/effort...) are deeper.
         m = re.match(r'^ {8}"([^"]+)"\s*:\s*\{', line)
         if m:
             models.add(m.group(1))
@@ -352,7 +426,7 @@ def cmd_fetch(args):
     save_state(state)
 
     print(f"== qiniu-model-sync fetch ==")
-    print(f"   Sufy models  : {len(sufy_ids)} (authoritative)")
+    print(f"   Modelink models: {len(sufy_ids)} (authoritative)")
     enriched = sum(1 for mid in sufy_ids if mid in dev_data.get("qiniu-ai",{}).get("models",{}) or f"openai/{mid}" in dev_data.get("openai",{}).get("models",{}))
     print(f"   models.dev   : metadata enrichment for {enriched}/{len(sufy_ids)} models")
     print(f"   catalog total: {len(catalog)} ({len(text)} text, {len(image)} image, {len(video)} video)")

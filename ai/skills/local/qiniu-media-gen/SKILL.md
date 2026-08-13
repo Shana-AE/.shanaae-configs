@@ -36,7 +36,7 @@ Generate images and videos through the Qiniu/Sufy AI inference API (`api.qnaigc.
 | `veo-3.0-fast-generate-001`    | Previous gen fast                       |
 | `veo-2.0-generate-001`         | Legacy                                  |
 
-> **Note**: Kling video (kling-v3, kling-v2-6, etc.), Vidu, Sora-2, and Doubao Seedance are listed on sufy.com but are NOT available via the API — only through the web console at <https://sufy.com/zh-CN/services/ai-inference/models>.
+> **Note**: Kling video (kling-v3, kling-v2-6, etc.), Vidu, Sora-2, and Doubao Seedance are listed on modelink.ai but are NOT available via the API — only through the web console at <https://modelink.ai/en-US/models>.
 
 ## API Reference
 
@@ -193,5 +193,5 @@ for i,v in enumerate(videos):
 - **Sync image gen** is instant (2-5s). Use for quick iterations.
 - **Async image gen** takes 10-30s. Kling models often produce better artistic results.
 - **Video gen** takes 1-5 minutes. Use `veo-3.1-fast-generate-001` for speed, `veo-3.1-generate-001` for quality.
-- For **image-to-image** or **image-to-video**, check the sufy.com docs for additional `image` field in the request.
+- For **image-to-image** or **image-to-video**, check the modelink.ai docs for additional `image` field in the request.
 - Costs: image gen ~$0.003-$0.03/image, video gen ~$0.10-$0.40/second.
