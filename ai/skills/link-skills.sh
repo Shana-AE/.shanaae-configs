@@ -26,7 +26,7 @@ PRIVATE_DIR="$BASE_DIR/private"
 FOR_TOOLS_DIR="$BASE_DIR/for-tools"
 POLICY_FILE="$BASE_DIR/skills-policy.json"
 
-AGENTS=(opencode claude codex trae)
+AGENTS=(opencode claude codex trae pi)
 POLICY_TMP="$(mktemp -d "${TMPDIR:-/tmp}/link-skills.XXXXXX")"
 trap 'rm -rf "$POLICY_TMP"' EXIT
 
@@ -42,6 +42,7 @@ tool_link_path() {
         claude)   echo "$BASE_DIR/../../.claude/skills" ;;
         codex)    echo "$BASE_DIR/../../.codex/skills" ;;
         trae)     echo "$BASE_DIR/../../.trae/skills" ;;
+        pi)       echo "$BASE_DIR/../../pi/skills" ;;
     esac
 }
 
@@ -52,6 +53,7 @@ tool_link_rel() {
         claude)   echo "../ai/skills/for-tools/claude" ;;
         codex)    echo "../ai/skills/for-tools/codex" ;;
         trae)     echo "../ai/skills/for-tools/trae" ;;
+        pi)       echo "../ai/skills/for-tools/pi" ;;
     esac
 }
 
@@ -71,7 +73,7 @@ load_policy() {
     done < <(python3 - "$POLICY_FILE" <<'PYEOF'
 import json, sys
 
-agents = ["opencode", "claude", "codex", "trae"]
+agents = ["opencode", "claude", "codex", "trae", "pi"]
 p = json.load(open(sys.argv[1], encoding="utf-8"))
 
 unknown = [k for k in p if k != "defaults" and k not in agents]
