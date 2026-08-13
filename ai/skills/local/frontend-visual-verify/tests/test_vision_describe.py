@@ -152,7 +152,7 @@ class DescribeTests(unittest.TestCase):
 class BaseUrlTests(unittest.TestCase):
     def test_accepts_qiniu_https_endpoints(self):
         self.assertEqual("https://api.qnaigc.com/v1", validate_base_url("https://api.qnaigc.com/v1/"))
-        self.assertEqual("https://openai.sufy.com/v1", validate_base_url("https://openai.sufy.com/v1"))
+        self.assertEqual("https://api.modelink.ai/v1", validate_base_url("https://api.modelink.ai/v1"))
 
     def test_rejects_non_qiniu_or_insecure_endpoints(self):
         with self.assertRaises(ValueError):

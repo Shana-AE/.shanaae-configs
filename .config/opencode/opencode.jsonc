@@ -419,6 +419,18 @@
           },
           "limit": {"context": 1000000, "output": 384000}
         },
+        "deepseek/deepseek-v4-pro-0813": {
+          "name": "DeepSeek-V4-Pro-0813 (Qiniu)",
+          "reasoning": true,
+          "interleaved": { "field": "reasoning_content" },
+          "variants": {
+            "low": {"disabled": true},
+            "medium": {"disabled": true},
+            "high": {"reasoningEffort": "high"},
+            "max": {"reasoningEffort": "max"}
+          },
+          "limit": {"context": 1000000, "output": 384000}
+        },
         "deepseek/deepseek-v4-pro-202606": {
           "name": "DeepSeek-V4-Pro-202606 (Qiniu)",
           "reasoning": true,
@@ -430,6 +442,9 @@
             "max": {"reasoningEffort": "max"}
           },
           "limit": {"context": 1000000, "output": 384000}
+        },
+        "doubao-1.5-pro-32k": {
+          "name": "Doubao-1.5-Pro-32k (Qiniu)", "limit": {"context": 128000, "output": 12000}
         },
         "doubao-1.5-thinking-pro": {
           "name": "Doubao-1.5-Thinking-Pro (Qiniu)", "reasoning": true, "limit": {"context": 128000, "output": 128000}
@@ -595,6 +610,9 @@
         },
         "qwen/qwen3.7-max": {
           "name": "Qwen/Qwen3.7-Max (Qiniu)", "reasoning": true, "limit": {"context": 1000000, "output": 64000}
+        },
+        "qwen/qwen3.8-max": {
+          "name": "Qwen/Qwen3.8-Max (Qiniu)", "reasoning": true, "limit": {"context": 1000000, "output": 64000}
         },
         "qwen2.5-vl-72b-instruct": {
           "name": "Qwen2.5-VL-72B-Instruct (Qiniu)", "attachment": true, "modalities": {"input": ["text", "image", "audio", "video"], "output": ["text"]}, "limit": {"context": 128000, "output": 128000}

@@ -149,7 +149,7 @@ def normalize_confidence(value: object) -> float:
 def validate_base_url(base_url: str) -> str:
     normalized = base_url.rstrip("/")
     parsed = urllib.parse.urlparse(normalized)
-    if parsed.scheme != "https" or parsed.hostname not in {"api.qnaigc.com", "openai.sufy.com"}:
+    if parsed.scheme != "https" or parsed.hostname not in {"api.qnaigc.com", "api.modelink.ai"}:
         raise ValueError("QINIU_AI_BASE_URL must be an HTTPS Qiniu AI endpoint")
     return normalized
 
