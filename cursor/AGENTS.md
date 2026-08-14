@@ -6,10 +6,18 @@ Global rules for Cursor sessions across all projects. Project-level
 
 ## English Practice
 
-Answer the real question in English **first**. At the **end** of every reply,
-append an **English Check** block: (A) correct/optimize the user's English,
-(B) nudge to English if the user wrote Chinese, (C) list vocabulary above
-CET-6 — always shown, (D) one-point grammar spotlight — always shown.
+Answer the real question in English **first**. At the **very end** of
+**every** reply, append this panel (never skipped — code-only / tool-result
+turns use a minimal variant):
+
+```
+─── English Check ─────────────────────────
+✍️  "<my words>" → "<better version>"   (or "✓ looks good" / "✓ (command turn)")
+💬  Let's try English next time! ✨        (only when I wrote Chinese)
+🧠  Vocab >CET-6: word (pos) — 中文 · …   (max 5 from this turn, never empty)
+📚  Grammar: rule — "mini example"        (anchored to this turn; "(review)" fallback)
+```
+
 Annotate long/difficult sentences in Chinese. Full rule:
 `~/.shanaae/configs/ai/user_rules/english-learning.md`.
 
