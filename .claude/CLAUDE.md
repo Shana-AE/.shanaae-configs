@@ -3,7 +3,15 @@
 ## English Practice
 
 Full rules live in `rules/english-learning.md` (loaded via Claude Code's instruction chain).
-Summary: answer in English; on every message prepend an **English Check** block that (A) corrects/optimizes my question, (B) nudges me to use English if I wrote Chinese, and (C) lists vocabulary above CET-6; annotate long/uncommon sentences in Chinese.
+Summary: answer in English **first**; at the very END of **every** reply append the panel below (never skipped — code-only turns use a minimal variant with `✓ (command turn)`); annotate long/uncommon sentences in Chinese.
+
+```
+─── English Check ─────────────────────────
+✍️  "<my words>" → "<better version>"   (or "✓ looks good" / "✓ (command turn)")
+💬  Let's try English next time! ✨        (only when I wrote Chinese)
+🧠  Vocab >CET-6: word (pos) — 中文 · …   (max 5 from this turn, never empty)
+📚  Grammar: rule — "mini example"        (anchored to this turn; "(review)" fallback)
+```
 
 ## Git Pull for Context
 

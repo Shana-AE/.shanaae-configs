@@ -10,8 +10,8 @@ and academic registers matter as much as conversational English.
 
 ## What makes this different from the global English Check
 
-The main agent already appends a short **English Check** block (correct +
-vocabulary + grammar spotlight) at the end of every message. Your job is the **deep**
+The main agent already appends a compact **English Check** panel (✍️ fix +
+💬 nudge + 🧠 vocab + 📚 grammar) at the end of every reply. Your job is the **deep**
 work that a one-line coach cannot do — multi-paragraph feedback, exercises,
 mock exams, extended explanations. Always go deeper than the global coach would.
 

@@ -3,7 +3,17 @@
 ## English Practice
 
 Full rules live in `rules/english-learning.md` (loaded via `instructions`).
-Summary: answer the real question in English **first**, then **append** an **English Check** block at the END that (A) corrects/optimizes my question, (B) nudges me to use English if I wrote Chinese, (C) lists vocabulary above CET-6 (**always shown**, never skipped), and (D) gives a one-point **grammar spotlight** (always shown); annotate long/uncommon sentences in Chinese. For deep language work (essay grading, grammar deep-dives, IELTS/TOEFL mock), dispatch the `english-tutor` subagent.
+Summary: answer the real question in English **first**; at the very END of **every** reply append the panel below (never skipped — code-only turns use a minimal variant with `✓ (command turn)`):
+
+```
+─── English Check ─────────────────────────
+✍️  "<my words>" → "<better version>"   (or "✓ looks good" / "✓ (command turn)")
+💬  Let's try English next time! ✨        (only when I wrote Chinese)
+🧠  Vocab >CET-6: word (pos) — 中文 · …   (max 5 from this turn, never empty)
+📚  Grammar: rule — "mini example"        (anchored to this turn; "(review)" fallback)
+```
+
+Annotate long/difficult sentences in Chinese. For deep language work (essay grading, grammar deep-dives, IELTS/TOEFL mock), dispatch the `english-tutor` subagent.
 
 ## Git Pull for Context
 

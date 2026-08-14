@@ -428,11 +428,19 @@ Rules are stored in `ai/user_rules/` and symlinked to tool directories.
 
 ### English Learning
 
-- Always answer the real question in English **first**; the coaching block goes at the **end** of the response
-- On every message, **append** an **English Check** block: (A) correct/optimize my question, (B) nudge me to English if I used Chinese, (C) vocabulary above CET-6 — **always shown, never skipped**, (D) a one-point **grammar spotlight** — always shown
+- Always answer the real question in English **first**; the coaching panel goes at the **very end** of the response
+- **Every** reply ends with the English Check panel — never skipped; code-only / tool-result turns use a minimal variant (`✓ (command turn)`):
+
+  ```
+  ─── English Check ─────────────────────────
+  ✍️  "<my words>" → "<better version>"   (or "✓ looks good" / "✓ (command turn)")
+  💬  Let's try English next time! ✨        (only when I wrote Chinese)
+  🧠  Vocab >CET-6: word (pos) — 中文 · …   (max 5 from this turn, never empty)
+  📚  Grammar: rule — "mini example"        (anchored to this turn; "(review)" fallback)
+  ```
 - Annotate long/difficult sentences in Chinese
 - For deep language work (essay grading, grammar deep-dives, IELTS/TOEFL mock), dispatch the `english-tutor` subagent
-- Full rule: `ai/user_rules/english-learning.md` (threshold = CET-6, consistent everywhere)
+- Full rule: `ai/user_rules/english-learning.md` (canonical — hard gate, decision table, worked example; threshold = CET-6, consistent everywhere)
 
 ### Skill Coaching (self-gating)
 
