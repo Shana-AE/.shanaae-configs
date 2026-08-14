@@ -22,6 +22,8 @@ not the tool configs.**
 | claude | `~/.claude.json` (`mcpServers`) | resolved plaintext | `disabled: true` |
 | mcp.json | `~/.claude/mcp.json` (repo, committed) | `${VAR}` (shell) | `disabled: true` |
 | codex | `~/.codex/config.toml` (`[mcp_servers.*]`, sentinel block) | `env_vars`/`bearer_token_env_var`/`env_http_headers` (env-name refs) | `enabled = false` |
+| cursor | `~/.cursor/mcp.json` + `%USERPROFILE%\.cursor\mcp.json` (live) | resolved plaintext | `disabled: true` |
+| qoder | `~/.qoder/mcp.json` + `%USERPROFILE%\.qoder\{,cn}\mcp.json` (live) | resolved plaintext | `disabled: true` |
 
 The opencode edit is **surgical** — only the `"mcp": {...}` block is rewritten;
 all comments, `plugin`, `provider`, `tools`, and `instructions` are preserved.

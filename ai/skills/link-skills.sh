@@ -6,7 +6,7 @@
 # Policy:     ai/skills/skills-policy.json  (per-agent include/exclude)
 # Output:     ai/skills/for-tools/<agent>/  (symlinks, gitignored)
 # Ownership:  also re-points each tool's `skills` symlink (opencode /
-#             claude / codex / trae) to its own pool.
+#             claude / codex / pi / cursor / qoder) to its own pool.
 #
 # Bash 3.2+ compatible (macOS /bin/bash, Linux bash 4/5). No associative
 # arrays, no gnu-only flags.
@@ -26,7 +26,7 @@ PRIVATE_DIR="$BASE_DIR/private"
 FOR_TOOLS_DIR="$BASE_DIR/for-tools"
 POLICY_FILE="$BASE_DIR/skills-policy.json"
 
-AGENTS=(opencode claude codex trae pi)
+AGENTS=(opencode claude codex pi cursor qoder)
 POLICY_TMP="$(mktemp -d "${TMPDIR:-/tmp}/link-skills.XXXXXX")"
 trap 'rm -rf "$POLICY_TMP"' EXIT
 
@@ -41,8 +41,9 @@ tool_link_path() {
         opencode) echo "$BASE_DIR/../../.config/opencode/skills" ;;
         claude)   echo "$BASE_DIR/../../.claude/skills" ;;
         codex)    echo "$BASE_DIR/../../.codex/skills" ;;
-        trae)     echo "$BASE_DIR/../../.trae/skills" ;;
         pi)       echo "$BASE_DIR/../../pi/skills" ;;
+        cursor)   echo "$BASE_DIR/../../cursor/skills" ;;
+        qoder)    echo "$BASE_DIR/../../qoder/skills" ;;
     esac
 }
 
@@ -52,8 +53,9 @@ tool_link_rel() {
         opencode) echo "../../ai/skills/for-tools/opencode" ;;
         claude)   echo "../ai/skills/for-tools/claude" ;;
         codex)    echo "../ai/skills/for-tools/codex" ;;
-        trae)     echo "../ai/skills/for-tools/trae" ;;
         pi)       echo "../ai/skills/for-tools/pi" ;;
+        cursor)   echo "../ai/skills/for-tools/cursor" ;;
+        qoder)    echo "../ai/skills/for-tools/qoder" ;;
     esac
 }
 
@@ -73,7 +75,7 @@ load_policy() {
     done < <(python3 - "$POLICY_FILE" <<'PYEOF'
 import json, sys
 
-agents = ["opencode", "claude", "codex", "trae", "pi"]
+agents = ["opencode", "claude", "codex", "pi", "cursor", "qoder"]
 p = json.load(open(sys.argv[1], encoding="utf-8"))
 
 unknown = [k for k in p if k != "defaults" and k not in agents]

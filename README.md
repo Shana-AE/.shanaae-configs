@@ -10,17 +10,17 @@ model catalogs.
 | ----------- | ----------- | ------------------------------ |
 | Claude Code | Active      | `.claude/`                       |
 | OpenCode    | Active      | `.config/opencode/`              |
-| Trae        | Active      | `.trae/` + `ai/mcp/trae.json`      |
-| Cursor      | Planned (WIP) | `.cursor/` (not yet created)    |
+| Cursor      | Active      | `cursor/`                        |
+| Qoder       | Active      | `qoder/` (Qoder + QoderCN)       |
 | Codex CLI   | Active      | `.codex/`                        |
 | dsh         | Active (dev preview) | `dsh/` (DeepSeek Harness) |
 | Pi          | Active      | `pi/`                            |
 
 > **Cross-platform support (Linux / Windows / macOS) is in design.**
 > See [`docs/superpowers/specs/2026-06-25-cross-platform-configs-design.md`](docs/superpowers/specs/2026-06-25-cross-platform-configs-design.md).
-> Today the repo runs on **Linux (WSL2)** and is partially wired into Windows
-> (Trae/Claude). The design adds an `install.py` + link manifest so every tool
-> live-links into the repo on all three OSes.
+> Today the repo runs on **Linux (WSL2)** and is wired into Windows
+> (Cursor/Qoder copy-sync + Claude). The design adds an `install.py` + link
+> manifest so every tool live-links into the repo on all three OSes.
 
 ## Project Layout (high level)
 
@@ -28,9 +28,10 @@ model catalogs.
 configs/
 ├── .claude/              # Claude Code config (rules, skills, mcp.json, settings)
 ├── .config/opencode/     # OpenCode config (opencode.jsonc, agents, plugins)
-├── .trae/                # Trae config (skills, user_rules)
+├── cursor/               # Cursor config (skills pool, AGENTS.md, user_rules)
+├── qoder/                # Qoder / QoderCN config (skills pool, AGENTS.md, user_rules)
 ├── ai/
-│   ├── mcp/              # Master MCP configs (trae.json + .example)
+│   ├── mcp/              # Master MCP server templates
 │   ├── skills/           # vendor/ + local/ + private/ (gitignored) + skills-policy.json + for-tools/<agent>/ (generated, gitignored)
 │   └── user_rules/       # English, Vue, HarmonyOS, learning, save-to-* rules
 ├── .claude-code-router/  # Claude Code Router (multi-provider routing)
@@ -45,20 +46,22 @@ See [`AGENTS.md`](AGENTS.md) for the full agent guidelines and
 
 ## Deployment Links (current)
 
-### MCP Configuration (`ai/mcp/trae.json`)
+### Skills & user rules (Cursor / Qoder)
 
-- **Linux (Remote)**: symlink to `~/.trae-server/data/Machine/mcp.json`
-- **Linux (Local)**: symlink to `~/.config/Trae/User/mcp.json`
-- **Windows**: symlink to `C:\Users\shana\AppData\Roaming\Trae\User\mcp.json`
+- **WSL**: `~/.cursor/skills` -> `cursor/skills` and `~/.qoder/skills` ->
+  `qoder/skills` (per-agent pools); rules via `cursor/user_rules` and
+  `qoder/user_rules` -> `ai/user_rules`
+- **Windows**: pools are **copy-synced** (NTFS can't junction into `\\wsl$`) by
+  `ai/skills/local/sync-cursor-qoder/scripts/sync_cursor_qoder.py` into
+  `%USERPROFILE%\.cursor`, `%USERPROFILE%\.qoder`, `%USERPROFILE%\.qoder-cn`
 
-> These paths are the current Linux/WSL values. The cross-platform design
-> replaces them with env-var references (`{env:PROJECTS_DIR}` etc.) resolved
-> per-OS at runtime.
+### MCP Configuration
 
-### Trae Configuration
-
-- **Skills**: `.trae/skills` -> `ai/skills/for-tools/trae` (per-agent pool)
-- **User Rules**: `.trae/user_rules` -> `ai/user_rules`
+- **Cursor / Qoder**: `mcp.json` written live by `sync_mcp.py` (canonical:
+  `ai/skills/local/mcp-sync/scripts/mcp_servers.json`)
+- **Claude**: `.claude/mcp.json` (repo) / `~/.claude.json` (runtime)
+- **Codex**: `.codex/config.toml` `[mcp_servers.*]` sentinel block
+- **OpenCode**: `.config/opencode/opencode.jsonc` `mcp` section
 
 ### dsh (DeepSeek Harness) & Pi
 

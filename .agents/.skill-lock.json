@@ -333,9 +333,7 @@
     "kimi-cli",
     "opencode",
     "warp",
-    "trae",
     "claude-code",
-    "openclaw",
-    "trae-cn"
+    "openclaw"
   ]
 }
