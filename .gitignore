@@ -69,15 +69,7 @@
 .claude/.gitignore
 
 # ----------------------------------------------------------------------------
-# 4. Trae相关
-# ----------------------------------------------------------------------------
-
-.trae/mcps/
-# Trae IDE tool-host runtime snapshots (native runcommand process dumps)
-.trae/toolhost/
-
-# ----------------------------------------------------------------------------
-# 4b. Codex CLI runtime (only config.toml, AGENTS.md, skills/ are tracked)
+# 4. Codex CLI runtime (only config.toml, AGENTS.md, skills/ are tracked)
 # ----------------------------------------------------------------------------
 .codex/agents/
 .codex/ambient-suggestions/
@@ -152,7 +144,6 @@ yarn-error.log*
 .sw?
 .swp
 .tmp
-.trae-server/data/User/globalStorage/.mcp_gallery_cache/
 .claude-code-router/.claude-code-router.pid
 
 # All plugin data is machine-local (marketplaces, cache, config, private plugins)
@@ -179,7 +170,6 @@ yarn-error.log*
 .secrets
 .secrets.d/
 .config/opencode/antigravity-accounts.json
-ai/mcp/trae.json
 .local/share/opencode/auth.json
 .claude/.credentials.json
 
@@ -196,10 +186,6 @@ oh-my-openagent*.bak*
 *.bak
 *.bak-*
 *.bak.*
-
-.trae/memory
-.trae/builtin
-.trae/builtin_skills
 
 # -----------------------------------------------------------------------------
 # Machine-local runtime + secret loaders (mac-mini et al.) — never committed

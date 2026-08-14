@@ -8,10 +8,10 @@ control. Some ship as `.example` templates with placeholders; others use
 
 | File                          | How it's produced                                         |
 | ----------------------------- | --------------------------------------------------------- |
-| `ai/mcp/trae.json`              | Rendered from `ai/mcp/trae.json.example` by `setup_configs.py` |
 | `.config/opencode/opencode.jsonc` | **Live file** — uses `{env:VAR}` substitution at read time; no `.example` |
 | `.claude/mcp.json`              | Live file — uses `$VAR` substitution where supported        |
 | `.codex/config.toml`            | Live file — MCP servers rendered by `sync_mcp.py`; uses env-name refs (`env_vars`, `bearer_token_env_var`); no secrets |
+| `~/.cursor/mcp.json`, `~/.qoder/mcp.json` | Live files — MCP servers rendered by `sync_mcp.py`; resolved plaintext |
 | `.secrets`                      | Manual — holds all tokens + per-OS paths (gitignored)       |
 
 ## Required Secrets
@@ -19,15 +19,10 @@ control. Some ship as `.example` templates with placeholders; others use
 Create a `.secrets` file in the **repo root** (this directory). It is a plain
 `KEY=value` file (an `export` prefix is tolerated).
 
-Only one config is still rendered from a `.example` template — `ai/mcp/trae.json`
-(from `ai/mcp/trae.json.example`) — which uses this placeholder:
-
-| Placeholder in `trae.json.example` | Key in `.secrets`   | Description                          |
-| ---------------------------------- | ------------------- | ------------------------------------ |
-| `YOUR_GITHUB_TOKEN`                  | `GITHUB_TOKEN_MCP`    | GitHub PAT for the GitHub MCP.       |
-
-All other secrets are read directly from `.secrets` / the environment at runtime
-(via OpenCode `{env:VAR}`, the router `$VAR`, or skills via curl):
+Every config is now either a live `{env:VAR}` reference or rendered by
+`sync_mcp.py` — no `.example` templates remain. Secrets are read directly from
+`.secrets` / the environment at runtime (via OpenCode `{env:VAR}`, the router
+`$VAR`, or skills via curl):
 
 | Key                    | Used by                                                            |
 | ---------------------- | ------------------------------------------------------------------ |
@@ -102,10 +97,6 @@ Subagents ship with a default model but every user can override it. The
 The `setup-configs` skill renders the `.example` files from your `.secrets`.
 
 ```bash
-# Via the Trae skill
-trae run setup-configs
-
-# Or directly
 python3 ai/skills/local/setup-configs/scripts/setup_configs.py
 ```
 

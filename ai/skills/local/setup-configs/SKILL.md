@@ -19,8 +19,7 @@ Substitutes placeholders in `.example` files with values from `.secrets`:
 python3 ai/skills/local/setup-configs/scripts/setup_configs.py
 ```
 
-Generates: `ai/mcp/trae.json`, `.config/opencode/opencode.json` from their
-`.example` templates.
+Generates: `.config/opencode/opencode.json` from its `.example` template.
 
 ## 2. `scripts/setup_claude_code.py` — Claude Code statusline setup
 

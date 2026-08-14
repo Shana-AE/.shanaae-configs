@@ -9,7 +9,7 @@
 Make the `.shanaae/configs` repo — the single source of truth for AI-agent
 configuration (skills, MCP servers, user rules, model catalogs) — usable on
 **Linux (WSL2), Windows (native), and macOS**, across **OpenCode, Claude Code,
-Trae, Cursor, Codex CLI**, and easily extensible to other tools.
+Cursor, Qoder (Qoder/QoderCN), Codex CLI**, and easily extensible to other tools.
 
 Today the repo is WSL2-only: hardcoded `/home/...` paths, bash-only scripts,
 Unix symlinks, and WSL-specific networking assumptions. This spec removes those
@@ -28,7 +28,7 @@ requires.
 | #  | Decision                                       | Choice                                                    |
 | -- | ---------------------------------------------- | --------------------------------------------------------- |
 | D1 | Target OSes                                    | Linux (WSL2), Windows (native), macOS                     |
-| D2 | Target tools                                   | OpenCode, Claude Code, Trae, Cursor, Codex CLI (+ ext.)   |
+| D2 | Target tools                                   | OpenCode, Claude Code, Cursor, Qoder, Codex CLI (+ ext.)   |
 | D3 | OS-specific values inside configs              | **Env-var first** + minimal templating escape-hatch       |
 | D4 | How configs reach each tool                    | **Live link** tool-native-location → repo path            |
 | D5 | Installer technology                           | **Single Python `install.py`** for all OSes               |
@@ -50,7 +50,7 @@ requires.
 
 ```
 Layer 1  PORTABLE CORE (the repo, as-is)
-         .config/opencode/ .claude/ .trae/ .cursor/ .codex/ ai/
+         .config/opencode/ .claude/ cursor/ qoder/ .codex/ ai/
          Source of truth. Contains NO OS-specific literals.
 
 Layer 2  OS-SPECIFIC VALUES  (env / .secrets, gitignored)
@@ -90,8 +90,6 @@ Substitution syntax per tool (the installer does **not** rewrite these — the
 tool resolves them at read time):
 - OpenCode `opencode.jsonc` → `{env:PROJECTS_DIR}`
 - Claude Code `mcp.json` → `$PROJECTS_DIR`
-- Trae `trae.json` → rendered from `trae.json.example` as `{{PROJECTS_DIR}}`
-  (Trae has no native env-sub; this is the one templating case)
 
 `AI_CONFIGS_ROOT` is exported by the installer into a sourced
 `env.sh`/`env.ps1` (or the user's shell profile) so scripts and docs can refer
@@ -107,9 +105,8 @@ holds runtime state (e.g. `~/.claude/history`, `statsig`).
 | opencode         | `.config/opencode/`                | `~/.config/opencode`               | `%USERPROFILE%\.config\opencode`     | dir    |
 | claude           | `.claude/rules`, `.claude/skills`, `.claude/mcp.json`, `.claude/settings.json`, `.claude/config.json` | same paths under `~/.claude` | same under `%USERPROFILE%\.claude` | mixed  |
 | claude-router    | `.claude-code-router/`             | `~/.claude-code-router`            | `%USERPROFILE%\.claude-code-router`  | dir    |
-| trae             | `.trae/`                           | `~/.trae`                          | `%APPDATA%\Trae\User` (selective)    | mixed  |
-| trae-mcp         | `ai/mcp/trae.json`                 | `~/.trae/mcp.json`                 | `%APPDATA%\Trae\User\mcp.json`       | file   |
-| cursor           | `.cursor/`                         | `~/.cursor`                        | `%USERPROFILE%\.cursor`              | dir    |
+| cursor           | `cursor/skills`, `cursor/AGENTS.md`, `cursor/user_rules` | `~/.cursor/skills`, `~/.cursor/rules` | `%USERPROFILE%\.cursor\skills` (copy-synced — can't junction into `\\wsl$`) | mixed  |
+| qoder            | `qoder/skills`, `qoder/AGENTS.md`, `qoder/user_rules` | `~/.qoder/skills`, `~/.qoder/rules` | `%USERPROFILE%\.qoder` + `%USERPROFILE%\.qoder-cn` (copy-synced) | mixed  |
 | codex            | `.codex/`                          | `~/.codex`                         | `%USERPROFILE%\.codex`               | dir ✅ implemented |
 
 `mode` controls link granularity: `dir` = link the whole directory;
@@ -168,10 +165,9 @@ backups are timestamped and gitignored. Never deletes a non-backed-up target.
 | new    | `install/manifest.json`                             | declarative link manifest (§6)                                                      |
 | new    | `ai/skills/link_skills.py`                          | portable rewrite of link-skills.sh                                                  |
 | new    | `.secrets.example`                                  | committed; all vars with per-OS commented samples                                   |
-| new    | `.cursor/`, `.codex/`                                 | minimal config scaffolding for the two new tools                                    | `.codex/` done (config.toml + AGENTS.md + skills symlink); `.cursor/` pending |
+| new    | `cursor/`, `qoder/`, `.codex/`                       | minimal config scaffolding for the three tools                                      | `.codex/` + `cursor/` + `qoder/` done (AGENTS.md + skills symlink + mcp via mcp-sync) |
 | edit   | `.config/opencode/opencode.jsonc`                   | `/home/shanaae/projects`→`{env:PROJECTS_DIR}`; minimax→`{env:MINIMAX_OUTPUT_DIR}`     |
 | edit   | `.claude/mcp.json`                                  | filesystem arg → `$PROJECTS_DIR`                                                    |
-| edit   | `ai/mcp/trae.json.example`                          | paths → `{{PROJECTS_DIR}}` (the one templating case)                                |
 | edit   | `AGENTS.md`, `.config/opencode/AGENTS.md`             | Obsidian path → per-OS documented variants + `$OBSIDIAN_VAULT_DIR`                    |
 | edit   | `ai/skills/local/get-secret-token/SKILL.md`           | hardcoded repo path → `$AI_CONFIGS_ROOT/.secrets`                                    |
 | edit   | `CONFIG_README.md`                                  | hardcoded root → `$AI_CONFIGS_ROOT`                                                  |
@@ -184,7 +180,7 @@ backups are timestamped and gitignored. Never deletes a non-backed-up target.
 
 `setup_configs.py` already renders `*.example` → real config via a replacement
 map. We extend that map with the §5 path vars **only** for configs whose tool
-cannot env-substitute (Trae is the only known case). Everything else uses
+cannot env-substitute. Everything else uses
 native `{env:}`/`$VAR`, resolved by the tool at read time. No new templating
 engine is introduced.
 
@@ -227,13 +223,13 @@ tool is self-documenting.
 | Windows file-symlink needs Developer Mode   | Junction for dirs (no admin); copy+sync fallback for files (§6).        |
 | User hardcodes a path anyway → breaks port  | Add a CI/lint grep for `/home/`, `C:\Users`, `/mnt/` in tracked configs. |
 | Whole-tool-dir link clobbers runtime state  | Manifest uses per-file/per-subdir `mode` (§6), never blind whole-dir.   |
-| Trae's native location differs by version   | Manifest keeps trae target overridable; document lookup in README.      |
+| Windows IDE (Cursor/Qoder) can't junction into `\\wsl$` | WSL-side symlinks + Windows-side **copy-sync** (`sync_cursor_qoder.py`) re-run after pool changes (§6). |
 | `AI_CONFIGS_ROOT` not set in non-install shells | Installer emits `env.sh`/`env.ps1` + offers profile append.             |
 
 ## 14. Open Questions (to resolve in implementation plan)
 
 1. Should `install.py` also offer to append `source .../env.sh` to the user's
    `.bashrc`/`.zshrc`/PowerShell `$PROFILE`, or only emit the file?
-2. Cursor/Codex initial config content — mirror Claude Code's structure
+2. Cursor/Qoder initial config content — mirror Claude Code's structure
    (rules + skills + mcp), or minimal empty scaffolding?
 3. Whether to add the CI grep guard (Risks) now or as a follow-up.

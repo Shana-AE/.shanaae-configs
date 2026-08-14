@@ -13,17 +13,6 @@ SECRETS_FILE = os.path.join(PROJECT_ROOT, ".secrets")
 
 CONFIG_MAPPINGS = [
     {
-        "example": "ai/mcp/trae.json.example",
-        "target": "ai/mcp/trae.json",
-        "replacements": {
-            "YOUR_FIGMA_API_KEY": "FIGMA_ACCESS_TOKEN",
-            "YOUR_CONTEXT7_API_KEY": "CONTEXT7_API_KEY",
-            "YOUR_EUDIC_AUTH_TOKEN": "EUDIC_TOKEN",
-            "YOUR_GITHUB_TOKEN": "GITHUB_TOKEN_MCP",
-            "YOUR_OBSIDIAN_API_KEY": "OBSIDIAN_API_KEY"
-        }
-    },
-    {
         "example": ".config/opencode/opencode.json.example",
         "target": ".config/opencode/opencode.json",
         "replacements": {

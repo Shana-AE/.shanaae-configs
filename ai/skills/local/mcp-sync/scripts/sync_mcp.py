@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Sync MCP server config + enabled/disabled status across opencode, Claude Code, and Codex.
+r"""Sync MCP server config + enabled/disabled status across opencode, Claude Code, Codex, Cursor, and Qoder.
 
 Source of truth: mcp_servers.json (next to this script).
 Targets:
@@ -11,6 +11,9 @@ Targets:
                (full rewrite of mcpServers only)
   - codex    : ~/.codex/config.toml (repo, symlinked) -> [mcp_servers.*] TOML tables, env_var refs,
                enabled flags (sentinel-block merge: preserves base settings + provider tables)
+  - cursor   : ~/.cursor/mcp.json + %USERPROFILE%\.cursor\mcp.json -> "mcpServers",
+               resolved plaintext, disabled flags (VS Code-style IDE config)
+  - qoder    : ~/.qoder/mcp.json + %USERPROFILE%\.qoder\{,cn}\mcp.json -> same as cursor
 
 Usage:
   python3 sync_mcp.py                      # dry-run (print diff, write nothing)
@@ -39,7 +42,33 @@ CLAUDE_JSON = os.path.expanduser("~/.claude.json")
 MCP_JSON = os.path.expanduser("~/.claude/mcp.json")
 CODEX_CONFIG = os.path.expanduser("~/.codex/config.toml")
 
-TARGETS = {"opencode": OPENCODE, "claude": CLAUDE_JSON, "mcp.json": MCP_JSON, "codex": CODEX_CONFIG}
+# IDE (VS Code-style mcp.json) targets. Secrets are resolved to plaintext like
+# the claude runtime target (these IDEs have no {env:VAR} substitution in
+# mcp.json). Windows profile paths are included only when /mnt/c is mounted.
+def _win_user_home() -> str:
+    return "/mnt/c/Users/shana"
+
+
+def _ide_targets(wsl_path: str, *win_rels: str) -> list[str]:
+    paths = [os.path.expanduser(wsl_path)]
+    if os.path.isdir("/mnt/c"):
+        for rel in win_rels:
+            paths.append(os.path.join(_win_user_home(), rel))
+    return paths
+
+CURSOR_TARGETS = _ide_targets("~/.cursor/mcp.json", ".cursor/mcp.json")
+QODER_TARGETS = _ide_targets("~/.qoder/mcp.json", ".qoder/mcp.json", ".qoder-cn/mcp.json")
+
+TARGETS = {
+    "opencode": [OPENCODE],
+    "claude": [CLAUDE_JSON],
+    "mcp.json": [MCP_JSON],
+    "codex": [CODEX_CONFIG],
+    "cursor": CURSOR_TARGETS,
+    "qoder": QODER_TARGETS,
+}
+# Targets whose rendered config contains resolved secrets — chmod 0600 on write.
+SECRET_BEARING = {"claude", "cursor", "qoder"}
 ENV_PATTERN = re.compile(r"\{env:([A-Z0-9_]+)\}")
 # Codex sentinel delimiters — canonical [mcp_servers.*] tables between these
 # lines are regenerated from the source of truth; foreign content placed here
@@ -179,6 +208,25 @@ def to_mcpjson(name, spec) -> dict:
         entry["url"] = transform(spec["url"], "shell")
         if spec.get("headers"):
             entry["headers"] = transform_obj(spec["headers"], "shell")
+    if not spec.get("enabled", False):
+        entry["disabled"] = True
+    return entry
+
+
+def to_ide(name, spec) -> dict:
+    """VS Code-style IDE mcp.json entry (Cursor / Qoder): resolved plaintext
+    secrets (no {env:} substitution in these IDEs' mcp.json), disabled flag."""
+    entry: dict = {}
+    if spec.get("type") == "local":
+        cmd = transform_obj(spec.get("command", []), "plain")
+        entry["command"] = cmd[0]
+        entry["args"] = cmd[1:]
+        entry["env"] = transform_obj(spec.get("env") or {}, "plain")
+    else:
+        entry["type"] = "http"
+        entry["url"] = transform(spec["url"], "plain")
+        if spec.get("headers"):
+            entry["headers"] = transform_obj(spec["headers"], "plain")
     if not spec.get("enabled", False):
         entry["disabled"] = True
     return entry
@@ -405,6 +453,11 @@ def render_mcp_json(ordered) -> str:
     return json.dumps(data, indent=2, ensure_ascii=False) + "\n"
 
 
+def render_ide_json(ordered) -> str:
+    data = {"mcpServers": {name: to_ide(name, spec) for name, spec in ordered}}
+    return json.dumps(data, indent=2, ensure_ascii=False) + "\n"
+
+
 def _segment_codex_sentinel(inner, canonical_names):
     """Split sentinel inner text into ordered segments.
 
@@ -567,31 +620,35 @@ def redact(s: str) -> str:
 
 
 def do_target(name, new_text, apply):
-    path = TARGETS[name]
-    old = ""
-    if os.path.exists(path):
-        with open(path, encoding="utf-8") as f:
-            old = f.read()
-    if old == new_text:
-        print(f"  [{name}] already in sync — no changes.")
-        return False
-    diff = list(unified_diff(
-        old.splitlines(keepends=True), new_text.splitlines(keepends=True),
-        fromfile=f"{name} (current)", tofile=f"{name} (target)", n=1))
-    print(f"  [{name}] DRIFT — changes:")
-    sys.stdout.write(redact("".join(diff)))
-    if apply:
-        bak = path + ".bak." + datetime.now().strftime("%Y%m%dT%H%M%S")
+    """Write new_text to every path of a multi-path target (e.g. WSL + Windows)."""
+    paths = TARGETS[name]
+    changed_any = False
+    for path in paths:
+        old = ""
         if os.path.exists(path):
-            shutil.copy2(path, bak)
-            os.chmod(bak, 0o600)
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "w", encoding="utf-8") as f:
-            f.write(new_text)
-        if path == CLAUDE_JSON:
-            os.chmod(path, 0o600)
-        print(f"  [{name}] written (backup: {bak})")
-    return True
+            with open(path, encoding="utf-8") as f:
+                old = f.read()
+        if old == new_text:
+            print(f"  [{name}] {os.path.basename(path)} already in sync — no changes.")
+            continue
+        print(f"  [{name}] {path} DRIFT — changes:")
+        diff = list(unified_diff(
+            old.splitlines(keepends=True), new_text.splitlines(keepends=True),
+            fromfile=f"{name} (current)", tofile=f"{name} (target)", n=1))
+        sys.stdout.write(redact("".join(diff)))
+        changed_any = True
+        if apply:
+            bak = path + ".bak." + datetime.now().strftime("%Y%m%dT%H%M%S")
+            if os.path.exists(path):
+                shutil.copy2(path, bak)
+                os.chmod(bak, 0o600)
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(new_text)
+            if name in SECRET_BEARING:
+                os.chmod(path, 0o600)
+            print(f"  [{name}] written (backup: {bak})")
+    return changed_any
 
 
 def main():
@@ -616,6 +673,8 @@ def main():
         "claude": render_claude_json(ordered),
         "mcp.json": render_mcp_json(ordered),
         "codex": render_codex(ordered),
+        "cursor": render_ide_json(ordered),
+        "qoder": render_ide_json(ordered),
     }
     targets = ["opencode", "mcp.json", "codex"] if args.repo_only else (
         [args.target] if args.target else list(TARGETS))
