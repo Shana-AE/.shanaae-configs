@@ -60,6 +60,18 @@
         "AGENTMEMORY_SECRET": "{env:AGENTMEMORY_SECRET}"
       }
     },
+    // DevEco CLI MCP: ArkTS / C/C++ static syntax analysis (`devecocli serve mcp`,
+    // tools: check, restart). Requires DEVECO_CLI_CLT_PATH stub (set inline below
+    // and in ~/.zshrc) — devecocli hard-gates on toolchain presence even for
+    // non-build commands; real DevEco Studio toolchain is Windows-only.
+    "deveco-mcp": {
+      "type": "local",
+      "command": ["devecocli", "serve", "mcp"],
+      "environment": {
+        "DEVECO_CLI_CLT_PATH": "/home/shanaae/.local/share/deveco-clt"
+      },
+      "enabled": true
+    },
     // Connects to Brave on Windows via the debug port. Brave must be running with:
     // brave.exe --remote-debugging-port=9222 --user-data-dir="C:\Users\shana\brave-debug"
     // WSL is in Mirrored mode (.wslconfig: networkingMode=Mirrored + hostAddressLoopback=true),
@@ -314,6 +326,9 @@
         "anthropic/claude-fable-5": {
           "name": "Anthropic/Claude Fable 5 (Qiniu)", "reasoning": true, "attachment": true, "modalities": {"input": ["text", "image", "pdf"], "output": ["text"]}, "limit": {"context": 1000000, "output": 128000}
         },
+        "anthropic/claude-fable-5.1": {
+          "name": "Anthropic/Claude Fable 5.1 (Qiniu)", "reasoning": true, "attachment": true, "modalities": {"input": ["text", "image", "pdf"], "output": ["text"]}, "limit": {"context": 1000000, "output": 128000}
+        },
         "anthropic/claude-opus-5": {"name": "anthropic/claude-opus-5 (Qiniu)", "reasoning": true, "attachment": true, "modalities": {"input": ["text", "image", "pdf"], "output": ["text"]}, "limit": {"context": 1000000, "output": 128000}},
         "anthropic/claude-sonnet-5": {"name": "anthropic/claude-sonnet-5 (Qiniu)", "limit": {"context": 200000, "output": 64000}},
         "arcee-ai/trinity-mini": {
@@ -349,9 +364,6 @@
         },
         "deepseek-v3": {
           "name": "DeepSeek-V3 (Qiniu)", "limit": {"context": 128000, "output": 128000}
-        },
-        "deepseek-v3-0324": {
-          "name": "DeepSeek-V3-0324 (Qiniu)", "limit": {"context": 128000, "output": 128000}
         },
         "deepseek-v3.1": {
           "name": "DeepSeek-V3.1 (Qiniu)", "reasoning": true, "interleaved": {"field": "reasoning_content"}, "limit": {"context": 128000, "output": 128000}
@@ -405,6 +417,20 @@
             "high": {"reasoningEffort": "high"},
             "max": {"reasoningEffort": "max"}
           },
+          "limit": {"context": 1000000, "output": 384000}
+        },
+        "deepseek/deepseek-v4-flash-vision-exp": {
+          "name": "DeepSeek V4 Flash Vision Exp (Qiniu)",
+          "reasoning": true,
+          "interleaved": { "field": "reasoning_content" },
+          "variants": {
+            "low": {"disabled": true},
+            "medium": {"disabled": true},
+            "high": {"reasoningEffort": "high"},
+            "max": {"reasoningEffort": "max"}
+          },
+          "attachment": true,
+          "modalities": {"input": ["text", "image"], "output": ["text"]},
           "limit": {"context": 1000000, "output": 384000}
         },
         "deepseek/deepseek-v4-pro": {
@@ -506,6 +532,17 @@
         },
         "google/gemini-3.5-flash-lite": {"name": "google/gemini-3.5-flash-lite (Qiniu)", "reasoning": true, "attachment": true, "modalities": {"input": ["text", "image", "video", "audio", "pdf"], "output": ["text"]}, "limit": {"context": 1000000, "output": 64000}},
         "google/gemini-3.6-flash": {"name": "google/gemini-3.6-flash (Qiniu)", "reasoning": true, "attachment": true, "modalities": {"input": ["text", "image", "video", "audio", "pdf"], "output": ["text"]}, "limit": {"context": 1000000, "output": 64000}},
+        "google/gemini-3.7-flash": {
+          "name": "Gemini 3.7 Flash (Qiniu)",
+          "reasoning": true,
+          "variants": {
+            "low": {"reasoningEffort": "low"},
+            "high": {"reasoningEffort": "high"}
+          },
+          "attachment": true,
+          "modalities": {"input": ["text", "image", "video", "audio", "pdf"], "output": ["text"]},
+          "limit": {"context": 1000000, "output": 64000}
+        },
         "gpt-oss-120b": {
           "name": "GPT-OSS-120B (Qiniu)", "reasoning": true, "limit": {"context": 128000, "output": 4096}
         },
@@ -611,6 +648,28 @@
         "qwen/qwen3.7-max": {
           "name": "Qwen/Qwen3.7-Max (Qiniu)", "reasoning": true, "limit": {"context": 1000000, "output": 64000}
         },
+        "qwen/qwen3.7-plus": {
+          "name": "qwen/qwen3.7-plus (Qiniu)",
+          "reasoning": true,
+          "variants": {
+            "low": {"reasoningEffort": "low"},
+            "medium": {"reasoningEffort": "medium"},
+            "high": {"reasoningEffort": "high"}
+          },
+          "limit": {"context": 1000000, "output": 64000}
+        },
+        "qwen/qwen3.8-flash-next": {
+          "name": "qwen/qwen3.8-flash-next (Qiniu)",
+          "reasoning": true,
+          "variants": {
+            "low": {"reasoningEffort": "low"},
+            "medium": {"reasoningEffort": "medium"},
+            "high": {"reasoningEffort": "high"}
+          },
+          "attachment": true,
+          "modalities": {"input": ["text", "image"], "output": ["text"]},
+          "limit": {"context": 1000000, "output": 64000}
+        },
         "qwen/qwen3.8-max": {
           "name": "Qwen/Qwen3.8-Max (Qiniu)", "reasoning": true, "limit": {"context": 1000000, "output": 64000}
         },
@@ -663,6 +722,16 @@
         "tencent/hy3-preview": {
           "name": "Tencent/Hy3-Preview (Qiniu)", "reasoning": true, "limit": {"context": 262144, "output": 262144}
         },
+        "tencent/hy4-preview": {
+          "name": "tencent/hy4-preview (Qiniu)",
+          "reasoning": true,
+          "variants": {
+            "low": {"reasoningEffort": "low"},
+            "high": {"reasoningEffort": "high"},
+            "fast": {"reasoningEffort": "no_think"}
+          },
+          "limit": {"context": 262144, "output": 262144}
+        },
         "x-ai/grok-4-fast": {"name": "x-AI/Grok-4-Fast (Qiniu)", "reasoning": true, "attachment": true, "modalities": {"input": ["text", "image", "audio", "video"], "output": ["text"]}, "limit": {"context": 2000000, "output": 2000000}},
         "x-ai/grok-4-fast-non-reasoning": {
           "name": "xAI/Grok 4 Fast Non-Reasoning (Qiniu)", "reasoning": true, "attachment": true, "modalities": {"input": ["text", "image", "audio", "video"], "output": ["text"]}, "limit": {"context": 2000000, "output": 128000}
@@ -691,6 +760,18 @@
           "name": "xAI/Grok 4.3 (Qiniu)", "reasoning": true, "attachment": true, "modalities": {"input": ["text", "image"], "output": ["text"]}, "limit": {"context": 1000000, "output": 128000}
         },
         "x-ai/grok-4.5": {"name": "x-ai/grok-4.5 (Qiniu)", "limit": {"context": 200000, "output": 64000}},
+        "x-ai/grok-4.6": {
+          "name": "xAI/Grok 4.6 (Qiniu)",
+          "reasoning": true,
+          "variants": {
+            "low": {"reasoningEffort": "low"},
+            "medium": {"reasoningEffort": "medium"},
+            "high": {"reasoningEffort": "high"}
+          },
+          "attachment": true,
+          "modalities": {"input": ["text", "image"], "output": ["text"]},
+          "limit": {"context": 1000000, "output": 128000}
+        },
         "x-ai/grok-code-fast-1": {
           "name": "xAI/Grok Code Fast 1 (Qiniu)", "reasoning": true, "attachment": true, "limit": {"context": 256000, "output": 128000}
         },
@@ -708,6 +789,30 @@
         },
         "z-ai/glm-5.2": {
           "name": "Z-AI/GLM-5.2 (Qiniu)", "reasoning": true, "limit": {"context": 1000000, "output": 128000}
+        },
+        "z-ai/glm-5.3": {
+          "name": "Z-AI/GLM-5.3 (Qiniu)",
+          "reasoning": true,
+          "variants": {
+            "low": {"reasoningEffort": "low"},
+            "medium": {"disabled": true},
+            "high": {"reasoningEffort": "high"},
+            "max": {"reasoningEffort": "max"}
+          },
+          "limit": {"context": 1000000, "output": 128000}
+        },
+        "z-ai/glm-5.3-flash": {
+          "name": "Z-AI/GLM-5.3-Flash (Qiniu)",
+          "reasoning": true,
+          "variants": {
+            "low": {"reasoningEffort": "low"},
+            "medium": {"disabled": true},
+            "high": {"reasoningEffort": "high"},
+            "max": {"reasoningEffort": "max"}
+          },
+          "attachment": true,
+          "modalities": {"input": ["text", "image"], "output": ["text"]},
+          "limit": {"context": 1000000, "output": 128000}
         }
       }
     }
