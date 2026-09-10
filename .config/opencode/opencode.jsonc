@@ -469,6 +469,20 @@
           },
           "limit": {"context": 1000000, "output": 384000}
         },
+        "deepseek/deepseek-v4.1-flash": {
+          "name": "DeepSeek-V4.1-Flash (Qiniu)",
+          "reasoning": true,
+          "interleaved": { "field": "reasoning_content" },
+          "variants": {
+            "low": {"disabled": true},
+            "medium": {"disabled": true},
+            "high": {"reasoningEffort": "high"},
+            "max": {"reasoningEffort": "max"}
+          },
+          "attachment": true,
+          "modalities": {"input": ["text", "image"], "output": ["text"]},
+          "limit": {"context": 1000000, "output": 384000}
+        },
         "doubao-1.5-pro-32k": {
           "name": "Doubao-1.5-Pro-32k (Qiniu)", "limit": {"context": 128000, "output": 12000}
         },
@@ -543,6 +557,7 @@
           "modalities": {"input": ["text", "image", "video", "audio", "pdf"], "output": ["text"]},
           "limit": {"context": 1000000, "output": 64000}
         },
+        "google/gemini-3.8-flash": {"name": "Gemini 3.8 Flash (Qiniu)", "reasoning": true, "attachment": true, "modalities": {"input": ["text", "image", "video", "audio", "pdf"], "output": ["text"]}, "limit": {"context": 1048576, "output": 65536}},
         "gpt-oss-120b": {
           "name": "GPT-OSS-120B (Qiniu)", "reasoning": true, "limit": {"context": 128000, "output": 4096}
         },
@@ -627,6 +642,7 @@
         "openai/gpt-5.6-luna": {"name": "GPT-5.6 Luna (Qiniu)", "reasoning": true, "attachment": true, "modalities": {"input": ["text", "image", "pdf"], "output": ["text"]}, "limit": {"context": 1050000, "output": 128000}},
         "openai/gpt-5.6-sol": {"name": "GPT-5.6 Sol (Qiniu)", "reasoning": true, "attachment": true, "modalities": {"input": ["text", "image", "pdf"], "output": ["text"]}, "limit": {"context": 1050000, "output": 128000}},
         "openai/gpt-5.6-terra": {"name": "GPT-5.6 Terra (Qiniu)", "reasoning": true, "attachment": true, "modalities": {"input": ["text", "image", "pdf"], "output": ["text"]}, "limit": {"context": 1050000, "output": 128000}},
+        "openai/gpt-6-astra": {"name": "GPT-6 Astra (Qiniu)", "reasoning": true, "attachment": true, "modalities": {"input": ["text", "image", "pdf"], "output": ["text"]}, "limit": {"context": 1050000, "output": 128000}},
         "qwen-max-2025-01-25": {
           "name": "Qwen-Max-2025-01-25 (Qiniu)", "limit": {"context": 128000, "output": 128000}
         },
