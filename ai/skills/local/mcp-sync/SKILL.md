@@ -39,9 +39,14 @@ that is neither canonical nor in that allowlist is treated as a removed server
 and dropped. Base settings, provider tables (written by cc-switch), and user
 comments outside the sentinels are preserved.
 
-`exclude_from_opencode` (default: `context7`, `codegraph`) lists servers managed
-by the oh-my-openagent plugin at runtime; they are omitted from opencode.jsonc
-but still written to the Claude and Codex configs.
+`exclude_from_<target>` keys in the canonical file list servers omitted from
+that target entirely (stale entries dropped on render) while other targets keep
+them. Supported targets: `opencode`, `claude`, `mcpjson` (for the `mcp.json`
+target), `codex`, `cursor`, `qoder`. Example: `exclude_from_opencode`
+(default: `context7`, `codegraph`) lists servers managed by the oh-my-openagent
+plugin at runtime; `exclude_from_opencode`/`exclude_from_cursor`/
+`exclude_from_qoder` = `figma` (2026-09-07) because Figma's hosted MCP only
+authenticates Claude Code and Codex — those three use `Figma-Desktop` instead.
 
 ### Codex env-var mapping
 

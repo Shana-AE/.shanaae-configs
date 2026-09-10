@@ -47,6 +47,7 @@ args = ["-y", "chrome-devtools-mcp@latest", "--browser-url=http://127.0.0.1:9222
 command = "codegraph"
 args = ["serve", "--mcp"]
 
+# Desktop Dev Mode MCP server (RE-ENABLED 2026-09-07 after the 2026-09-04 tools/list hang was resolved). Requires the Figma desktop app running with Dev Mode MCP server enabled (port 3845). In WSL, 127.0.0.1 reaches Windows via mirrored networking. This is the fallback for clients NOT in Figma's MCP Catalog (opencode, Cursor, Qoder).
 [mcp_servers.Figma-Desktop]
 url = "http://127.0.0.1:3845/mcp"
 
@@ -180,4 +181,14 @@ js_repl = false
 
 [projects."/Users/shanaae/.openclaw/workspace"]
 trust_level = "trusted"
+
+# DevEco CLI MCP: ArkTS / C/C++ static syntax analysis (devecocli serve mcp, tools: check, restart). Requires DEVECO_CLI_CLT_PATH stub — devecocli hard-gates on toolchain presence even for non-build commands; real DevEco Studio toolchain is Windows-only. (Backfilled into canonical 2026-09-04: was opencode.jsonc-only and sync would have dropped it.)
+[mcp_servers.deveco-mcp]
+command = "devecocli"
+args = ["serve", "mcp"]
+env = { "DEVECO_CLI_CLT_PATH" = "/home/shanaae/.local/share/deveco-clt" }
+
+# Figma hosted remote MCP (Figma-recommended). OAuth-only — no static token/headers. Only Claude Code and Codex can authenticate (Figma's MCP Catalog). Excluded from opencode/cursor/qoder via exclude_from_<target>; those use Figma-Desktop instead.
+[mcp_servers.figma]
+url = "https://mcp.figma.com/mcp"
 # END mcp-sync
