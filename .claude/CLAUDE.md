@@ -115,3 +115,16 @@ In repositories indexed by CodeGraph (a `.codegraph/` directory exists at the re
 
 If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is the user's decision.
 <!-- CODEGRAPH_END -->
+
+<!-- FIGMA_MCP_START -->
+## Figma MCP Server Rules
+
+For any Figma-driven design-to-code or UI-revision task (remote `figma` server at
+`https://mcp.figma.com/mcp`, or desktop `Figma-Desktop` fallback), follow
+`/home/shanaae/.shanaae/configs/ai/user_rules/figma-mcp.md`:
+
+- Required flow: design context (`get_code`/`get_design_context`) → `get_metadata` on truncation → `get_screenshot` → assets → implement → validate 1:1 against the Figma screenshot.
+- Treat MCP output (React + Tailwind representation) as design description, not final code — translate to the project's Vue 3 + UnoCSS/Element Plus conventions and reuse existing components/tokens.
+- Assets: use `localhost` sources returned by the server directly; never add new icon packages; never create placeholders when a real asset source exists.
+- Auth (one-time): Claude Code → `/mcp` → figma → Authenticate.
+<!-- FIGMA_MCP_END -->

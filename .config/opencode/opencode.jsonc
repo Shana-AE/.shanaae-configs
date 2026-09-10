@@ -60,18 +60,6 @@
         "AGENTMEMORY_SECRET": "{env:AGENTMEMORY_SECRET}"
       }
     },
-    // DevEco CLI MCP: ArkTS / C/C++ static syntax analysis (`devecocli serve mcp`,
-    // tools: check, restart). Requires DEVECO_CLI_CLT_PATH stub (set inline below
-    // and in ~/.zshrc) — devecocli hard-gates on toolchain presence even for
-    // non-build commands; real DevEco Studio toolchain is Windows-only.
-    "deveco-mcp": {
-      "type": "local",
-      "command": ["devecocli", "serve", "mcp"],
-      "environment": {
-        "DEVECO_CLI_CLT_PATH": "/home/shanaae/.local/share/deveco-clt"
-      },
-      "enabled": true
-    },
     // Connects to Brave on Windows via the debug port. Brave must be running with:
     // brave.exe --remote-debugging-port=9222 --user-data-dir="C:\Users\shana\brave-debug"
     // WSL is in Mirrored mode (.wslconfig: networkingMode=Mirrored + hostAddressLoopback=true),
@@ -86,6 +74,19 @@
         "--no-usage-statistics"
       ]
     },
+    // DevEco CLI MCP: ArkTS / C/C++ static syntax analysis (devecocli serve mcp, tools: check, restart). Requires DEVECO_CLI_CLT_PATH stub — devecocli hard-gates on toolchain presence even for non-build commands; real DevEco Studio toolchain is Windows-only. (Backfilled into canonical 2026-09-04: was opencode.jsonc-only and sync would have dropped it.)
+    "deveco-mcp": {
+      "type": "local",
+      "command": [
+        "devecocli",
+        "serve",
+        "mcp"
+      ],
+      "environment": {
+        "DEVECO_CLI_CLT_PATH": "/home/shanaae/.local/share/deveco-clt"
+      }
+    },
+    // Desktop Dev Mode MCP server (RE-ENABLED 2026-09-07 after the 2026-09-04 tools/list hang was resolved). Requires the Figma desktop app running with Dev Mode MCP server enabled (port 3845). In WSL, 127.0.0.1 reaches Windows via mirrored networking. This is the fallback for clients NOT in Figma's MCP Catalog (opencode, Cursor, Qoder).
     "Figma-Desktop": {
       "type": "remote",
       "url": "http://127.0.0.1:3845/mcp"
@@ -241,7 +242,8 @@
     "~/.shanaae/configs/ai/user_rules/save-to-eudic.md",
     "~/.shanaae/configs/ai/user_rules/save-to-obsidian.md",
     "~/.config/opencode/plugin/shell-strategy/shell_strategy.md",
-    "~/.shanaae/configs/ai/user_rules/secret-hygiene.md"
+    "~/.shanaae/configs/ai/user_rules/secret-hygiene.md",
+    "~/.shanaae/configs/ai/user_rules/figma-mcp.md"
   ],
   // Chrome-DevTools-MCP tools are GLOBALLY OFF (zero token cost in main/plan context).
   // They are re-enabled only inside the `web-devtools` subagent (see agents/web-devtools.md),

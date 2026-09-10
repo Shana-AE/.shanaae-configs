@@ -15,6 +15,10 @@ Targets:
                resolved plaintext, disabled flags (VS Code-style IDE config)
   - qoder    : ~/.qoder/mcp.json + %USERPROFILE%\.qoder\{,cn}\mcp.json -> same as cursor
 
+Per-target exclusion: "exclude_from_<target>" keys in the canonical file
+("mcp.json" target -> "exclude_from_mcpjson") list servers omitted from that
+target entirely (stale entries dropped) while other targets keep them.
+
 Usage:
   python3 sync_mcp.py                      # dry-run (print diff, write nothing)
   python3 sync_mcp.py --apply              # write all targets (with .bak backups)
@@ -143,7 +147,7 @@ def transform_obj(obj, style):
 # --------------------------------------------------------------------------- #
 # Canonical load
 # --------------------------------------------------------------------------- #
-def load_canonical() -> tuple[list[dict], set[str]]:
+def load_canonical() -> tuple[list[dict], dict[str, set[str]]]:
     with open(CANONICAL, encoding="utf-8") as f:
         data = json.load(f)
     servers = data["servers"]
@@ -151,8 +155,15 @@ def load_canonical() -> tuple[list[dict], set[str]]:
         servers.items(),
         key=lambda kv: (not kv[1].get("enabled", False), kv[0].lower()),
     )
-    exclude_opencode = set(data.get("exclude_from_opencode", []))
-    return ordered, exclude_opencode
+    # Per-target exclusion lists: "exclude_from_<target>" in the canonical file
+    # ("mcp.json" target -> key "exclude_from_mcpjson"). Excluded servers are
+    # omitted from that target's rendered config entirely (and any stale
+    # entries for them are dropped), while remaining present in other targets.
+    excludes = {
+        target: set(data.get(f"exclude_from_{target.replace('.', '')}", []))
+        for target in TARGETS
+    }
+    return ordered, excludes
 
 
 # --------------------------------------------------------------------------- #
@@ -441,20 +452,30 @@ def render_opencode(ordered, exclude) -> str:
     return text[:line_start] + new_block + text[end_idx + 1:]
 
 
-def render_claude_json(ordered) -> str:
+def render_claude_json(ordered, exclude=frozenset()) -> str:
     with open(CLAUDE_JSON, encoding="utf-8") as f:
         data = json.load(f)
-    data["mcpServers"] = {name: to_claude(name, spec) for name, spec in ordered}
+    data["mcpServers"] = {
+        name: to_claude(name, spec) for name, spec in ordered if name not in exclude
+    }
     return json.dumps(data, indent=2, ensure_ascii=False) + "\n"
 
 
-def render_mcp_json(ordered) -> str:
-    data = {"mcpServers": {name: to_mcpjson(name, spec) for name, spec in ordered}}
+def render_mcp_json(ordered, exclude=frozenset()) -> str:
+    data = {
+        "mcpServers": {
+            name: to_mcpjson(name, spec) for name, spec in ordered if name not in exclude
+        }
+    }
     return json.dumps(data, indent=2, ensure_ascii=False) + "\n"
 
 
-def render_ide_json(ordered) -> str:
-    data = {"mcpServers": {name: to_ide(name, spec) for name, spec in ordered}}
+def render_ide_json(ordered, exclude=frozenset()) -> str:
+    data = {
+        "mcpServers": {
+            name: to_ide(name, spec) for name, spec in ordered if name not in exclude
+        }
+    }
     return json.dumps(data, indent=2, ensure_ascii=False) + "\n"
 
 
@@ -502,6 +523,20 @@ def _segment_codex_sentinel(inner, canonical_names):
         while pending and (pending[-1].lstrip().startswith("#") or pending[-1].strip() == ""):
             pending.pop()
 
+    def strip_trailing_comments_from_last_foreign():
+        """A foreign section's body-scan runs until the next header line, so it
+        absorbs the blank + leading comment lines that belong to the *next*
+        canonical server. When that server is regenerated (or dropped), strip
+        those trailing lines from the foreign block so they are not duplicated."""
+        if segs and segs[-1][0] == "foreign":
+            tail = segs[-1][1].split("\n")
+            while tail and (tail[-1].lstrip().startswith("#") or tail[-1].strip() == ""):
+                tail.pop()
+            if tail:
+                segs[-1] = ("foreign", "\n".join(tail).rstrip())
+            else:
+                segs.pop()
+
     i, n = 0, len(lines)
     while i < n:
         line = lines[i]
@@ -517,6 +552,7 @@ def _segment_codex_sentinel(inner, canonical_names):
             kind, name = classify(header)
             if kind == "canonical":
                 pop_trailing_comments()
+                strip_trailing_comments_from_last_foreign()
                 flush()
                 segs.append(("canonical", name))
             elif kind == "foreign":
@@ -524,6 +560,7 @@ def _segment_codex_sentinel(inner, canonical_names):
                 segs.append(("foreign", "\n".join(block_lines).rstrip()))
             else:  # drop: removed server — discard its leading comments too
                 pop_trailing_comments()
+                strip_trailing_comments_from_last_foreign()
                 flush()
             i = j
         else:
@@ -533,7 +570,7 @@ def _segment_codex_sentinel(inner, canonical_names):
     return segs
 
 
-def render_codex(ordered) -> str:
+def render_codex(ordered, exclude=frozenset()) -> str:
     """Tolerant merge of [mcp_servers.*] into ~/.codex/config.toml.
 
     Regenerates the canonical ``[mcp_servers.<name>]`` tables between the
@@ -547,7 +584,9 @@ def render_codex(ordered) -> str:
     """
     with open(CODEX_CONFIG, encoding="utf-8") as f:
         text = f.read()
-    canonical_names = {name for name, _ in ordered}
+    # Excluded servers are not emitted, and any stale tables for them inside
+    # the sentinel are dropped: canonical_names drives the classifier too.
+    canonical_names = {name for name, _ in ordered if name not in exclude}
     spec_by_name = dict(ordered)
 
     def emit_canon(name, blocks):
@@ -577,6 +616,8 @@ def render_codex(ordered) -> str:
             else:
                 blocks.append(val)
         for name, _ in ordered:
+            if name in exclude:
+                continue
             if name not in seen:
                 seen.add(name)
                 emit_canon(name, blocks)
@@ -660,7 +701,7 @@ def main():
     ap.add_argument("--check", action="store_true", help="exit 1 if any drift (dry-run, for CI / hooks)")
     args = ap.parse_args()
 
-    ordered, exclude = load_canonical()
+    ordered, excludes = load_canonical()
     mode = "CHECK" if args.check else ("APPLY" if args.apply else "DRY-RUN")
     print(f"== mcp-sync ({mode}) ==")
     print(f"   canonical : {os.path.relpath(CANONICAL, CONFIGS_ROOT)}")
@@ -669,12 +710,12 @@ def main():
           f"{sum(1 for _, s in ordered if not s.get('enabled'))} disabled)")
 
     renders = {
-        "opencode": render_opencode(ordered, exclude),
-        "claude": render_claude_json(ordered),
-        "mcp.json": render_mcp_json(ordered),
-        "codex": render_codex(ordered),
-        "cursor": render_ide_json(ordered),
-        "qoder": render_ide_json(ordered),
+        "opencode": render_opencode(ordered, excludes["opencode"]),
+        "claude": render_claude_json(ordered, excludes["claude"]),
+        "mcp.json": render_mcp_json(ordered, excludes["mcp.json"]),
+        "codex": render_codex(ordered, excludes["codex"]),
+        "cursor": render_ide_json(ordered, excludes["cursor"]),
+        "qoder": render_ide_json(ordered, excludes["qoder"]),
     }
     targets = ["opencode", "mcp.json", "codex"] if args.repo_only else (
         [args.target] if args.target else list(TARGETS))

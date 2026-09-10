@@ -26,6 +26,19 @@
       ],
       "env": {}
     },
+    "deveco-mcp": {
+      "command": "devecocli",
+      "args": [
+        "serve",
+        "mcp"
+      ],
+      "env": {
+        "DEVECO_CLI_CLT_PATH": "/home/shanaae/.local/share/deveco-clt"
+      }
+    },
+    "figma": {
+      "url": "https://mcp.figma.com/mcp"
+    },
     "Figma-Desktop": {
       "url": "http://127.0.0.1:3845/mcp"
     },
