@@ -3,6 +3,15 @@
 Local-first token tracker (`tokentracker-cli`) with WSL tracking + custom-provider
 (Qiniu/Sufy) pricing. Files here are synced across devices via `.shanaae-configs`.
 
+> **2026-09 status:** upstream **0.96.x now has opencode fork-copy dedup built in**
+> (fingerprint index + `dedupedForkCopy`; see issue #426). The repair for the
+> post-upgrade 11× drift is: **quit app → delete cursor state (`cursors.json` /
+> `cursor-store-v2/`) → `sync --drain` (full fresh scan) → compact queue +
+> retract ghost buckets → reset offset → drain again.**
+> Tools: `extract_hourly_buckets.py` + `compact_retract.py`.
+> `rebuild-opencode-forkdedup.mjs` / `seed-cursor-state.mjs` are legacy fallbacks
+> for versions without the upstream dedup.
+
 ## What's here
 
 | File | Purpose |
