@@ -23,6 +23,11 @@
 //
 // Usage:
 //   node rebuild-opencode-forkdedup.mjs <app-path> <queue-path> <db-path> [<db-path>...]
+//                                     [--dump-state <dir>]
+//
+// --dump-state writes two JSON files into <dir> for cursor-state seeding:
+//   messageIndex.json      — complete opencode messageIndex { key: { lastTotals, updatedAt } }
+//   hourlyBuckets.json     — deduped opencode hourly buckets { "opencode|model|hour": { totals, queuedKey } }
 //
 // After running: compact the queue (keep last row per source|model|hour),
 // reset queue.state.json offset to 0, then `tracker.js sync --drain`.
@@ -45,10 +50,18 @@ function usage() {
 
 async function main() {
   const argv = process.argv.slice(2);
-  if (argv.length < 3) usage();
-  const appPath = resolve(argv[0]);
-  const queuePath = resolve(argv[1]);
-  const dbPaths = argv.slice(2).map((p) => resolve(p));
+  const flags = {};
+  const pos = [];
+  for (let i = 0; i < argv.length; i++) {
+    if (argv[i] === "--dump-state") {
+      flags.dumpState = resolve(argv[i + 1] || ".");
+      i++;
+    } else pos.push(argv[i]);
+  }
+  if (pos.length < 3) usage();
+  const appPath = resolve(pos[0]);
+  const queuePath = resolve(pos[1]);
+  const dbPaths = pos.slice(2).map((p) => resolve(p));
 
   const rolloutPath = join(appPath, "src", "lib", "rollout.js");
   const sqliteReaderPath = join(appPath, "src", "lib", "sqlite-reader.js");
@@ -230,6 +243,32 @@ async function main() {
   console.log(
     `[forkdedup] DONE: +${res.eventsAggregated} events, +${res.bucketsQueued} buckets appended to ${queuePath}`
   );
+
+  // ---------------------------------------------------------------------------
+  // 5. Optionally dump the seeded cursor state (messageIndex + hourly buckets).
+  // ---------------------------------------------------------------------------
+  if (flags.dumpState) {
+    const fsMod = await import("node:fs");
+    fsMod.mkdirSync(flags.dumpState, { recursive: true });
+    const messageIndex = cursors?.opencode?.messages || {};
+    fsMod.writeFileSync(
+      join(flags.dumpState, "messageIndex.json"),
+      JSON.stringify({ messages: messageIndex, updatedAt: new Date().toISOString() })
+    );
+    const allBuckets = cursors?.hourly?.buckets || {};
+    const ocBuckets = {};
+    for (const [key, bucket] of Object.entries(allBuckets)) {
+      if (!key.startsWith("opencode|")) continue;
+      ocBuckets[key] = { totals: bucket?.totals || {}, queuedKey: bucket?.queuedKey ?? null };
+    }
+    fsMod.writeFileSync(
+      join(flags.dumpState, "hourlyBuckets.json"),
+      JSON.stringify({ buckets: ocBuckets, updatedAt: new Date().toISOString() })
+    );
+    console.log(
+      `[forkdedup] dumped state: ${Object.keys(messageIndex).length} messages, ${Object.keys(ocBuckets).length} opencode buckets -> ${flags.dumpState}`
+    );
+  }
 }
 
 function num(v) {
