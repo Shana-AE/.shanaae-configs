@@ -315,6 +315,33 @@
       "skillFolderHash": "",
       "installedAt": "2026-04-14T10:36:41.687Z",
       "updatedAt": "2026-04-14T10:36:41.687Z"
+    },
+    "harmonyos-development": {
+      "source": "DengShiyingA/harmonyos-ai-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/DengShiyingA/harmonyos-ai-skill.git",
+      "skillPath": "harmonyos-development/SKILL.md",
+      "skillFolderHash": "dcb7228c8fdb78e5efbbe9f47934c4a421c1ca65",
+      "installedAt": "2026-09-01T08:11:28.053Z",
+      "updatedAt": "2026-09-01T08:11:28.053Z"
+    },
+    "figma-design-to-code": {
+      "source": "figma/mcp-server-guide",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/figma/mcp-server-guide.git",
+      "skillPath": "skills/figma-design-to-code/SKILL.md",
+      "skillFolderHash": "80699efd9135e0ef1c17cef81e463b8c2a9a17e6",
+      "installedAt": "2026-09-07T03:50:20.042Z",
+      "updatedAt": "2026-09-07T03:50:20.042Z"
+    },
+    "figma-code-connect": {
+      "source": "figma/mcp-server-guide",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/figma/mcp-server-guide.git",
+      "skillPath": "skills/figma-code-connect/SKILL.md",
+      "skillFolderHash": "e431043b082872e6f5401e09441d26dc7dbcc788",
+      "installedAt": "2026-09-07T03:50:36.802Z",
+      "updatedAt": "2026-09-07T03:50:36.802Z"
     }
   },
   "dismissed": {
