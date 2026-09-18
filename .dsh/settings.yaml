@@ -1195,7 +1195,18 @@ llm-pi-ai:
       models:
         - id: deepseek-chat
         - id: deepseek-reasoner
+    nvidia:
+      apiKeyEnv: NVIDIA_API_KEY
+    moonshotai-cn:
+      apiKeyEnv: MOONSHOT_API_KEY
+    kimi-coding:
+      apiKeyEnv: KIMI_API_KEY
+    zai-coding-cn:
+      apiKeyEnv: BIGMODEL_API_KEY
+    minimax-cn:
+      apiKeyEnv: MINIMAX_TOKEN_PLAN_API_KEY
+    openai-codex:
+      displayName: "OpenAI Codex (ChatGPT Plus/Pro)"
 # END config-sync:llm-pi-ai
 ui-onboarding:
   welcomeNoticeVersion: 2026-08-13.1
-

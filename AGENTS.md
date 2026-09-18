@@ -436,8 +436,12 @@ developer preview).
   store), `profiles/` (installed web profile + node_modules), `storages/`.
 - **Run**: `npx @deepseek-ai/dsh web` → http://127.0.0.1:3080 (Settings → Models).
 - **Providers configured**: `qiniu` (Qiniu AI gateway, `api.qnaigc.com/v1`,
-  OpenAI-compatible, `QINIU_AI_API_KEY`) and `deepseek` (official,
-  `DEEPSEEK_API_KEY`). Model IDs verified against the live catalog.
+  146 models, `QINIU_AI_API_KEY`) and `deepseek` (official, `DEEPSEEK_API_KEY`)
+  are hand-declared; `nvidia`, `moonshotai-cn` (Kimi), `kimi-coding`,
+  `zai-coding-cn` (Zhipu coding plan), `minimax-cn`, and `openai-codex`
+  (ChatGPT Plus/Pro OAuth) are catalog routes — pi-ai supplies their endpoint,
+  protocol, and models, so dsh declares only `apiKeyEnv`. Model IDs verified
+  against the live catalog.
 
 ## Pi Coding Agent
 

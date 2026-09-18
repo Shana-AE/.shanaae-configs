@@ -35,12 +35,25 @@ KEEP_MODALITIES = {"text", "image"}
 DEFAULT_LEVELS = [("off", None), ("low", "low"), ("medium", "medium"), ("high", "high")]
 
 # Providers not present in opencode.jsonc but wanted in dsh (official APIs).
+# These are hand-declared routes (api + baseURL + explicit models).
 EXTRA_PROVIDERS = {
     "deepseek": {
         "apiKeyEnv": "DEEPSEEK_API_KEY",
         "baseURL": "https://api.deepseek.com",
         "models": [{"id": "deepseek-chat"}, {"id": "deepseek-reasoner"}],
     }
+}
+
+# Routes the installed pi-ai catalog ships: only apiKeyEnv (or nothing, for an
+# OAuth login) is needed — the catalog supplies endpoint, protocol, and models.
+# env names reuse the repo's existing .secrets keys where one already exists.
+CATALOG_PROVIDERS = {
+    "nvidia": {"apiKeyEnv": "NVIDIA_API_KEY"},
+    "moonshotai-cn": {"apiKeyEnv": "MOONSHOT_API_KEY"},
+    "kimi-coding": {"apiKeyEnv": "KIMI_API_KEY"},
+    "zai-coding-cn": {"apiKeyEnv": "BIGMODEL_API_KEY"},
+    "minimax-cn": {"apiKeyEnv": "MINIMAX_TOKEN_PLAN_API_KEY"},
+    "openai-codex": {"displayName": "OpenAI Codex (ChatGPT Plus/Pro)"},
 }
 
 
@@ -176,6 +189,14 @@ def render_block(opencode: dict) -> str:
         out.append("      models:")
         for model in spec["models"]:
             out.extend(render_model(model["id"], model))
+    for name, spec in CATALOG_PROVIDERS.items():
+        if name in providers or name in EXTRA_PROVIDERS:
+            continue
+        out.append(f"    {name}:")
+        if spec.get("apiKeyEnv"):
+            out.append(f"      apiKeyEnv: {spec['apiKeyEnv']}")
+        if spec.get("displayName"):
+            out.append(f"      displayName: {yaml_str(spec['displayName'])}")
     out.append(END)
     return "\n".join(out) + "\n"
 
