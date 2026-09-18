@@ -1,0 +1,1201 @@
+# DeepSeek Harness (dsh) — global settings ($DSH_HOME/settings.yaml).
+# Docs: https://github.com/deepseek-ai/deepseek-harness
+#
+# Secrets are never stored in this repo: llm-pi-ai routes reference env vars
+# via apiKeyEnv (values live in ~/.shanaae/configs/.secrets). The built-in
+# DeepSeek card stores its key in $DSH_HOME/.credentials.yaml (machine-local,
+# write-only — never committed).
+#
+# Managed file: dsh watches it and hot-publishes external edits. You can also
+# configure providers through the Web UI: npx @deepseek-ai/dsh web -> Settings -> Models.
+
+# BEGIN config-sync:llm-pi-ai
+llm-pi-ai:
+  providers:
+    qiniu:
+      apiKeyEnv: QINIU_AI_API_KEY
+      api: openai-completions
+      baseURL: https://api.qnaigc.com/v1
+      models:
+        - id: MiniMax-M1
+          name: "MiniMax-M1 (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 128000
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: anthropic/claude-4.7-opus
+          name: "Claude 4.7 Opus (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: anthropic/claude-4.8-opus
+          name: "Claude 4.8 Opus (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: anthropic/claude-fable-5
+          name: "Anthropic/Claude Fable 5 (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: anthropic/claude-fable-5.1
+          name: "Anthropic/Claude Fable 5.1 (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: anthropic/claude-opus-5
+          name: "anthropic/claude-opus-5 (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: anthropic/claude-sonnet-5
+          name: "anthropic/claude-sonnet-5 (Qiniu)"
+          contextWindow: 200000
+          maxTokens: 64000
+        - id: arcee-ai/trinity-mini
+          name: "Arcee-AI/Trinity-Mini (Qiniu)"
+          contextWindow: 128000
+          maxTokens: 128000
+        - id: bytedance/doubao-seed-2-1-pro
+          name: "bytedance/doubao-seed-2-1-pro (Qiniu)"
+          contextWindow: 256000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: bytedance/doubao-seed-2-1-turbo
+          name: "bytedance/doubao-seed-2-1-turbo (Qiniu)"
+          contextWindow: 256000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: claude-4.0-opus
+          name: "Claude 4.0 Opus (Qiniu)"
+          contextWindow: 200000
+          maxTokens: 32000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: claude-4.0-sonnet
+          name: "Claude 4.0 Sonnet (Qiniu)"
+          contextWindow: 200000
+          maxTokens: 64000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: claude-4.1-opus
+          name: "Claude 4.1 Opus (Qiniu)"
+          contextWindow: 200000
+          maxTokens: 64000
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: claude-4.5-haiku
+          name: "Claude 4.5 Haiku (Qiniu)"
+          contextWindow: 200000
+          maxTokens: 64000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: claude-4.5-opus
+          name: "Claude 4.5 Opus (Qiniu)"
+          contextWindow: 200000
+          maxTokens: 64000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: claude-4.5-sonnet
+          name: "Claude 4.5 Sonnet (Qiniu)"
+          contextWindow: 200000
+          maxTokens: 64000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: claude-4.6-opus
+          name: "Claude 4.6 Opus (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: claude-4.6-sonnet
+          name: "Claude 4.6 Sonnet (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 64000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: deepseek-r1
+          name: "DeepSeek-R1 (Qiniu)"
+          contextWindow: 128000
+          maxTokens: 128000
+          compat:
+            thinkingFormat: deepseek
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: deepseek-r1-0528
+          name: "DeepSeek-R1-0528 (Qiniu)"
+          contextWindow: 128000
+          maxTokens: 128000
+          compat:
+            thinkingFormat: deepseek
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: deepseek-v3
+          name: "DeepSeek-V3 (Qiniu)"
+          contextWindow: 128000
+          maxTokens: 128000
+        - id: deepseek-v3.1
+          name: "DeepSeek-V3.1 (Qiniu)"
+          contextWindow: 128000
+          maxTokens: 128000
+          compat:
+            thinkingFormat: deepseek
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: deepseek/deepseek-v3.1-terminus
+          name: "DeepSeek-V3.1-Terminus (Qiniu)"
+          contextWindow: 128000
+          maxTokens: 128000
+        - id: deepseek/deepseek-v3.1-terminus-thinking
+          name: "DeepSeek-V3.1-Terminus-Thinking (Qiniu)"
+          contextWindow: 128000
+          maxTokens: 128000
+          compat:
+            thinkingFormat: deepseek
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: deepseek/deepseek-v3.2-251201
+          name: "DeepSeek-V3.2-251201 (Qiniu)"
+          contextWindow: 128000
+          maxTokens: 128000
+          compat:
+            thinkingFormat: deepseek
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: deepseek/deepseek-v3.2-exp
+          name: "DeepSeek-V3.2-Exp (Qiniu)"
+          contextWindow: 128000
+          maxTokens: 128000
+        - id: deepseek/deepseek-v3.2-exp-thinking
+          name: "DeepSeek-V3.2-Exp-Thinking (Qiniu)"
+          contextWindow: 128000
+          maxTokens: 128000
+          compat:
+            thinkingFormat: deepseek
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: deepseek/deepseek-v4-flash
+          name: "DeepSeek-V4-Flash (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 384000
+          compat:
+            thinkingFormat: deepseek
+          reasoningEfforts:
+            high: high
+            max: max
+        - id: deepseek/deepseek-v4-flash-202605
+          name: "deepseek/deepseek-v4-flash-202605 (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 384000
+          compat:
+            thinkingFormat: deepseek
+          reasoningEfforts:
+            high: high
+            max: max
+        - id: deepseek/deepseek-v4-flash-20260731
+          name: "deepseek/deepseek-v4-flash-20260731 (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 384000
+          compat:
+            thinkingFormat: deepseek
+          reasoningEfforts:
+            high: high
+            max: max
+        - id: deepseek/deepseek-v4-flash-vision-exp
+          name: "DeepSeek V4 Flash Vision Exp (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 384000
+          input: [text, image]
+          compat:
+            thinkingFormat: deepseek
+          reasoningEfforts:
+            high: high
+            max: max
+        - id: deepseek/deepseek-v4-pro
+          name: "DeepSeek-V4-Pro (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 384000
+          compat:
+            thinkingFormat: deepseek
+          reasoningEfforts:
+            high: high
+            max: max
+        - id: deepseek/deepseek-v4-pro-0813
+          name: "DeepSeek-V4-Pro-0813 (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 384000
+          compat:
+            thinkingFormat: deepseek
+          reasoningEfforts:
+            high: high
+            max: max
+        - id: deepseek/deepseek-v4-pro-202606
+          name: "DeepSeek-V4-Pro-202606 (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 384000
+          compat:
+            thinkingFormat: deepseek
+          reasoningEfforts:
+            high: high
+            max: max
+        - id: deepseek/deepseek-v4.1-flash
+          name: "DeepSeek-V4.1-Flash (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 384000
+          input: [text, image]
+          compat:
+            thinkingFormat: deepseek
+          reasoningEfforts:
+            high: high
+            max: max
+        - id: doubao-1.5-pro-32k
+          name: "Doubao-1.5-Pro-32k (Qiniu)"
+          contextWindow: 128000
+          maxTokens: 12000
+        - id: doubao-1.5-thinking-pro
+          name: "Doubao-1.5-Thinking-Pro (Qiniu)"
+          contextWindow: 128000
+          maxTokens: 128000
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: doubao-1.5-vision-pro
+          name: "Doubao-1.5-Vision-Pro (Qiniu)"
+          contextWindow: 128000
+          maxTokens: 128000
+          input: [text, image]
+        - id: doubao-seed-1.6
+          name: "Doubao-Seed-1.6 (Qiniu)"
+          contextWindow: 256000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: doubao-seed-1.6-flash
+          name: "Doubao-Seed-1.6-Flash (Qiniu)"
+          contextWindow: 256000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: doubao-seed-1.6-thinking
+          name: "Doubao-Seed-1.6-Thinking (Qiniu)"
+          contextWindow: 256000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: doubao-seed-2.0-code
+          name: "Doubao-Seed-2.0-Code (Qiniu)"
+          contextWindow: 256000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: doubao-seed-2.0-lite
+          name: "Doubao-Seed-2.0-Lite (Qiniu)"
+          contextWindow: 256000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: doubao-seed-2.0-mini
+          name: "Doubao-Seed-2.0-Mini (Qiniu)"
+          contextWindow: 256000
+          maxTokens: 32000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: doubao-seed-2.0-pro
+          name: "Doubao-Seed-2.0-Pro (Qiniu)"
+          contextWindow: 256000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: gemini-2.5-flash
+          name: "Gemini 2.5 Flash (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 64000
+          input: [text, image]
+        - id: gemini-2.5-flash-image
+          name: "Gemini 2.5 Flash Image (Qiniu)"
+          contextWindow: 32768
+          maxTokens: 8192
+          input: [text, image]
+        - id: gemini-2.5-flash-lite
+          name: "Gemini 2.5 Flash Lite (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 64000
+          input: [text, image]
+        - id: gemini-2.5-pro
+          name: "Gemini 2.5 Pro (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 64000
+          input: [text, image]
+        - id: gemini-3.0-flash-preview
+          name: "Gemini 3.0 Flash Preview (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 64000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: gemini-3.0-pro-image-preview
+          name: "Gemini 3.0 Pro Image Preview (Qiniu)"
+          contextWindow: 32768
+          maxTokens: 8192
+          input: [text, image]
+        - id: gemini-3.1-flash-image-preview
+          name: "gemini-3.1-flash-image-preview (Qiniu)"
+          contextWindow: 200000
+          maxTokens: 64000
+        - id: gemini-3.1-flash-lite-preview
+          name: "gemini-3.1-flash-lite-preview (Qiniu)"
+          contextWindow: 200000
+          maxTokens: 64000
+        - id: gemini-3.1-pro-preview
+          name: "Gemini 3.1 Pro Preview (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 64000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: glm-4.5
+          name: "GLM-4.5 (Qiniu)"
+          contextWindow: 131072
+          maxTokens: 131072
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: google/gemini-3-pro-image
+          name: "google/gemini-3-pro-image (Qiniu)"
+          contextWindow: 200000
+          maxTokens: 64000
+        - id: google/gemini-3.1-flash-image
+          name: "google/gemini-3.1-flash-image (Qiniu)"
+          contextWindow: 200000
+          maxTokens: 64000
+        - id: google/gemini-3.1-flash-lite
+          name: "Gemini 3.1 Flash Lite (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 64000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: google/gemini-3.1-flash-lite-image
+          name: "google/gemini-3.1-flash-lite-image (Qiniu)"
+          contextWindow: 200000
+          maxTokens: 64000
+        - id: google/gemini-3.5-flash
+          name: "Gemini 3.5 Flash (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 64000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: google/gemini-3.5-flash-lite
+          name: "google/gemini-3.5-flash-lite (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 64000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: google/gemini-3.6-flash
+          name: "google/gemini-3.6-flash (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 64000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: google/gemini-3.7-flash
+          name: "Gemini 3.7 Flash (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 64000
+          input: [text, image]
+          reasoningEfforts:
+            low: low
+            high: high
+        - id: google/gemini-3.8-flash
+          name: "Gemini 3.8 Flash (Qiniu)"
+          contextWindow: 1048576
+          maxTokens: 65536
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: gpt-oss-120b
+          name: "GPT-OSS-120B (Qiniu)"
+          contextWindow: 128000
+          maxTokens: 4096
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: kimi-k2
+          name: "Kimi-K2 (Qiniu)"
+          contextWindow: 128000
+          maxTokens: 128000
+        - id: meituan/longcat-flash-lite
+          name: "Meituan/Longcat-Flash-Lite (Qiniu)"
+          contextWindow: 256000
+          maxTokens: 320000
+        - id: minimax/minimax-m2
+          name: "MiniMax/Minimax-M2 (Qiniu)"
+          contextWindow: 200000
+          maxTokens: 128000
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: minimax/minimax-m2.1
+          name: "MiniMax/Minimax-M2.1 (Qiniu)"
+          contextWindow: 205000
+          maxTokens: 128000
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: minimax/minimax-m2.5
+          name: "MiniMax/Minimax-M2.5 (Qiniu)"
+          contextWindow: 205000
+          maxTokens: 128000
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: minimax/minimax-m2.5-highspeed
+          name: "MiniMax/Minimax-M2.5-Highspeed (Qiniu)"
+          contextWindow: 205000
+          maxTokens: 128000
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: minimax/minimax-m2.7
+          name: "MiniMax/Minimax-M2.7 (Qiniu)"
+          contextWindow: 205000
+          maxTokens: 128000
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: minimax/minimax-m3
+          name: "MiniMax/Minimax-M3 (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: moonshotai/kimi-k2-thinking
+          name: "Moonshot-AI/Kimi-K2-Thinking (Qiniu)"
+          contextWindow: 256000
+          maxTokens: 128000
+        - id: moonshotai/kimi-k2.5
+          name: "Moonshot-AI/Kimi-K2.5 (Qiniu)"
+          contextWindow: 256000
+          maxTokens: 256000
+          input: [text, image]
+        - id: moonshotai/kimi-k2.6
+          name: "Moonshot-AI/Kimi-K2.6 (Qiniu)"
+          contextWindow: 262144
+          maxTokens: 262144
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: moonshotai/kimi-k2.7-code
+          name: "Moonshot-AI/Kimi-K2.7-Code (Qiniu)"
+          contextWindow: 262144
+          maxTokens: 262144
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: moonshotai/kimi-k3
+          name: "moonshotai/kimi-k3 (Qiniu)"
+          contextWindow: 200000
+          maxTokens: 64000
+          input: [text, image]
+        - id: nvidia/nemotron-3-super-120b-a12b
+          name: "Nvidia/Nemotron-3-Super-120B-A12B (Qiniu)"
+          contextWindow: 262144
+          maxTokens: 262144
+        - id: openai/gpt-5
+          name: "OpenAI/GPT-5 (Qiniu)"
+          contextWindow: 400000
+          maxTokens: 128000
+          input: [text, image]
+        - id: openai/gpt-5-chat
+          name: "openai/gpt-5-chat (Qiniu)"
+          contextWindow: 200000
+          maxTokens: 64000
+        - id: openai/gpt-5-mini
+          name: "OpenAI/GPT-5 Mini (Qiniu)"
+          contextWindow: 400000
+          maxTokens: 128000
+        - id: openai/gpt-5-nano
+          name: "OpenAI/GPT-5 Nano (Qiniu)"
+          contextWindow: 400000
+          maxTokens: 128000
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: openai/gpt-5-pro
+          name: "OpenAI/GPT-5 Pro (Qiniu)"
+          contextWindow: 400000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: openai/gpt-5.2
+          name: "OpenAI/GPT-5.2 (Qiniu)"
+          contextWindow: 400000
+          maxTokens: 128000
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: openai/gpt-5.2-chat
+          name: "openai/gpt-5.2-chat (Qiniu)"
+          contextWindow: 200000
+          maxTokens: 64000
+        - id: openai/gpt-5.2-codex
+          name: "OpenAI/GPT-5.2 Codex (Qiniu)"
+          contextWindow: 400000
+          maxTokens: 128000
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: openai/gpt-5.3-codex
+          name: "OpenAI/GPT-5.3 Codex (Qiniu)"
+          contextWindow: 400000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: openai/gpt-5.4
+          name: "OpenAI/GPT-5.4 (Qiniu)"
+          contextWindow: 1100000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: openai/gpt-5.4-mini
+          name: "OpenAI/GPT-5.4 Mini (Qiniu)"
+          contextWindow: 400000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: openai/gpt-5.4-nano
+          name: "OpenAI/GPT-5.4 Nano (Qiniu)"
+          contextWindow: 400000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: openai/gpt-5.4-pro
+          name: "OpenAI/GPT-5.4 Pro (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: openai/gpt-5.5
+          name: "OpenAI/GPT-5.5 (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: openai/gpt-5.6-luna
+          name: "GPT-5.6 Luna (Qiniu)"
+          contextWindow: 1050000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: openai/gpt-5.6-sol
+          name: "GPT-5.6 Sol (Qiniu)"
+          contextWindow: 1050000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: openai/gpt-5.6-terra
+          name: "GPT-5.6 Terra (Qiniu)"
+          contextWindow: 1050000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: openai/gpt-6-astra
+          name: "GPT-6 Astra (Qiniu)"
+          contextWindow: 1050000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: qwen-max-2025-01-25
+          name: "Qwen-Max-2025-01-25 (Qiniu)"
+          contextWindow: 128000
+          maxTokens: 128000
+        - id: qwen-turbo
+          name: "Qwen-Turbo (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 64000
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: qwen-vl-max-2025-01-25
+          name: "Qwen-VL-Max-2025-01-25 (Qiniu)"
+          contextWindow: 128000
+          maxTokens: 128000
+          input: [text, image]
+        - id: qwen/qwen3.5-plus
+          name: "Qwen/Qwen3.5-Plus (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 64000
+          input: [text, image]
+        - id: qwen/qwen3.6-27b
+          name: "Qwen/Qwen3.6-27B (Qiniu)"
+          contextWindow: 262144
+          maxTokens: 262144
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: qwen/qwen3.6-plus
+          name: "Qwen/Qwen3.6-Plus (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 64000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: qwen/qwen3.7-max
+          name: "Qwen/Qwen3.7-Max (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 64000
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: qwen/qwen3.7-plus
+          name: "qwen/qwen3.7-plus (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 64000
+          reasoningEfforts:
+            low: low
+            medium: medium
+            high: high
+        - id: qwen/qwen3.8-flash-next
+          name: "qwen/qwen3.8-flash-next (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 64000
+          input: [text, image]
+          reasoningEfforts:
+            low: low
+            medium: medium
+            high: high
+        - id: qwen/qwen3.8-max
+          name: "Qwen/Qwen3.8-Max (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 64000
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: qwen2.5-vl-72b-instruct
+          name: "Qwen2.5-VL-72B-Instruct (Qiniu)"
+          contextWindow: 128000
+          maxTokens: 128000
+          input: [text, image]
+        - id: qwen3-235b-a22b
+          name: "Qwen3-235B-A22B (Qiniu)"
+          contextWindow: 128000
+          maxTokens: 128000
+        - id: qwen3-235b-a22b-instruct-2507
+          name: "Qwen3-235B-A22B-Instruct-2507 (Qiniu)"
+          contextWindow: 262144
+          maxTokens: 262144
+        - id: qwen3-235b-a22b-thinking-2507
+          name: "Qwen3-235B-A22B-Thinking-2507 (Qiniu)"
+          contextWindow: 262144
+          maxTokens: 262144
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: qwen3-30b-a3b
+          name: "Qwen3-30B-A3B (Qiniu)"
+          contextWindow: 40000
+          maxTokens: 4096
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: qwen3-30b-a3b-instruct-2507
+          name: "Qwen3-30B-A3B-Instruct-2507 (Qiniu)"
+          contextWindow: 128000
+          maxTokens: 128000
+        - id: qwen3-30b-a3b-thinking-2507
+          name: "Qwen3-30B-A3B-Thinking-2507 (Qiniu)"
+          contextWindow: 126000
+          maxTokens: 126000
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: qwen3-32b
+          name: "Qwen3-32B (Qiniu)"
+          contextWindow: 40000
+          maxTokens: 4096
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: qwen3-coder-480b-a35b-instruct
+          name: "Qwen3-Coder-480B-A35B-Instruct (Qiniu)"
+          contextWindow: 262144
+          maxTokens: 262144
+        - id: qwen3-max
+          name: "Qwen3-Max (Qiniu)"
+          contextWindow: 262144
+          maxTokens: 262144
+        - id: qwen3-max-preview
+          name: "Qwen3-Max-Preview (Qiniu)"
+          contextWindow: 262144
+          maxTokens: 262144
+        - id: qwen3-next-80b-a3b-instruct
+          name: "Qwen3-Next-80B-A3B-Instruct (Qiniu)"
+          contextWindow: 131072
+          maxTokens: 131072
+        - id: qwen3-next-80b-a3b-thinking
+          name: "Qwen3-Next-80B-A3B-Thinking (Qiniu)"
+          contextWindow: 131072
+          maxTokens: 131072
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: qwen3-vl-30b-a3b-thinking
+          name: "Qwen3-VL-30B-A3B-Thinking (Qiniu)"
+          contextWindow: 128000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: qwen3.5-397b-a17b
+          name: "Qwen3.5-397B-A17B (Qiniu)"
+          contextWindow: 256000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: stepfun/step-3.7-flash
+          name: "stepfun/step-3.7-flash (Qiniu)"
+          contextWindow: 200000
+          maxTokens: 64000
+        - id: tencent/hy3-preview
+          name: "Tencent/Hy3-Preview (Qiniu)"
+          contextWindow: 262144
+          maxTokens: 262144
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: tencent/hy4-preview
+          name: "tencent/hy4-preview (Qiniu)"
+          contextWindow: 262144
+          maxTokens: 262144
+          reasoningEfforts:
+            low: low
+            high: high
+            off:
+        - id: x-ai/grok-4-fast
+          name: "x-AI/Grok-4-Fast (Qiniu)"
+          contextWindow: 2000000
+          maxTokens: 2000000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: x-ai/grok-4-fast-non-reasoning
+          name: "xAI/Grok 4 Fast Non-Reasoning (Qiniu)"
+          contextWindow: 2000000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: x-ai/grok-4-fast-reasoning
+          name: "xAI/Grok 4 Fast Reasoning (Qiniu)"
+          contextWindow: 2000000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: x-ai/grok-4.1-fast
+          name: "x-AI/Grok-4.1-Fast (Qiniu)"
+          contextWindow: 2000000
+          maxTokens: 2000000
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: x-ai/grok-4.1-fast-non-reasoning
+          name: "xAI/Grok 4.1 Fast Non-Reasoning (Qiniu)"
+          contextWindow: 2000000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: x-ai/grok-4.1-fast-reasoning
+          name: "xAI/Grok 4.1 Fast Reasoning (Qiniu)"
+          contextWindow: 2000000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: x-ai/grok-4.2-fast-non-reasoning
+          name: "xAI/Grok 4.2 Fast Non-Reasoning (Qiniu)"
+          contextWindow: 2000000
+          maxTokens: 128000
+          input: [text, image]
+        - id: x-ai/grok-4.2-fast-reasoning
+          name: "xAI/Grok 4.2 Fast Reasoning (Qiniu)"
+          contextWindow: 2000000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: x-ai/grok-4.2-non-reasoning
+          name: "x-ai/grok-4.2-non-reasoning (Qiniu)"
+          contextWindow: 200000
+          maxTokens: 64000
+        - id: x-ai/grok-4.2-reasoning
+          name: "xAI/Grok 4.2 Reasoning (Qiniu)"
+          contextWindow: 2000000
+          maxTokens: 128000
+          input: [text, image]
+        - id: x-ai/grok-4.3
+          name: "xAI/Grok 4.3 (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: x-ai/grok-4.5
+          name: "x-ai/grok-4.5 (Qiniu)"
+          contextWindow: 200000
+          maxTokens: 64000
+        - id: x-ai/grok-4.6
+          name: "xAI/Grok 4.6 (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            low: low
+            medium: medium
+            high: high
+        - id: x-ai/grok-code-fast-1
+          name: "xAI/Grok Code Fast 1 (Qiniu)"
+          contextWindow: 256000
+          maxTokens: 128000
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: z-ai/glm-4.6
+          name: "Z-AI/GLM-4.6 (Qiniu)"
+          contextWindow: 200000
+          maxTokens: 128000
+        - id: z-ai/glm-4.7
+          name: "Z-AI/GLM-4.7 (Qiniu)"
+          contextWindow: 200000
+          maxTokens: 128000
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: z-ai/glm-5
+          name: "Z-AI/GLM-5 (Qiniu)"
+          contextWindow: 200000
+          maxTokens: 128000
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: z-ai/glm-5.1
+          name: "Z-AI/GLM-5.1 (Qiniu)"
+          contextWindow: 200000
+          maxTokens: 128000
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: z-ai/glm-5.2
+          name: "Z-AI/GLM-5.2 (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 128000
+          reasoningEfforts:
+            off:
+            low: low
+            medium: medium
+            high: high
+        - id: z-ai/glm-5.3
+          name: "Z-AI/GLM-5.3 (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 128000
+          reasoningEfforts:
+            low: low
+            high: high
+            max: max
+        - id: z-ai/glm-5.3-flash
+          name: "Z-AI/GLM-5.3-Flash (Qiniu)"
+          contextWindow: 1000000
+          maxTokens: 128000
+          input: [text, image]
+          reasoningEfforts:
+            low: low
+            high: high
+            max: max
+    deepseek:
+      apiKeyEnv: DEEPSEEK_API_KEY
+      api: openai-completions
+      baseURL: https://api.deepseek.com
+      models:
+        - id: deepseek-chat
+        - id: deepseek-reasoner
+# END config-sync:llm-pi-ai
+ui-onboarding:
+  welcomeNoticeVersion: 2026-08-13.1
+

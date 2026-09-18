@@ -1,0 +1,126 @@
+# =============================================================================
+# dsh global user patch layer — applies to every profile on this machine.
+# Linked from $DSH_HOME/cordis.patch.yml (repo .dsh/ -> ~/.dsh).
+# =============================================================================
+# Top-level array of loader patch entries: id-targeted config overrides,
+# disables, and insert lists. `!!js` expressions are evaluated at load.
+#
+# Portable by design: no OS literals. Paths resolve from AI_CONFIGS_ROOT
+# (exported by install.py into env.sh / env.ps1) with a HOME fallback;
+# secrets resolve from the ambient environment loaded from .secrets.
+# =============================================================================
+
+# --- Skills: the shipped CLI disables both rows; opt in explicitly. ----------
+- id: skill-filesystem
+  disabled: false
+  config:
+    includeDefaultRoots: true
+    customSkillDirs:
+      - !!js (process.env.AI_CONFIGS_ROOT || (process.env.HOME + '/.shanaae/configs')) + '/ai/skills/for-tools/dsh'
+
+- id: tool-skill
+  disabled: false
+
+# --- MCP servers (mirrors ai/skills/local/mcp-sync/scripts/mcp_servers.json) --
+- insert:
+    - id: mcp-agentmemory
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: agentmemory
+        transport: stdio
+        command: agentmemory-mcp
+        args: []
+        cwd: !!js process.cwd()
+        failOnStartupError: false
+        env:
+          AGENTMEMORY_URL: !!js process.env.AGENTMEMORY_URL
+          AGENTMEMORY_SECRET: !!js process.env.AGENTMEMORY_SECRET
+
+    - id: mcp-chrome-devtools
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: Chrome-DevTools-MCP
+        transport: stdio
+        command: npx
+        args:
+          - -y
+          - chrome-devtools-mcp@latest
+          - --browser-url=http://127.0.0.1:9222
+          - --no-usage-statistics
+        cwd: !!js process.cwd()
+        failOnStartupError: false
+        env: {}
+
+    - id: mcp-deveco
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: deveco-mcp
+        transport: stdio
+        command: devecocli
+        args: [serve, mcp]
+        cwd: !!js process.cwd()
+        failOnStartupError: false
+        env:
+          DEVECO_CLI_CLT_PATH: !!js process.env.DEVECO_CLI_CLT_PATH
+
+    - id: mcp-codegraph
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: codegraph
+        transport: stdio
+        command: codegraph
+        args: [serve, --mcp]
+        cwd: !!js process.cwd()
+        failOnStartupError: false
+        env: {}
+
+    - id: mcp-zai
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: zai-mcp-server
+        transport: stdio
+        command: npx
+        args: [-y, '@z_ai/mcp-server']
+        cwd: !!js process.cwd()
+        failOnStartupError: false
+        env:
+          Z_AI_MODE: ZHIPU
+          Z_AI_API_KEY: !!js process.env.BIGMODEL_API_KEY
+
+    - id: mcp-figma-desktop
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: Figma-Desktop
+        transport: streamable-http
+        url: http://127.0.0.1:3845/mcp
+        headers: {}
+        failOnStartupError: false
+
+    - id: mcp-figma
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: figma
+        transport: streamable-http
+        url: https://mcp.figma.com/mcp
+        headers: {}
+        failOnStartupError: false
+
+    - id: mcp-web-search-prime
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: web-search-prime
+        transport: streamable-http
+        url: https://open.bigmodel.cn/api/mcp/web_search_prime/mcp
+        headers:
+          Authorization: !!js "'Bearer ' + process.env.BIGMODEL_API_KEY"
+        failOnStartupError: false
+
+    - id: mcp-zread
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: zread
+        transport: streamable-http
+        url: https://open.bigmodel.cn/api/mcp/zread/mcp
+        headers:
+          Authorization: !!js "'Bearer ' + process.env.BIGMODEL_API_KEY"
+        failOnStartupError: false

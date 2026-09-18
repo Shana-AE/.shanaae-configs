@@ -13,15 +13,21 @@ This is the central configuration hub for AI development tools (Claude Code, Ope
 The repo is being made portable across **Linux (WSL2), Windows, and macOS**.
 Full design: [`docs/superpowers/specs/2026-06-25-cross-platform-configs-design.md`](docs/superpowers/specs/2026-06-25-cross-platform-configs-design.md).
 
-Summary of the planned model:
+Summary of the model (installer implemented):
 - **Portable core** — repo configs contain no OS-specific literals.
 - **Env-var values** — OS-specific paths live in `.secrets` and are resolved by
-  each tool at read time (`{env:VAR}` in OpenCode, `$VAR` in Claude Code).
+  each tool at read time (`{env:VAR}` in OpenCode, `$VAR` in Claude Code,
+  `!!js process.env.*` in dsh).
 - **Link manifest + `install.py`** — one-time installer live-links each tool's
   native config location into the repo (symlink on *nix, junction on Windows).
+  `install/manifest.json` is the declarative source; add a tool = add a row.
+- **Generated blocks** — `config-sync` renders derived content into sentinel
+  blocks (e.g. dsh's `llm-pi-ai` catalog from `opencode.jsonc`); a lefthook
+  `--check` guards drift.
 
-> Until the installer lands, paths shown in this doc (e.g. `/home/shanaae/projects`)
-> are the current **Linux/WSL** values.
+> Paths shown in this doc (e.g. `/home/shanaae/projects`) are the current
+> **Linux/WSL** values; `install.py` emits `env.sh`/`env.ps1` exporting
+> `AI_CONFIGS_ROOT` for per-OS resolution.
 
 ## Directory Structure
 
@@ -58,16 +64,27 @@ configs/
 │   │   ├── local/     # Custom skills (eudic-manager, get-secret-token, etc.)
 │   │   ├── private/   # Machine-local skills (gitignored — never committed)
 │   │   ├── skills-policy.json  # Per-agent skill toggles (source of truth)
-│   │   ├── for-tools/ # Per-agent pools: opencode/ claude/ codex/ pi/ cursor/ qoder/ (generated, gitignored)
+│   │   ├── for-tools/ # Per-agent pools: opencode/ claude/ codex/ pi/ cursor/ qoder/ dsh/ (generated, gitignored)
 │   │   └── link-skills.sh
 │   └── user_rules/    # User rule definitions
-├── dsh/                   # DeepSeek Harness config (settings.yaml, env-ref secrets)
+├── .dsh/                 # DeepSeek Harness portable core (whole-dir link -> ~/.dsh)
+│   ├── settings.yaml     # llm-pi-ai providers/models (config-sync sentinel) + ui-onboarding
+│   ├── cordis.patch.yml  # Global user patch: enables skills + inserts MCP servers
+│   ├── AGENTS.md         # dsh global instructions
+│   ├── skills -> ../ai/skills/for-tools/dsh  # Per-agent pool (symlink)
+│   ├── profiles/         # Runtime profile + node_modules (gitignored)
+│   └── .credentials.yaml # Write-only key store (gitignored)
 ├── pi/                    # Pi coding agent config (settings.json, AGENTS.md, models.json, skills link)
+├── install.py             # Cross-platform installer (reads install/manifest.json)
+├── install/manifest.json  # Link manifest — add a tool = add a row
 ├── .claude-code-router/  # Claude Code Router config
 │   └── config.json       # Router configuration
 ├── .codex/               # Codex CLI configuration
 │   ├── config.toml       # Codex config (base settings + MCP via mcp-sync sentinel)
+│   ├── qiniu.config.toml # Generated profile (cc-switch Responses proxy) — codex --profile qiniu
 │   ├── AGENTS.md         # Codex global instructions
+│   ├── agents/           # Generated custom subagents (*.toml from opencode agents/*.md)
+│   ├── prompts/          # Generated custom prompts (*.md from opencode commands)
 │   ├── skills -> ../ai/skills/for-tools/codex  # Per-agent pool (symlink)
 │   ├── sqlite/           # Runtime state (gitignored)
 │   ├── codex-lsp/        # LSP daemon runtime (gitignored)
@@ -78,9 +95,18 @@ configs/
 ## Build/Setup Commands
 
 ```bash
+# One-time per machine: link every tool's native config to this repo
+python3 install.py --list                 # show the plan, touch nothing
+python3 install.py --all                  # link + render + rebuild skill pools
+python3 install.py --tool dsh --force     # one tool, overwrite non-owned targets
+
 # Build per-agent skill pools in for-tools/ (mandatory after clone — for-tools is gitignored)
 bash ai/skills/link-skills.sh --dry-run   # preview what would be linked
 bash ai/skills/link-skills.sh             # apply
+
+# Render the dsh llm-pi-ai model catalog from opencode.jsonc
+python3 ai/skills/local/config-sync/scripts/render_dsh.py --check   # CI/hook guard
+python3 ai/skills/local/config-sync/scripts/render_dsh.py           # regenerate
 
 # Setup configuration files from .secrets
 python3 ai/skills/local/setup-configs/scripts/setup_configs.py
@@ -393,16 +419,25 @@ DeepSeek Harness (`dsh`, [deepseek-ai/deepseek-harness](https://github.com/deeps
 is an open-source agent harness ("everything is a plugin", Cordis-based,
 developer preview).
 
-- **Config**: `dsh/settings.yaml` — symlinked as `~/.dsh/settings.yaml`
-  (`$DSH_HOME` defaults to `~/.dsh`; dsh watches the file and hot-publishes
-  edits). LLM routes are declared under `llm-pi-ai.providers.*` with
-  `apiKeyEnv:` env refs — **no secrets in the repo**.
-- **Credentials**: `~/.dsh/.credentials.yaml` (write-only key store) and
-  `~/.dsh/profiles/` (installed web profile + node_modules) stay machine-local.
+- **Config**: `.dsh/settings.yaml` — the repo is the portable core, whole-dir
+  symlinked as `~/.dsh` (`$DSH_HOME` defaults to `~/.dsh`; dsh watches the file
+  and hot-publishes edits). LLM routes live under `llm-pi-ai.providers.*` with
+  `apiKeyEnv:` env refs — **no secrets in the repo**. The `llm-pi-ai` block is
+  generated by `config-sync` from `opencode.jsonc` (see the sentinel markers).
+- **Global patch**: `.dsh/cordis.patch.yml` → `$DSH_HOME/cordis.patch.yml`,
+  applied to every profile. It enables `skill-filesystem` + `tool-skill` (both
+  off by default) and inserts the `dsh-mcp-client` rows mirroring
+  `ai/skills/local/mcp-sync/scripts/mcp_servers.json`. Paths/secrets use
+  `!!js process.env.*`, so the file is OS-agnostic.
+- **Skills**: `.dsh/skills` → `ai/skills/for-tools/dsh`; `customSkillDirs`
+  resolves `$AI_CONFIGS_ROOT/ai/skills/for-tools/dsh` (with a `$HOME` fallback).
+- **Instructions**: `.dsh/AGENTS.md` (loaded from `$DSH_HOME/AGENTS.md`).
+- **Credentials / runtime** (gitignored): `.credentials.yaml` (write-only key
+  store), `profiles/` (installed web profile + node_modules), `storages/`.
 - **Run**: `npx @deepseek-ai/dsh web` → http://127.0.0.1:3080 (Settings → Models).
-- **Providers configured**: `qiniu` (Qiniu AI gateway,
-  `api.qnaigc.com/v1`, OpenAI-compatible, `QINIU_AI_API_KEY`) and `deepseek`
-  (official, `DEEPSEEK_API_KEY`). Model IDs verified against the live catalog.
+- **Providers configured**: `qiniu` (Qiniu AI gateway, `api.qnaigc.com/v1`,
+  OpenAI-compatible, `QINIU_AI_API_KEY`) and `deepseek` (official,
+  `DEEPSEEK_API_KEY`). Model IDs verified against the live catalog.
 
 ## Pi Coding Agent
 
@@ -527,7 +562,9 @@ The `.gitignore` uses a layered approach:
 
 ## Symlink Management
 
-Key symlinks in this repository:
+All links are declared in `install/manifest.json` and created by `python3 install.py`
+(symlink on *nix; junction for dirs / symlink-or-copy for files on Windows).
+Key links:
 
 ```bash
 # Claude Code
@@ -551,8 +588,8 @@ Key symlinks in this repository:
 # Codex CLI (whole dir — runtime subdirs gitignored)
 ~/.codex -> configs/.codex
 
-# DeepSeek Harness (file-level — runtime stays in ~/.dsh)
-~/.dsh/settings.yaml -> configs/dsh/settings.yaml
+# DeepSeek Harness (whole dir — runtime subdirs gitignored)
+~/.dsh -> configs/.dsh
 
 # Pi (file-level — runtime sessions/auth stay in ~/.pi/agent)
 ~/.pi/agent/settings.json -> configs/pi/settings.json

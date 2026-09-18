@@ -69,9 +69,8 @@
 .claude/.gitignore
 
 # ----------------------------------------------------------------------------
-# 4. Codex CLI runtime (only config.toml, AGENTS.md, skills/ are tracked)
+# 4. Codex CLI runtime (config.toml, AGENTS.md, skills/, agents/, prompts/ tracked)
 # ----------------------------------------------------------------------------
-.codex/agents/
 .codex/ambient-suggestions/
 .codex/cache/
 .codex/codex-lsp/
@@ -94,6 +93,23 @@
 .codex/*.sqlite
 .codex/*.sqlite-shm
 .codex/*.sqlite-wal
+
+# ----------------------------------------------------------------------------
+# 4b. DeepSeek Harness (dsh) — whole-dir portable core (~/.dsh -> .dsh)
+#     Tracked: settings.yaml, cordis.patch.yml, AGENTS.md, skills/
+# ----------------------------------------------------------------------------
+.dsh/profiles/
+.dsh/storages/
+.dsh/.credentials.yaml
+.dsh/.anonymous-user-id
+.dsh/*.log
+
+# ----------------------------------------------------------------------------
+# 4c. Installer artifacts (generated, machine-local)
+# ----------------------------------------------------------------------------
+install/.copy-state.json
+/env.sh
+/env.ps1
 
 # ----------------------------------------------------------------------------
 # 5. Claude Code Router

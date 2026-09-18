@@ -5,6 +5,12 @@ pre-commit:
     - name: mcp-sync
       glob: "ai/skills/local/mcp-sync/scripts/mcp_servers.json"
       run: python3 ai/skills/local/mcp-sync/scripts/sync_mcp.py --check --repo-only
+    - name: dsh-settings
+      glob: "{.config/opencode/opencode.jsonc,.dsh/settings.yaml}"
+      run: python3 ai/skills/local/config-sync/scripts/render_dsh.py --check
+    - name: codex-artifacts
+      glob: "{.config/opencode/agents/**,.config/opencode/command/**,.config/opencode/commands/**,.codex/agents/**,.codex/prompts/**}"
+      run: python3 ai/skills/local/config-sync/scripts/render_codex.py --check
 
 pre-push:
   jobs:

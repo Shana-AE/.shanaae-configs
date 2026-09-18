@@ -6,5 +6,6 @@
   "claude": { "exclude": [] },
   "codex": { "exclude": [] },
   "cursor": { "exclude": ["lark-*"] },
-  "qoder": { "exclude": ["lark-*"] }
+  "qoder": { "exclude": ["lark-*"] },
+  "dsh": { "exclude": [] }
 }

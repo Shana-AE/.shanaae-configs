@@ -1,0 +1,175 @@
+{
+  "_doc": "Link manifest for install.py. Each row live-links a repo source to the tool's native config location. Add a tool = add an entry; no code change. See docs/superpowers/specs/2026-06-25-cross-platform-configs-design.md",
+  "_modes": "mode=dir links the whole directory; mode=file links a single file. windows_strategy overrides the default Windows behavior (junction for dirs, symlink/copy for files): 'copy' force-copies; 'delegate:<script>' runs an external sync script instead.",
+  "version": 1,
+  "tools": {
+    "opencode": [
+      {
+        "source": ".config/opencode",
+        "target": {
+          "linux": "~/.config/opencode",
+          "darwin": "~/.config/opencode",
+          "windows": "%USERPROFILE%\\.config\\opencode"
+        },
+        "mode": "dir"
+      }
+    ],
+    "claude": [
+      {
+        "source": ".claude",
+        "target": {
+          "linux": "~/.claude",
+          "darwin": "~/.claude",
+          "windows": "%USERPROFILE%\\.claude"
+        },
+        "mode": "dir"
+      }
+    ],
+    "claude-router": [
+      {
+        "source": ".claude-code-router",
+        "target": {
+          "linux": "~/.claude-code-router",
+          "darwin": "~/.claude-code-router",
+          "windows": "%USERPROFILE%\\.claude-code-router"
+        },
+        "mode": "dir"
+      }
+    ],
+    "codex": [
+      {
+        "source": ".codex",
+        "target": {
+          "linux": "~/.codex",
+          "darwin": "~/.codex",
+          "windows": "%USERPROFILE%\\.codex"
+        },
+        "mode": "dir"
+      }
+    ],
+    "dsh": [
+      {
+        "source": ".dsh",
+        "target": {
+          "linux": "~/.dsh",
+          "darwin": "~/.dsh",
+          "windows": "%USERPROFILE%\\.dsh"
+        },
+        "mode": "dir"
+      }
+    ],
+    "agents": [
+      {
+        "source": ".agents",
+        "target": {
+          "linux": "~/.agents",
+          "darwin": "~/.agents",
+          "windows": "%USERPROFILE%\\.agents"
+        },
+        "mode": "dir"
+      }
+    ],
+    "pi": [
+      {
+        "source": "pi/settings.json",
+        "target": {
+          "linux": "~/.pi/agent/settings.json",
+          "darwin": "~/.pi/agent/settings.json",
+          "windows": "%USERPROFILE%\\.pi\\agent\\settings.json"
+        },
+        "mode": "file"
+      },
+      {
+        "source": "pi/AGENTS.md",
+        "target": {
+          "linux": "~/.pi/agent/AGENTS.md",
+          "darwin": "~/.pi/agent/AGENTS.md",
+          "windows": "%USERPROFILE%\\.pi\\agent\\AGENTS.md"
+        },
+        "mode": "file"
+      },
+      {
+        "source": "pi/models.json",
+        "target": {
+          "linux": "~/.pi/agent/models.json",
+          "darwin": "~/.pi/agent/models.json",
+          "windows": "%USERPROFILE%\\.pi\\agent\\models.json"
+        },
+        "mode": "file"
+      },
+      {
+        "source": "pi/skills",
+        "target": {
+          "linux": "~/.pi/agent/skills",
+          "darwin": "~/.pi/agent/skills",
+          "windows": "%USERPROFILE%\\.pi\\agent\\skills"
+        },
+        "mode": "dir"
+      }
+    ],
+    "cursor": [
+      {
+        "source": "cursor/skills",
+        "target": {
+          "linux": "~/.cursor/skills",
+          "darwin": "~/.cursor/skills",
+          "windows": "%USERPROFILE%\\.cursor\\skills"
+        },
+        "mode": "dir",
+        "windows_strategy": "delegate:ai/skills/local/sync-cursor-qoder/scripts/sync_cursor_qoder.py"
+      },
+      {
+        "source": "cursor/user_rules",
+        "target": {
+          "linux": "~/.cursor/rules",
+          "darwin": "~/.cursor/rules",
+          "windows": "%USERPROFILE%\\.cursor\\rules"
+        },
+        "mode": "dir",
+        "windows_strategy": "delegate:ai/skills/local/sync-cursor-qoder/scripts/sync_cursor_qoder.py"
+      },
+      {
+        "source": "cursor/AGENTS.md",
+        "target": {
+          "linux": "~/.cursor/AGENTS.md",
+          "darwin": "~/.cursor/AGENTS.md",
+          "windows": "%USERPROFILE%\\.cursor\\AGENTS.md"
+        },
+        "mode": "file",
+        "windows_strategy": "delegate:ai/skills/local/sync-cursor-qoder/scripts/sync_cursor_qoder.py"
+      }
+    ],
+    "qoder": [
+      {
+        "source": "qoder/skills",
+        "target": {
+          "linux": "~/.qoder/skills",
+          "darwin": "~/.qoder/skills",
+          "windows": "%USERPROFILE%\\.qoder\\skills"
+        },
+        "mode": "dir",
+        "windows_strategy": "delegate:ai/skills/local/sync-cursor-qoder/scripts/sync_cursor_qoder.py"
+      },
+      {
+        "source": "qoder/user_rules",
+        "target": {
+          "linux": "~/.qoder/rules",
+          "darwin": "~/.qoder/rules",
+          "windows": "%USERPROFILE%\\.qoder\\rules"
+        },
+        "mode": "dir",
+        "windows_strategy": "delegate:ai/skills/local/sync-cursor-qoder/scripts/sync_cursor_qoder.py"
+      },
+      {
+        "source": "qoder/AGENTS.md",
+        "target": {
+          "linux": "~/.qoder/AGENTS.md",
+          "darwin": "~/.qoder/AGENTS.md",
+          "windows": "%USERPROFILE%\\.qoder\\AGENTS.md"
+        },
+        "mode": "file",
+        "windows_strategy": "delegate:ai/skills/local/sync-cursor-qoder/scripts/sync_cursor_qoder.py"
+      }
+    ]
+  }
+}
