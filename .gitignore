@@ -100,6 +100,7 @@
 # ----------------------------------------------------------------------------
 .dsh/profiles/
 .dsh/storages/
+.dsh/sessions/
 .dsh/.credentials.yaml
 .dsh/.anonymous-user-id
 .dsh/*.log
