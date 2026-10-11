@@ -630,6 +630,9 @@ def load_policy() -> dict:
     count = policy.get("keep_versions_per_series", 2)
     if not isinstance(count, int) or isinstance(count, bool) or count < 1:
         raise ValueError("keep_versions_per_series must be a positive integer")
+    for version in policy.get("minimum_versions", {}).values():
+        if not isinstance(version, str) or not re.fullmatch(r"[0-9]+\.[0-9]+", version):
+            raise ValueError("minimum_versions values must use major.minor syntax")
     for pattern in policy.get("exclude", []):
         re.compile(pattern, re.IGNORECASE)
     return policy
@@ -660,6 +663,12 @@ def model_series(mid: str) -> tuple[str, tuple[int, ...]] | None:
 def retained_models(ids: set[str], policy: dict) -> set[str]:
     pinned = set(policy.get("pin", [])) & ids
     candidates = {mid for mid in ids if not any(re.search(p, mid, re.IGNORECASE) for p in policy.get("exclude", []))}
+    candidates = {
+        mid for mid in candidates
+        if not (minimum := policy.get("minimum_versions", {}).get(detect_family(mid)))
+        or (parsed := model_series(mid)) is None
+        or parsed[1] >= tuple(map(int, minimum.split(".")))
+    }
     groups: dict[str, set[tuple[int, ...]]] = {}
     for mid in candidates:
         parsed = model_series(mid)

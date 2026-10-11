@@ -17,6 +17,8 @@ import argparse
 import json
 import os
 import re
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -209,6 +211,28 @@ def splice(settings: str, block: str) -> str:
     raise SystemExit(f"error: sentinels {BEGIN!r}/{END!r} not found in {DSH_SETTINGS}")
 
 
+def sync_live_profiles(check: bool = False) -> int:
+    """Desktop dsh reads profile patches, not the legacy settings.yaml."""
+    home = Path(os.environ.get("DSH_HOME", Path.home() / ".dsh"))
+    profiles_dir = home / "profiles"
+    if not profiles_dir.is_dir():
+        return 0
+    profiles = sorted(path / "cordis.patch.yml" for path in profiles_dir.iterdir()
+                      if path.is_dir() and (path / "cordis.patch.yml").is_file())
+    if not profiles:
+        return 0
+    candidates = [os.environ.get("DSH_NODE_BIN"), shutil.which("node"),
+                  str(Path.home() / ".local/share/fnm/aliases/default/bin/node"),
+                  str(Path.home() / ".volta/bin/node")]
+    node = next((candidate for candidate in candidates if candidate and os.path.isfile(candidate)), None)
+    if node is None:
+        raise SystemExit("Node.js is required to sync live dsh profiles; set DSH_NODE_BIN")
+    helper = SCRIPT_DIR / "sync_dsh_profiles.cjs"
+    result = subprocess.run([node, str(helper), str(DSH_SETTINGS),
+                             "--check" if check else "--apply", *map(str, profiles)])
+    return result.returncode
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--check", action="store_true", help="exit 1 if the rendered block differs")
@@ -227,10 +251,10 @@ def main() -> int:
             print(f"STALE: {DSH_SETTINGS.relative_to(REPO_ROOT)} — run render_dsh.py", file=sys.stderr)
             return 1
         print(f"ok: {DSH_SETTINGS.relative_to(REPO_ROOT)} in sync")
-        return 0
+        return sync_live_profiles(check=True)
     DSH_SETTINGS.write_text(desired, encoding="utf-8")
-    print(f"wrote {DSH_SETTINGS.relative_to(REPO_ROOT)}")
-    return 0
+    print(f"wrote {DSH_SETTINGS.relative_to(REPO_ROOT)}", flush=True)
+    return sync_live_profiles()
 
 
 if __name__ == "__main__":

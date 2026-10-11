@@ -280,7 +280,7 @@ Routes map Claude Code request types to a provider+model. Current defaults:
 | Route | Default Model |
 |-------|---------------|
 | default | qiniu,anthropic/claude-sonnet-5.5 |
-| background | qiniu,claude-4.5-haiku |
+| background | qiniu,anthropic/claude-haiku-5.5 |
 | think | qiniu,deepseek/deepseek-v4-pro |
 | longContext | qiniu,qwen/qwen3.8-max |
 | webSearch | qiniu,qwen/qwen3.8-max |
@@ -289,7 +289,10 @@ Routes map Claude Code request types to a provider+model. Current defaults:
 > Qiniu model retention is managed by `ai/skills/local/qiniu-model-sync/model-policy.json`.
 > Run `python3 ai/skills/local/qiniu-model-sync/scripts/qiniu_model_sync.py update --target all --apply`
 > to add new models, prune outdated generations, migrate affected router selections,
-> and regenerate the dsh catalog. Preview with `--dry-run`.
+> and regenerate the dsh catalog, including Qiniu models in live desktop profiles
+> (`$DSH_HOME/profiles/<profile>/cordis.patch.yml`). Preview with `--dry-run`.
+> The current cutoffs are GPT 5.5+, Gemini 3.5+, Grok 4.6+, GLM 5.3+,
+> Kimi 2.7+, Claude 5+, DeepSeek 4+, and MiniMax 2.7+.
 
 ### Environment Variables
 

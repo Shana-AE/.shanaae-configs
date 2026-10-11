@@ -18,5 +18,15 @@
   "route_replacements": {
     "deepseek/deepseek-v3.2": "deepseek/deepseek-v4-pro",
     "qwen3-max": "qwen/qwen3.8-max"
+  },
+  "minimum_versions": {
+    "claude": "5.0",
+    "gpt": "5.5",
+    "deepseek": "4.0",
+    "gemini": "3.5",
+    "grok": "4.6",
+    "glm": "5.3",
+    "kimi": "2.7",
+    "minimax": "2.7"
   }
 }

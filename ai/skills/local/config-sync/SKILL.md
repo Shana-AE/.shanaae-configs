@@ -11,7 +11,7 @@ Single canonical source → per-tool generated artifacts, guarded by `--check`.
 
 | Script          | Canonical source                                                                 | Generated target                                                     |
 | --------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `render_dsh.py`   | `.config/opencode/opencode.jsonc` → `provider`                                     | `.dsh/settings.yaml` between `# BEGIN/END config-sync:llm-pi-ai`       |
+| `render_dsh.py`   | `.config/opencode/opencode.jsonc` → `provider`                                     | `.dsh/settings.yaml` sentinel plus live dsh profile Qiniu lists       |
 | `render_codex.py` | `.config/opencode/agents/*.md`, `.config/opencode/{command,commands}/*.md`         | `.codex/agents/*.toml`, `.codex/prompts/*.md`, `.codex/qiniu.config.toml` |
 | `sync_codex_windows.py` | the generated `.codex/` core + `mcp_servers.json`                            | `C:\Users\<user>\.codex` (machine-local merge; `--apply`)              |
 
@@ -41,3 +41,19 @@ generated file blocks the commit.
   env-name refs (Codex), never absolute literals.
 - The dsh renderer also emits a static official `deepseek` provider
   (`EXTRA_PROVIDERS`); add providers absent from opencode there.
+
+## Live desktop profiles / 桌面端配置
+
+Current dsh Desktop reads `$DSH_HOME/profiles/<profile>/cordis.patch.yml`.
+The linked `settings.yaml.imported` is a legacy import source; changing the repo
+`.dsh/settings.yaml` alone does not update the desktop's active catalog.
+`render_dsh.py` now also calls `sync_dsh_profiles.cjs` to sync Qiniu models in
+existing live profiles. `--check` checks both the generated file and these profiles.
+
+The helper uses Node.js and the profile's installed `yaml` module, changes only
+`llm-pi-ai.config.providers.qiniu.models`, preserves other settings and `!!js`
+expressions without evaluating them, and creates a private first-write backup.
+`DSH_HOME` selects the live home; `DSH_NODE_BIN` can select Node.js when it is not
+on PATH. Profiles without Qiniu are untouched. The helper never creates profiles.
+Verify the running desktop after an update; failed HMR can leave its in-memory
+catalog stale even after the file is corrected.

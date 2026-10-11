@@ -27,6 +27,15 @@ class RetentionTests(unittest.TestCase):
         self.assertEqual(kept, ids - {'deepseek/deepseek-v4.1-flash'})
         self.assertEqual(sync.model_series('claude-4.8-opus')[0], sync.model_series('anthropic/claude-opus-5.5')[0])
 
+    def test_minimum_versions_remove_old_specialized_variants(self):
+        old = {'openai/gpt-5.2-codex', 'openai/gpt-5.3-codex', 'openai/gpt-5.4-mini',
+               'gemini-3.1-flash-image-preview', 'google/gemini-3-pro-image',
+               'x-ai/grok-4.1-fast', 'x-ai/grok-4.2-fast-reasoning',
+               'z-ai/glm-5.2', 'moonshotai/kimi-k2.6', 'claude-4.5-haiku'}
+        current = {'openai/gpt-5.5', 'google/gemini-3.8-flash', 'x-ai/grok-4.7',
+                   'z-ai/glm-5.3', 'moonshotai/kimi-k2.7-code', 'gpt-oss-120b'}
+        self.assertEqual(sync.retained_models(old | current, self.policy), current)
+
     def test_pin_overrides_retirement(self):
         mid = 'deepseek-v3'
         self.assertEqual(sync.retained_models({mid}, {**self.policy, 'pin': [mid]}), {mid})

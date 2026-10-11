@@ -96,6 +96,9 @@ additions and existing entries; excluded models cannot reappear on the next sync
 - `keep_versions_per_series: 2`: keep the two newest numeric versions within
   each product series (e.g. Claude Opus / Sonnet / Haiku, DeepSeek Pro / Flash,
   GPT Codex / Sol / Luna). Dates and parameter counts are not versions.
+- `minimum_versions`: family-wide cutoffs remove old specialized variants too:
+  GPT 5.5+, Gemini 3.5+, Grok 4.6+, GLM 5.3+, Kimi 2.7+, Claude 5+,
+  DeepSeek 4+, and MiniMax 2.7+. Numeric versions are compared as tuples.
 - `exclude`: case-insensitive regex rules retire known obsolete generations,
   including **all DeepSeek V1–V3 and R1**. Applied regardless of API availability.
 - `pin`: exact model IDs that must be retained, overriding age rules. A pin does
@@ -116,5 +119,7 @@ other providers, credentials, comments, and its non-Qiniu default model.
 `--config PATH` overrides the path for a single target. Existing retained-model
 settings are preserved; new entries use the target's V1/V2 schema. Applying an
 update to the portable OpenCode config automatically regenerates the dsh catalog
-through `config-sync`. After updates, inspect `opencode models --standalone` on OpenCode V2;
+through `config-sync`, including live `DSH_HOME/profiles/*/cordis.patch.yml`
+Qiniu model lists. Updating legacy `settings.yaml` alone does not update the
+current desktop profile. After updates, inspect `opencode models --standalone` on OpenCode V2;
 OpenCode V1 supports `opencode models qiniu --verbose`.
