@@ -1,0 +1,3 @@
+- insert:
+    - id: qiniu-model-discovery
+      name: dsh-qiniu-model-discovery

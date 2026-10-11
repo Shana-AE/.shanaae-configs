@@ -1,7 +1,27 @@
 {
   "name": "dsh-qiniu-model-discovery",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
-  "exports": "./index.mjs",
-  "private": true
+  "exports": {
+    ".": "./index.mjs",
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json"
+  },
+  "private": true,
+  "description": "Fetch the live Qiniu Modelink catalog in dsh and filter retired model generations.",
+  "engines": {
+    "node": ">=20"
+  },
+  "dsh": {
+    "manifestVersion": 1,
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "files": [
+    "index.mjs",
+    "cordis.patch.yml",
+    "locale",
+    "README.md"
+  ]
 }

@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Qiniu Model Discovery",
+    "description": "Fetch the live Modelink catalog and apply the shared model cleanup policy."
+  }
+}

@@ -18,17 +18,31 @@ input, log messages, or command arguments.
 
 ## Installation
 
-Run `python3 ai/skills/local/config-sync/scripts/render_dsh.py`. It adds a local
-file-module entry to existing live profiles that configure Qiniu. The profile's
-runtime endpoint, credentials, and other providers are preserved. A private
-backup exists beside its `cordis.patch.yml`. The plugin wraps dsh's public
-`discoverModels` method because this installed build does not expose a separate
-catalog URL setting. Disposal restores the method. An incompatible dsh API
-fails explicitly; the adapter should be checked after dsh upgrades.
+Install the local package through dsh's official CLI, then migrate the old
+file-module mount and synchronize the existing credential reference:
 
-Node.js and Python 3.9+ are required. Set `DSH_PYTHON_BIN` if the app cannot find
-`python3`. The installed profile already supplies the `yaml` module used by the
-installer. Restart dsh after the first installation if HMR has not loaded it. No npm installation or additional service is required.
+```sh
+dsh plugin --profile desktop add "$AI_CONFIGS_ROOT/.dsh/plugins/qiniu-model-discovery"
+python3 "$AI_CONFIGS_ROOT/ai/skills/local/config-sync/scripts/render_dsh.py"
+```
+
+Restart dsh after installation. **Plugins → Installed → Qiniu Model Discovery**
+now shows the package, its version, description, and enable/disable controls.
+The package declares `dsh.bundle.patch`; dsh manages its dependency and selected
+bundle in the live profile. The shared renderer only synchronizes its credential
+reference and migrates the former direct file-module entry. It does not install,
+reinstall, or re-enable the package, so disabling or removing it stays effective.
+The plugin is private/local and is not published to the community marketplace.
+
+The runtime endpoint, credentials, and other providers are preserved. The
+plugin wraps dsh's public `discoverModels` method because this installed build
+has no separate catalog URL setting. Disposal restores the method. Check it
+after dsh upgrades; an incompatible discovery API fails explicitly.
+
+Node.js 20+ (dsh supplies the runtime) and Python 3.9+ are required. The local
+package is linked to this configs checkout because it uses the shared retention
+policy and Python script there. Set `DSH_PYTHON_BIN` if dsh cannot find Python.
+No additional service is required.
 
 ## Validation
 

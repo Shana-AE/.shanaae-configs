@@ -45,26 +45,25 @@ test('check mode detects desktop drift without writing', () => {
   }
 });
 
-test('discovery plugin installation preserves the runtime endpoint and is idempotent', () => {
-  const plugin = '/tmp/configs/.dsh/plugins/qiniu-model-discovery/index.mjs';
-  const result = ensureDiscoveryPlugin(profile, plugin, yaml);
+test('installed bundle gets a credential override without a second mount', () => {
+  const result = ensureDiscoveryPlugin(profile, '/tmp/plugin.mjs', yaml, {bundleInstalled:true});
   const doc = yaml.parseDocument(result);
-  assert.equal(doc.contents.items.find(entry => entry.get('id') === 'llm-pi-ai').getIn(['config','providers','qiniu','baseURL']), 'https://api.qnaigc.com/v1');
-  assert.equal(doc.contents.items.find(entry => entry.has('insert')).getIn(['insert',0,'name']), 'file://' + plugin);
-  assert.equal(ensureDiscoveryPlugin(result, plugin, yaml), result);
-  const unrelated = '- id: other\n  config: {keep: true}\n';
-  assert.equal(ensureDiscoveryPlugin(unrelated, plugin, yaml), unrelated);
+  const entry = doc.contents.items.find(row => row.get('id') === 'qiniu-model-discovery');
+  assert.equal(entry.get('name'), 'dsh-qiniu-model-discovery');
+  assert.equal(entry.getIn(['config','apiKeyEnv']), 'QINIU_AI_API_KEY');
+  assert.equal(doc.contents.items.some(row => row.has('insert')), false);
+  assert.equal(ensureDiscoveryPlugin(result, '/tmp/plugin.mjs', yaml, {bundleInstalled:true}), result);
+  assert.equal(ensureDiscoveryPlugin(profile, '/tmp/plugin.mjs', yaml), profile);
 });
-
-test('migrates a bare override to a real inserted plugin and preserves disabled state', () => {
-  const legacy = profile + '- id: qiniu-model-discovery\n  name: file:///old/index.mjs\n  disabled: true\n';
-  const result = ensureDiscoveryPlugin(legacy, '/tmp/plugin.mjs', yaml);
+test('migrates the direct mount, preserves adjacent entries and disabled state', () => {
+  const legacy = profile + '- insert: [{id: qiniu-model-discovery, name: file:///old/index.mjs, disabled: true}, {id: other-plugin, name: other}]\n';
+  const result = ensureDiscoveryPlugin(legacy, '/tmp/plugin.mjs', yaml, {bundleInstalled:true});
   const doc = yaml.parseDocument(result);
-  const patch = doc.contents.items.find(entry => entry.has('insert'));
-  assert.equal(patch.getIn(['insert',0,'disabled']), true);
-  assert.equal(patch.getIn(['insert',0,'config','apiKeyEnv']), 'QINIU_AI_API_KEY');
-  assert.equal(doc.contents.items.some(entry => entry.get('id') === 'qiniu-model-discovery'), false);
+  const entry = doc.contents.items.find(row => row.get('id') === 'qiniu-model-discovery');
+  assert.equal(entry.get('disabled'), true);
+  assert.equal(doc.contents.items.find(row => row.has('insert')).getIn(['insert',0,'id']), 'other-plugin');
+  assert.equal(ensureDiscoveryPlugin(result, '/tmp/plugin.mjs', yaml, {bundleInstalled:true}), result);
+  assert.ok(result.includes('apiKey: !!js process.env.OTHER_KEY'));
+  // Removal/disable through dsh must not be undone by model synchronization.
   assert.equal(ensureDiscoveryPlugin(result, '/tmp/plugin.mjs', yaml), result);
-  const changed = ensureDiscoveryPlugin(result, '/tmp/new.mjs', yaml);
-  assert.equal(yaml.parseDocument(changed).contents.items.find(entry => entry.has('insert')).getIn(['insert',0,'name']), 'file:///tmp/new.mjs');
 });

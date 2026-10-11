@@ -51,8 +51,12 @@ The linked `settings.yaml.imported` is a legacy import source; changing the repo
 existing live profiles. `--check` checks both the generated file and these profiles.
 
 The helper uses Node.js and the profile's installed `yaml` module, updates
-`llm-pi-ai.config.providers.qiniu.models` and installs the repository
-`.dsh/plugins/qiniu-model-discovery` adapter with the existing credential reference.
+`llm-pi-ai.config.providers.qiniu.models` and migrates the repository
+`.dsh/plugins/qiniu-model-discovery` adapter to a package override when the
+`dsh-qiniu-model-discovery` bundle is installed. Install the local bundle once
+with `dsh plugin --profile desktop add "$AI_CONFIGS_ROOT/.dsh/plugins/qiniu-model-discovery"`,
+then re-render and restart dsh. The renderer preserves bundle enable/disable
+and removal choices; it does not install or re-enable plugins.
 It preserves other settings and `!!js`
 expressions without evaluating them, and creates a private first-write backup.
 `DSH_HOME` selects the live home; `DSH_NODE_BIN` can select Node.js when it is not

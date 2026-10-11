@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "七牛模型发现",
+    "description": "从 Modelink 获取实时模型列表，并按共享策略过滤旧模型。"
+  }
+}

@@ -3,7 +3,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { isDeepStrictEqual } = require('node:util');
-const { pathToFileURL } = require('node:url');
 
 function loadYaml(profile) {
   return require(process.env.DSH_YAML_MODULE || require.resolve('yaml', { paths: [path.dirname(profile), __dirname] }));
@@ -36,33 +35,45 @@ function patchProfileText(text, models, yaml) {
   if (!isDeepStrictEqual(doc.toJS(), after.toJS())) throw new Error('Profile update changed unrelated settings');
   return result;
 }
-function ensureDiscoveryPlugin(text, pluginPath, yaml) {
+function ensureDiscoveryPlugin(text, pluginPath, yaml, options = {}) {
+  // Installation and bundle selection belong to dsh's package manager/UI.
+  // Do not reinstall or re-enable a bundle the user disabled or removed.
+  if (!options.bundleInstalled) return text;
   const doc = yaml.parseDocument(text);
   if (doc.errors.length) throw new Error('Invalid YAML in Cordis profile');
   if (!qiniuEntry(doc, yaml)?.getIn(['config', 'providers', 'qiniu', 'models'], true)) return text;
   const id = 'qiniu-model-discovery';
-  const url = pathToFileURL(pluginPath).href;
-  const apiKeyEnv = qiniuEntry(doc, yaml).getIn(['config', 'providers', 'qiniu', 'apiKeyEnv']);
-  if (apiKeyEnv !== undefined && typeof apiKeyEnv !== 'string') throw new Error('Qiniu apiKeyEnv must be a credential reference');
-  const config = {apiKeyEnv: apiKeyEnv || 'QINIU_AI_API_KEY'};
+  const name = 'dsh-qiniu-model-discovery';
+  const ref = qiniuEntry(doc, yaml).getIn(['config', 'providers', 'qiniu', 'apiKeyEnv']);
+  if (ref !== undefined && typeof ref !== 'string') throw new Error('Qiniu apiKeyEnv must be a credential reference');
+  let overrides = {}, edits = [], found = false;
   for (const patch of doc.contents.items) {
-    const insert = yaml.isMap(patch) ? patch.get('insert', true) : undefined;
-    const entry = yaml.isSeq(insert) ? insert.items.find(row => yaml.isMap(row) && row.get('id') === id) : undefined;
-    if (!entry) continue;
-    if (entry.get('name') === url && entry.getIn(['config', 'apiKeyEnv']) === config.apiKeyEnv) return text;
-    entry.set('name', url);
-    entry.setIn(['config', 'apiKeyEnv'], config.apiKeyEnv);
-    const replacement = yaml.stringify([patch.toJSON()], {lineWidth:0}).trimEnd();
-    return text.slice(0, patch.range[0] - 2) + replacement + '\n' + text.slice(patch.range[2]);
+    if (!yaml.isMap(patch)) continue;
+    const insert = patch.get('insert', true);
+    if (yaml.isSeq(insert)) {
+      const rows = insert.items.filter(row => yaml.isMap(row) && row.get('id') === id);
+      if (!rows.length) continue;
+      // Remove the old direct mount, retaining other entries in shared inserts.
+      for (const row of rows) {
+        const {id: _id, name: _name, ...rest} = row.toJSON();
+        overrides = {...overrides, ...rest};
+      }
+      const remaining = insert.items.filter(row => !rows.includes(row));
+      const replacement = remaining.length ? yaml.stringify([{...patch.toJSON(), insert:remaining.map(row=>row.toJSON())}], {lineWidth:0}) : '';
+      edits.push([patch.range[0]-2, patch.range[2], replacement]);
+    } else if (patch.get('id') === id) {
+      const value = patch.toJSON();
+      const desired = {...value, name, config:{...(value.config || {}), apiKeyEnv:ref || 'QINIU_AI_API_KEY'}};
+      if (!isDeepStrictEqual(value, desired)) edits.push([patch.range[0]-2, patch.range[2], yaml.stringify([desired], {lineWidth:0})]);
+      found = true;
+    }
   }
-  // A profile is a PATCH list: a bare id only overrides a pre-existing row.
-  // Migrate the earlier bare row to an insert so the module actually mounts.
-  const legacy = doc.contents.items.find(row => yaml.isMap(row) && row.get('id') === id);
-  const entry = {...(legacy?.toJSON() || {}), id, name:url, config:{...(legacy?.get('config', true)?.toJSON() || {}), ...config}};
-  const replacement = '- ' + JSON.stringify({insert:[entry]}) + '\n';
-  if (legacy) return text.slice(0, legacy.range[0] - 2) + replacement + text.slice(legacy.range[2]);
-  return text.trimEnd() + '\n' + replacement;
+  let result = text;
+  for (const [start,end,replacement] of edits.sort((a,b)=>b[0]-a[0])) result = result.slice(0,start) + replacement + result.slice(end);
+  if (!found) result = result.trimEnd() + '\n- ' + JSON.stringify({id, name, ...overrides, config:{...(overrides.config || {}), apiKeyEnv:ref || 'QINIU_AI_API_KEY'}}) + '\n';
+  return result;
 }
+
 function main(argv) {
   const [source, mode, ...profiles] = argv;
   const check = mode === '--check';
@@ -76,7 +87,10 @@ function main(argv) {
     const current = fs.readFileSync(profile, 'utf8');
     let desired = patchProfileText(current, models, yaml);
     const plugin = path.join(path.dirname(source), 'plugins/qiniu-model-discovery/index.mjs');
-    if (fs.existsSync(plugin)) desired = ensureDiscoveryPlugin(desired, plugin, yaml);
+    const manifestPath = path.join(path.dirname(profile), 'package.json');
+    const manifest = fs.existsSync(manifestPath) ? JSON.parse(fs.readFileSync(manifestPath, 'utf8')) : {};
+    const bundleInstalled = Object.hasOwn(manifest.dependencies || {}, 'dsh-qiniu-model-discovery');
+    if (fs.existsSync(plugin)) desired = ensureDiscoveryPlugin(desired, plugin, yaml, {bundleInstalled});
     if (current === desired) {
       console.log(`ok: ${profile} Qiniu models in sync`);
     } else if (check) {

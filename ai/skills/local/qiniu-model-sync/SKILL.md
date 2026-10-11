@@ -126,8 +126,11 @@ OpenCode V1 supports `opencode models qiniu --verbose`.
 
 ## dsh Fetch available / 桌面模型发现
 
-`config-sync` installs `.dsh/plugins/qiniu-model-discovery` into existing Qiniu
-profiles. The desktop **Fetch available** button obtains the Modelink live
+Install `.dsh/plugins/qiniu-model-discovery` as the local
+`dsh-qiniu-model-discovery` bundle through `dsh plugin --profile desktop add`,
+then run `config-sync` to migrate the old direct mount and credential reference.
+The plugin appears in **Plugins → Installed → Qiniu Model Discovery**; model
+synchronization respects its enable/disable and removal choices. The desktop **Fetch available** button obtains the Modelink live
 catalog, then applies this same retention policy. Runtime requests keep the
 configured Qnaigc endpoint. The adapter bypasses pi-ai's bundled Qiniu catalog
 with an anonymous discovery draft and resolves the profile's `apiKeyEnv` through
