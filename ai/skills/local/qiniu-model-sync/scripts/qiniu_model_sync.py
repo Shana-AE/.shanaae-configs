@@ -16,8 +16,9 @@ Usage:
   python3 qiniu_model_sync.py diff --target opencode          # new models vs opencode.jsonc
   python3 qiniu_model_sync.py diff --target router            # new models vs router config
   python3 qiniu_model_sync.py list --family claude            # list by family
+  python3 qiniu_model_sync.py diff --target hermes            # compare Hermes Qiniu models
   python3 qiniu_model_sync.py latest                          # latest model per family
-  python3 qiniu_model_sync.py update --target opencode --dry-run  # propose additions
+  python3 qiniu_model_sync.py update --target opencode --dry-run  # preview additions + removals
 """
 from __future__ import annotations
 
@@ -48,6 +49,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 CONFIGS_ROOT = SCRIPT_DIR.parents[4]  # ai/skills/local/qiniu-model-sync/scripts -> repo root
 OPENCODE_CONFIG = CONFIGS_ROOT / ".config" / "opencode" / "opencode.jsonc"
 ROUTER_CONFIG = CONFIGS_ROOT / ".claude-code-router" / "config.json"
+HERMES_CONFIG = Path(os.environ.get("HERMES_HOME", Path.home() / ".hermes")) / "config.yaml"
 
 IMAGE_MARKERS = ("image", "dall", "flux", "sd3", "kolors", "wanx")
 VIDEO_MARKERS = ("video", "kling", "veo", "sora", "cogvideo")
@@ -206,6 +208,8 @@ def merge_catalog(sufy_ids: list[str], dev_data: dict) -> dict[str, dict]:
         "claude-4.6-sonnet": {"input": ["text", "image"], "output": ["text"]},
         "bytedance/doubao-seed-2-1-pro": {"input": ["text", "image"], "output": ["text"]},
         "bytedance/doubao-seed-2-1-turbo": {"input": ["text", "image"], "output": ["text"]},
+        "deepseek/deepseek-v4.1-flash": {"input": ["text", "image"], "output": ["text"]},
+        "z-ai/glm-5.3-flash": {"input": ["text", "image", "video"], "output": ["text"]},
         "minimax/minimax-m3": {"input": ["text", "image", "video"], "output": ["text"]},
         "moonshotai/kimi-k2.6": {"input": ["text", "image", "video"], "output": ["text"]},
         "moonshotai/kimi-k2.7-code": {"input": ["text", "image", "video"], "output": ["text"]},
@@ -307,27 +311,9 @@ def parse_opencode_models(config_path: Path) -> set[str]:
     elsewhere at the same indentation (e.g. plugin configs like project-rules
     "projects": {"vue": ...}) are never mistaken for models.
     """
-    text = config_path.read_text()
-    qiniu_m = re.search(r'"qiniu"\s*:\s*\{', text)
-    if not qiniu_m:
-        return set()
-    qiniu_block = _balanced_json_block(text, qiniu_m.end() - 1)
-    if not qiniu_block:
-        return set()
-    models_m = re.search(r'"models"\s*:\s*\{', qiniu_block)
-    if not models_m:
-        return set()
-    models_block = _balanced_json_block(qiniu_block, models_m.end() - 1)
-    if not models_block:
-        return set()
-    models: set[str] = set()
-    for line in models_block.split("\n"):
-        # Model entries sit at exactly 8 spaces inside the models block;
-        # nested keys (reasoning/limit/variants/effort...) are deeper.
-        m = re.match(r'^ {8}"([^"]+)"\s*:\s*\{', line)
-        if m:
-            models.add(m.group(1))
-    return models
+    data = parse_jsonc(config_path.read_text())
+    providers = data.get("provider", data.get("providers", {}))
+    return set(providers.get("qiniu", {}).get("models", {}))
 
 
 def parse_router_models(config_path: Path) -> set[str]:
@@ -337,6 +323,80 @@ def parse_router_models(config_path: Path) -> set[str]:
         if p.get("name") == "qiniu":
             return set(p.get("models", []))
     return set()
+
+
+def parse_hermes_models(config_path: Path) -> set[str]:
+    """Read Hermes's Qiniu custom provider, honoring HERMES_HOME."""
+    import yaml
+    if not config_path.exists():
+        return set()
+    data = yaml.safe_load(config_path.read_text()) or {}
+    for provider in data.get("custom_providers", []) or []:
+        if isinstance(provider, dict) and provider.get("name") == "qiniu":
+            return set(provider.get("models") or [])
+    return set()
+
+
+def update_hermes_config(path: Path, catalog: dict, policy: dict) -> tuple[str, list[str], list[str]]:
+    """Patch only Qiniu models and affected model selections, preserving YAML."""
+    import yaml
+    original = path.read_text()
+    data = yaml.safe_load(original) or {}
+    tree = yaml.compose(original)
+    fields = {key.value: value for key, value in tree.value}
+    providers = fields.get("custom_providers")
+    if providers is None:
+        raise ValueError("Hermes custom_providers missing")
+    for provider in providers.value:
+        values = {key.value: value for key, value in provider.value}
+        if values.get("name") and values["name"].value == "qiniu":
+            models_node = values.get("models")
+            break
+    else:
+        raise ValueError("Hermes Qiniu provider missing")
+    if models_node is None:
+        raise ValueError("Hermes Qiniu models missing")
+    current = parse_hermes_models(path)
+    kept = retained_models(set(catalog) | current, policy)
+    added, removed = sorted(kept - current), sorted(current - kept)
+    edits = []
+    if added or removed:
+        # YAML accepts JSON flow sequences. A single flow sequence keeps the
+        # original key, indentation, following fields, comments, and secrets.
+        end = models_node.end_mark.index
+        suffix = ""
+        if not models_node.flow_style:
+            suffix = "\n" + " " * models_node.end_mark.column
+        edits.append((models_node.start_mark.index, end, json.dumps(sorted(kept), ensure_ascii=False) + suffix))
+    # Hermes can select Qiniu in its main model and auxiliary task models.
+    def selections(node):
+        if isinstance(node, yaml.MappingNode):
+            entries = {key.value: value for key, value in node.value}
+            provider = entries.get("provider")
+            if provider and provider.value == "qiniu":
+                for field in ("default", "model"):
+                    selection = entries.get(field)
+                    if not isinstance(selection, yaml.ScalarNode):
+                        continue
+                    value = selection.value
+                    prefixed = value.startswith("qiniu/")
+                    mid = value[6:] if prefixed else value
+                    if mid and mid not in kept:
+                        replacement = replacement_model(mid, kept, policy)
+                        if prefixed:
+                            replacement = "qiniu/" + replacement
+                        edits.append((selection.start_mark.index, selection.end_mark.index, json.dumps(replacement)))
+            for _, child in node.value:
+                selections(child)
+        elif isinstance(node, yaml.SequenceNode):
+            for child in node.value:
+                selections(child)
+    selections(tree)
+    result = original
+    for start, end, value in sorted(edits, reverse=True):
+        result = result[:start] + value + result[end:]
+    yaml.safe_load(result)
+    return result, added, removed
 
 
 # --------------------------------------------------------------------------- #
@@ -452,14 +512,17 @@ def cmd_diff(args):
     elif args.target == "router":
         target_ids = parse_router_models(ROUTER_CONFIG)
         target_name = "router config.json"
+    elif args.target == "hermes":
+        target_ids = parse_hermes_models(HERMES_CONFIG)
+        target_name = str(HERMES_CONFIG)
     else:
         sys.exit(f"unknown target: {args.target}")
 
-    catalog_ids = set(catalog.keys())
+    catalog_ids = retained_models(set(catalog) | target_ids, load_policy())
     new_in_catalog = sorted(catalog_ids - target_ids)
     removed_from_catalog = sorted(target_ids - catalog_ids)
 
-    print(f"== diff: merged catalog vs {target_name} ==")
+    print(f"== diff: retained catalog vs {target_name} ==")
     print(f"   catalog: {len(catalog_ids)} models | {target_name}: {len(target_ids)} models")
 
     if new_in_catalog:
@@ -472,7 +535,7 @@ def cmd_diff(args):
             print(f"     + {mid:45s} {name:45s} ({fam})")
 
     if removed_from_catalog:
-        print(f"\n   REMOVED (in {target_name}, not in catalog) — {len(removed_from_catalog)}:")
+        print(f"\n   OUTDATED (excluded by retention policy) — {len(removed_from_catalog)}:")
         for mid in removed_from_catalog:
             print(f"     - {mid}")
 
@@ -556,45 +619,180 @@ def pick_latest(ids: list[str]) -> str:
     return max(ids, key=score)
 
 
-def cmd_update(args):
-    catalog = merge_catalog(fetch_sufy(), fetch_models_dev())
-    if args.target == "opencode":
-        target_ids = parse_opencode_models(OPENCODE_CONFIG)
-    elif args.target == "router":
-        target_ids = parse_router_models(ROUTER_CONFIG)
+# --------------------------------------------------------------------------- #
+# Retention policy / 保留规则
+# --------------------------------------------------------------------------- #
+POLICY_FILE = SCRIPT_DIR.parent / "model-policy.json"
+
+
+def load_policy() -> dict:
+    policy = json.loads(POLICY_FILE.read_text())
+    count = policy.get("keep_versions_per_series", 2)
+    if not isinstance(count, int) or isinstance(count, bool) or count < 1:
+        raise ValueError("keep_versions_per_series must be a positive integer")
+    for pattern in policy.get("exclude", []):
+        re.compile(pattern, re.IGNORECASE)
+    return policy
+
+
+def model_series(mid: str) -> tuple[str, tuple[int, ...]] | None:
+    """Compare actual versions within product tiers, never dates or sizes."""
+    bare = mid.lower().rsplit("/", 1)[-1]
+    claude = re.fullmatch(r"claude-(?:(\d+(?:\.\d+)?)-(opus|sonnet|haiku)|(opus|sonnet|haiku|fable)-(\d+(?:\.\d+)?))", bare)
+    if claude:
+        version = claude[1] or claude[4]
+        return "claude-" + (claude[2] or claude[3]), tuple(map(int, version.split("."))) + (() if "." in version else (0,))
+    match = re.match(r"(deepseek-v|gpt-|glm-|gemini-|grok-|qwen|kimi-k|minimax-m|doubao-seed-|hy)(\d+(?:\.\d+)?)(.*)$", bare)
+    if not match:
+        return None
+    prefix, version, suffix = match.groups()
+    # Doubao uses both 2.0 and 2-1 version spellings.
+    if prefix == "doubao-seed-" and re.match(r"^-\d(?:-|$)", suffix):
+        minor = re.match(r"^-(\d)(.*)$", suffix)
+        version += "." + minor[1]
+        suffix = minor[2]
+    suffix = re.sub(r"-\d{4,8}(?=-|$)", "", suffix)
+    suffix = re.sub(r"-(?:preview|exp|thinking|non-reasoning|reasoning|highspeed|instruct|chat)(?=-|$)", "", suffix)
+    numbers = tuple(map(int, version.split(".")))
+    return prefix + suffix, numbers + (() if len(numbers) > 1 else (0,))
+
+
+def retained_models(ids: set[str], policy: dict) -> set[str]:
+    pinned = set(policy.get("pin", [])) & ids
+    candidates = {mid for mid in ids if not any(re.search(p, mid, re.IGNORECASE) for p in policy.get("exclude", []))}
+    groups: dict[str, set[tuple[int, ...]]] = {}
+    for mid in candidates:
+        parsed = model_series(mid)
+        if parsed:
+            groups.setdefault(parsed[0], set()).add(parsed[1])
+    windows = {series: sorted(versions, reverse=True)[:policy["keep_versions_per_series"]] for series, versions in groups.items()}
+    return pinned | {mid for mid in candidates if (parsed := model_series(mid)) is None or parsed[1] in windows[parsed[0]]}
+
+
+def parse_jsonc(text: str) -> dict:
+    # Match strings first so URLs, escaped quotes, and comma-like string content survive.
+    token = r'"(?:\\.|[^"\\])*"|//[^\n]*|/\*[\s\S]*?\*/'
+    clean = re.sub(token, lambda m: m[0] if m[0].startswith('"') else " ", text)
+    clean = re.sub(r'"(?:\\.|[^"\\])*"|,\s*(?=[}\]])', lambda m: m[0] if m[0].startswith('"') else "", clean)
+    return json.loads(clean)
+
+
+def replace_models_block(text: str, models: dict) -> str:
+    qiniu = re.search(r'"qiniu"\s*:\s*\{', text)
+    if not qiniu:
+        raise ValueError("qiniu provider missing")
+    block = _balanced_json_block(text, qiniu.end() - 1)
+    match = re.search(r'"models"\s*:\s*\{', block)
+    if not match:
+        raise ValueError("qiniu models block missing")
+    start = qiniu.end() - 1 + match.end() - 1
+    old = _balanced_json_block(text, start)
+    indent = re.match(r"[ \t]*", text[text.rfind("\n", 0, start) + 1:])[0]
+    rendered = json.dumps(models, ensure_ascii=False, indent=2).replace("\n", "\n" + indent)
+    return text[:start] + rendered + text[start + len(old):]
+
+
+def model_config(entry: dict) -> dict:
+    result = {"name": entry.get("name", entry["id"]) + " (Qiniu)"}
+    for key in ("reasoning", "attachment", "modalities"):
+        if entry.get(key):
+            result[key] = entry[key]
+    result["limit"] = {"context": entry.get("context", 200000), "output": entry.get("output", 64000)}
+    return result
+
+
+def replacement_model(mid: str, kept: set[str], policy: dict) -> str:
+    explicit = policy.get("route_replacements", {}).get(mid)
+    if explicit in kept:
+        return explicit
+    series = model_series(mid)
+    alternatives = [candidate for candidate in kept if series and model_series(candidate) and model_series(candidate)[0] == series[0]]
+    if alternatives:
+        return max(alternatives, key=lambda candidate: (model_series(candidate)[1], -len(candidate)))
+    raise ValueError(f"Active model {mid} would be removed; add a pin or route_replacements entry")
+
+
+def update_config(path: Path, target: str, catalog: dict, policy: dict) -> tuple[str, list[str], list[str]]:
+    if target == "hermes":
+        return update_hermes_config(path, catalog, policy)
+    original = path.read_text()
+    data = parse_jsonc(original)
+    v2 = "providers" in data and "provider" not in data
+    provider = data["providers" if v2 else "provider"]["qiniu"] if target == "opencode" else next(p for p in data["Providers"] if p["name"] == "qiniu")
+    existing = provider["models"]
+    current = set(existing)
+    # Include manually configured unlisted models; the same age policy still applies.
+    kept = retained_models(set(catalog) | current, policy)
+    added, removed = sorted(kept - current), sorted(current - kept)
+    if target == "opencode":
+        models = {mid: existing[mid] if mid in existing else model_config(catalog[mid]) for mid in sorted(kept)}
+        if v2:
+            for mid in added:
+                entry = models[mid]
+                capabilities = {"tools": True}
+                if entry.pop("reasoning", False):
+                    capabilities["reasoning"] = True
+                modalities = entry.pop("modalities", None)
+                entry.pop("attachment", None)
+                if modalities:
+                    capabilities.update(modalities)
+                entry["capabilities"] = capabilities
+        result = replace_models_block(original, models) if added or removed else original
+        for field in ("model", "small_model", "smallModel"):
+            selection = data.get(field, "")
+            if selection.startswith("qiniu/") and selection[6:] not in kept:
+                replacement = "qiniu/" + replacement_model(selection[6:], kept, policy)
+                result = re.sub(r'("' + field + r'"\s*:\s*)' + re.escape(json.dumps(selection)), lambda m: m[1] + json.dumps(replacement), result, count=1)
     else:
-        sys.exit(f"unknown target: {args.target}")
+        provider["models"] = sorted(kept)
+        for field, selection in data.get("Router", {}).items():
+            if isinstance(selection, str) and selection.startswith("qiniu,") and selection[6:] not in kept:
+                data["Router"][field] = "qiniu," + replacement_model(selection[6:], kept, policy)
+        result = json.dumps(data, ensure_ascii=False, indent=2) + "\n"
+    parse_jsonc(result)
+    return result, added, removed
 
-    new_ids = sorted(set(catalog.keys()) - target_ids)
-    if not new_ids:
-        print("nothing to add — fully in sync")
-        return
 
-    print(f"# {len(new_ids)} new models to add to {args.target}:")
-    if args.target == "opencode":
-        for mid in new_ids:
-            entry = catalog[mid]
-            name = entry.get("name", mid)
-            reasoning = entry.get("reasoning", False)
-            attachment = entry.get("attachment", False)
-            context = entry.get("context", 200000)
-            output = entry.get("output", 64000)
-            parts = [f'"name": "{name} (Qiniu)"']
-            if reasoning:
-                parts.append('"reasoning": true')
-            if attachment:
-                parts.append('"attachment": true')
-            mod = entry.get("modalities")
-            if isinstance(mod, dict) and mod.get("input"):
-                mod_json = json.dumps(mod).replace(", ", ", ")
-                parts.append(f'"modalities": {mod_json}')
-            parts.append(f'"limit": {{"context": {context}, "output": {output}}}')
-            body = ", ".join(parts)
-            print(f'        "{mid}": {{ {body} }},')
-    elif args.target == "router":
-        print("Add these to the qiniu provider's models array in config.json:")
-        for mid in new_ids:
-            print(f'        "{mid}",')
+def cmd_update(args):
+    # Every update refreshes model existence, never pruning from an empty response.
+    ids = fetch_sufy(force=True)
+    if not ids:
+        raise ValueError("Empty live catalog; refusing to update configs")
+    catalog = merge_catalog(ids, fetch_models_dev())
+    policy = load_policy()
+    if args.config:
+        if args.target == "all":
+            raise ValueError("--config requires a single target")
+        targets = [(Path(args.config), args.target)]
+    else:
+        targets = []
+        if args.target in ("opencode", "all"):
+            targets.append((OPENCODE_CONFIG, "opencode"))
+            machine = CONFIGS_ROOT / "machines/mac-studio/opencode/opencode.json"
+            if machine.exists() and machine.resolve() != OPENCODE_CONFIG.resolve():
+                targets.append((machine, "opencode"))
+        if args.target in ("router", "all"):
+            targets.append((ROUTER_CONFIG, "router"))
+        if args.target == "hermes" or (args.target == "all" and HERMES_CONFIG.exists()):
+            targets.append((HERMES_CONFIG, "hermes"))
+    # Validate all route replacements before writing any target.
+    changes = [(path, *update_config(path, target, catalog, policy)) for path, target in targets]
+    for path, result, added, removed in changes:
+        print(f"{path}: +{len(added)} new, -{len(removed)} outdated")
+        for mid in added:
+            print(f"  + {mid}")
+        for mid in removed:
+            print(f"  - {mid}")
+    if args.apply:
+        for path, result, _, _ in changes:
+            if path.read_text() != result:
+                path.write_text(result)
+        if any(path.resolve() == OPENCODE_CONFIG.resolve() for path, *_ in changes):
+            import subprocess
+            subprocess.run([sys.executable, str(CONFIGS_ROOT / "ai/skills/local/config-sync/scripts/render_dsh.py")], check=True)
+        print("Applied model sync")
+    else:
+        print("Dry run; use --apply to write")
 
 
 # --------------------------------------------------------------------------- #
@@ -613,7 +811,7 @@ def main():
     p_probe.set_defaults(func=cmd_probe)
 
     p_diff = sub.add_parser("diff", help="compare catalog against a config")
-    p_diff.add_argument("--target", choices=["opencode", "router"], required=True)
+    p_diff.add_argument("--target", choices=["opencode", "router", "hermes"], required=True)
     p_diff.set_defaults(func=cmd_diff)
 
     p_list = sub.add_parser("list", help="list models, optionally filtered by family")
@@ -623,9 +821,12 @@ def main():
     p_latest = sub.add_parser("latest", help="show the latest model per family")
     p_latest.set_defaults(func=cmd_latest)
 
-    p_update = sub.add_parser("update", help="propose additions for a config")
-    p_update.add_argument("--target", choices=["opencode", "router"], required=True)
-    p_update.add_argument("--dry-run", action="store_true", default=True)
+    p_update = sub.add_parser("update", help="sync new models and prune outdated models")
+    p_update.add_argument("--target", choices=["opencode", "router", "hermes", "all"], default="all")
+    mode = p_update.add_mutually_exclusive_group()
+    mode.add_argument("--dry-run", action="store_true", help="preview changes (default)")
+    mode.add_argument("--apply", action="store_true", help="write additions and removals")
+    p_update.add_argument("--config", help="override target config path (e.g. machine-specific OpenCode)")
     p_update.set_defaults(func=cmd_update)
 
     args = ap.parse_args()

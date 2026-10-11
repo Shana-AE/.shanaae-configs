@@ -279,16 +279,17 @@ Routes map Claude Code request types to a provider+model. Current defaults:
 
 | Route | Default Model |
 |-------|---------------|
-| default | qiniu,claude-4.6-sonnet |
+| default | qiniu,anthropic/claude-sonnet-5.5 |
 | background | qiniu,claude-4.5-haiku |
-| think | qiniu,deepseek/deepseek-v3.2 |
-| longContext | qiniu,qwen3-max |
-| webSearch | qiniu,qwen3-max |
+| think | qiniu,deepseek/deepseek-v4-pro |
+| longContext | qiniu,qwen/qwen3.8-max |
+| webSearch | qiniu,qwen/qwen3.8-max |
 | image | qiniu,qwen-vl-max-2025-01-25 |
 
-> `claude-4.6-sonnet` is the **newest available Sonnet** (4.7/4.8/4.9-sonnet
-> return "no available channels"); for heavy lifting, switch to
-> `claude-4.8-opus` via `ccr model`. Routes are already current-generation.
+> Qiniu model retention is managed by `ai/skills/local/qiniu-model-sync/model-policy.json`.
+> Run `python3 ai/skills/local/qiniu-model-sync/scripts/qiniu_model_sync.py update --target all --apply`
+> to add new models, prune outdated generations, migrate affected router selections,
+> and regenerate the dsh catalog. Preview with `--dry-run`.
 
 ### Environment Variables
 

@@ -1,0 +1,22 @@
+{
+  "keep_versions_per_series": 2,
+  "exclude": [
+    "(?:^|/)deepseek-(?:v[123](?:[.-]|$)|r1(?:-|$))",
+    "(?:^|/)claude-4\\.(?:0|1)(?:-|$)",
+    "(?:^|/)claude-4\\.5-(?:opus|sonnet)(?:-|$)",
+    "(?:^|/)gpt-5(?:\\.2)?(?:-(?:chat|mini|nano|pro))?$",
+    "(?:^|/)gemini-2(?:\\.|-)",
+    "(?:^|/)glm-4(?:\\.|-|$)",
+    "(?:^|/)minimax-m(?:1|2(?:\\.1)?)(?:-|$)",
+    "(?:^|/)kimi-k2(?:-thinking)?$",
+    "(?:^|/)doubao-(?:seed-)?1(?:\\.|-|$)",
+    "(?:^|/)qwen2(?:\\.|-|$)",
+    "(?:^|/)qwen-(?:max|turbo)(?:-|$)",
+    "(?:^|/)qwen3-(?:max|next|[0-9])"
+  ],
+  "pin": [],
+  "route_replacements": {
+    "deepseek/deepseek-v3.2": "deepseek/deepseek-v4-pro",
+    "qwen3-max": "qwen/qwen3.8-max"
+  }
+}
