@@ -1,0 +1,7 @@
+{
+  "name": "dsh-qiniu-model-discovery",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": "./index.mjs",
+  "private": true
+}

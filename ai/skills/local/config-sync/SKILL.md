@@ -50,8 +50,10 @@ The linked `settings.yaml.imported` is a legacy import source; changing the repo
 `render_dsh.py` now also calls `sync_dsh_profiles.cjs` to sync Qiniu models in
 existing live profiles. `--check` checks both the generated file and these profiles.
 
-The helper uses Node.js and the profile's installed `yaml` module, changes only
-`llm-pi-ai.config.providers.qiniu.models`, preserves other settings and `!!js`
+The helper uses Node.js and the profile's installed `yaml` module, updates
+`llm-pi-ai.config.providers.qiniu.models` and installs the repository
+`.dsh/plugins/qiniu-model-discovery` adapter with the existing credential reference.
+It preserves other settings and `!!js`
 expressions without evaluating them, and creates a private first-write backup.
 `DSH_HOME` selects the live home; `DSH_NODE_BIN` can select Node.js when it is not
 on PATH. Profiles without Qiniu are untouched. The helper never creates profiles.

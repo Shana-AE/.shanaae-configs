@@ -123,3 +123,20 @@ through `config-sync`, including live `DSH_HOME/profiles/*/cordis.patch.yml`
 Qiniu model lists. Updating legacy `settings.yaml` alone does not update the
 current desktop profile. After updates, inspect `opencode models --standalone` on OpenCode V2;
 OpenCode V1 supports `opencode models qiniu --verbose`.
+
+## dsh Fetch available / 桌面模型发现
+
+`config-sync` installs `.dsh/plugins/qiniu-model-discovery` into existing Qiniu
+profiles. The desktop **Fetch available** button obtains the Modelink live
+catalog, then applies this same retention policy. Runtime requests keep the
+configured Qnaigc endpoint. The adapter bypasses pi-ai's bundled Qiniu catalog
+with an anonymous discovery draft and resolves the profile's `apiKeyEnv` through
+the host credentials service. Draft API keys take precedence. Keys stay out of
+the Python policy subprocess and logs. Network failures alone fall back to Sufy.
+
+`python3 scripts/qiniu_model_sync.py filter` reads discovery metadata as JSON
+from stdin and emits filtered JSON without fetching or writing configuration.
+Known canonical metadata fills missing fields; upstream fields take precedence.
+Restart dsh after initial installation if its runtime has not loaded the plugin.
+Check the adapter after dsh upgrades: it wraps the public `discoverModels` method
+because this build lacks a separate discovery endpoint setting.

@@ -36,6 +36,20 @@ class RetentionTests(unittest.TestCase):
                    'z-ai/glm-5.3', 'moonshotai/kimi-k2.7-code', 'gpt-oss-120b'}
         self.assertEqual(sync.retained_models(old | current, self.policy), current)
 
+    def test_discovery_filter_preserves_known_metadata_without_adding_ids(self):
+        entries = [{'id': 'openai/gpt-5.4', 'name': 'old'},
+                   {'id': 'openai/gpt-6.1-sol', 'name': 'openai/gpt-6.1-sol'},
+                   {'id': 'openai/gpt-6.1-sol', 'name': 'duplicate'}]
+        configured = {'openai/gpt-6.1-sol': {'name': 'Sol (Qiniu)',
+                      'limit': {'context': 1050000, 'output': 128000},
+                      'modalities': {'input': ['text', 'image']}},
+                      'unlisted': {'name': 'must not be added'}}
+        self.assertEqual(sync.filter_discovered_models(entries, self.policy, configured),
+                         [{'id': 'openai/gpt-6.1-sol', 'name': 'Sol', 'contextWindow': 1050000,
+                           'maxTokens': 128000, 'inputModalities': ['text', 'image']}])
+        entries[1]['contextWindow'] = 123456
+        self.assertEqual(sync.filter_discovered_models(entries, self.policy, configured)[0]['contextWindow'], 123456)
+
     def test_pin_overrides_retirement(self):
         mid = 'deepseek-v3'
         self.assertEqual(sync.retained_models({mid}, {**self.policy, 'pin': [mid]}), {mid})

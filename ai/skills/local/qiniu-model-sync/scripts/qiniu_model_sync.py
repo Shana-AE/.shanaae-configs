@@ -762,6 +762,44 @@ def update_config(path: Path, target: str, catalog: dict, policy: dict) -> tuple
     return result, added, removed
 
 
+def filter_discovered_models(entries: list[dict], policy: dict, configured: dict | None = None) -> list[dict]:
+    """Apply the same retention policy to UI discovery, preserving known metadata."""
+    if not isinstance(entries, list) or any(not isinstance(entry, dict) or not isinstance(entry.get("id"), str) for entry in entries):
+        raise ValueError("discovery input must be a list of models with string IDs")
+    configured = configured or {}
+    kept = retained_models({entry["id"] for entry in entries}, policy)
+    result = []
+    seen = set()
+    for entry in entries:
+        mid = entry["id"]
+        if mid not in kept or mid in seen:
+            continue
+        seen.add(mid)
+        model = configured.get(mid) or {}
+        row = {key: entry[key] for key in ("id", "name", "contextWindow", "maxTokens", "inputModalities") if key in entry}
+        if row.get("name") in (None, mid) and model.get("name"):
+            row["name"] = model["name"].removesuffix(" (Qiniu)")
+        limit = model.get("limit") or {}
+        for field, source in (("contextWindow", "context"), ("maxTokens", "output")):
+            if field not in row and limit.get(source):
+                row[field] = limit[source]
+        inputs = (model.get("modalities") or {}).get("input")
+        if "inputModalities" not in row and inputs:
+            row["inputModalities"] = inputs
+        result.append(row)
+    return result
+
+
+def cmd_filter(args):
+    entries = json.load(sys.stdin)
+    configured = {}
+    if OPENCODE_CONFIG.exists():
+        data = parse_jsonc(OPENCODE_CONFIG.read_text())
+        configured = data.get("provider", data.get("providers", {})).get("qiniu", {}).get("models", {})
+    json.dump(filter_discovered_models(entries, load_policy(), configured), sys.stdout, ensure_ascii=False)
+    sys.stdout.write("\n")
+
+
 def cmd_update(args):
     # Every update refreshes model existence, never pruning from an empty response.
     ids = fetch_sufy(force=True)
@@ -829,6 +867,9 @@ def main():
 
     p_latest = sub.add_parser("latest", help="show the latest model per family")
     p_latest.set_defaults(func=cmd_latest)
+
+    p_filter = sub.add_parser("filter", help="filter a discovered model JSON array from stdin for the dsh UI")
+    p_filter.set_defaults(func=cmd_filter)
 
     p_update = sub.add_parser("update", help="sync new models and prune outdated models")
     p_update.add_argument("--target", choices=["opencode", "router", "hermes", "all"], default="all")
